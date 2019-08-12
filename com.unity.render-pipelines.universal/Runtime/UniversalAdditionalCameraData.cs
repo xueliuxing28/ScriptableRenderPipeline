@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEditor;
 using UnityEngine.Scripting.APIUpdating;
 using UnityEngine.Serialization;
 
@@ -31,6 +34,14 @@ namespace UnityEngine.Rendering.Universal
         FastApproximateAntialiasing,
         SubpixelMorphologicalAntiAliasing,
         //TemporalAntialiasing
+	}
+	
+    public enum LWRPCameraType
+    {
+        Offscreen,
+        Base,
+        Overlay,
+        ScreenSpaceUI,
     }
 
     // Only used for SMAA right now
@@ -39,6 +50,16 @@ namespace UnityEngine.Rendering.Universal
         Low,
         Medium,
         High
+	}
+	
+    static class LWRPCameraTypeUtility
+    {
+        static string[] s_LWRPCameraTypeNames = Enum.GetNames(typeof(LWRPCameraType)).ToArray();
+
+        public static string GetName(this LWRPCameraType type)
+        {
+            return s_LWRPCameraTypeNames[(int)type];
+        }
     }
 
     [DisallowMultipleComponent]
@@ -60,6 +81,9 @@ namespace UnityEngine.Rendering.Universal
 
         [SerializeField] RendererOverrideOption m_RendererOverrideOption = RendererOverrideOption.UsePipelineSettings;
         [SerializeField] ScriptableRendererData m_RendererData = null;
+		[SerializeField] LWRPCameraType m_CameraType = LWRPCameraType.Base;
+		[SerializeField] List<Camera> m_Cameras = new List<Camera>();
+		
         ScriptableRenderer m_Renderer = null;
 
         [SerializeField] LayerMask m_VolumeLayerMask = 1; // "Default"
@@ -98,6 +122,22 @@ namespace UnityEngine.Rendering.Universal
         {
             get => m_RequiresOpaqueTextureOption;
             set => m_RequiresOpaqueTextureOption = value;
+        }
+
+        public LWRPCameraType cameraType
+        {
+            get => m_CameraType;
+            set => m_CameraType = value;
+        }
+
+        public List<Camera> cameras
+        {
+            get => m_Cameras;
+        }
+
+        public void AddCamera(Camera camera)
+        {
+            m_Cameras.Add(camera);
         }
 
         public bool requiresDepthTexture
@@ -201,6 +241,39 @@ namespace UnityEngine.Rendering.Universal
                 m_RequiresDepthTextureOption = (m_RequiresDepthTexture) ? CameraOverrideOption.On : CameraOverrideOption.Off;
                 m_RequiresOpaqueTextureOption = (m_RequiresColorTexture) ? CameraOverrideOption.On : CameraOverrideOption.Off;
             }
+        }
+
+        public void OnDrawGizmos()
+        {
+            string gizmoName = "Packages/com.unity.render-pipelines.lightweight/Editor/Gizmos/";
+            Color tint = Color.white;
+            if (m_CameraType == LWRPCameraType.Base)
+            {
+                gizmoName += "Camera_Base.png";
+            }
+            else if (m_CameraType == LWRPCameraType.Overlay)
+            {
+                gizmoName += "Camera_Overlay.png";
+            }
+            else if (m_CameraType == LWRPCameraType.Offscreen)
+            {
+                gizmoName += "Camera_Offscreen.png";
+            }
+            else
+            {
+                gizmoName += "Camera_UI.png";
+            }
+
+#if UNITY_2019_2_OR_NEWER
+            if (Selection.activeObject == gameObject)
+            {
+                // Get the preferences selection color
+                tint = SceneView.selectedOutlineColor;
+            }
+            Gizmos.DrawIcon(transform.position, gizmoName, true, tint);
+#else
+            Gizmos.DrawIcon(transform.position, gizmoName);
+#endif
         }
     }
 }
