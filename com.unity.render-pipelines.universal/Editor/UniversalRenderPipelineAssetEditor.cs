@@ -19,8 +19,8 @@ namespace UnityEditor.Rendering.Universal
             public static GUIContent advancedSettingsText = EditorGUIUtility.TrTextContent("Advanced");
 
             // General
-            public static GUIContent rendererTypeText = EditorGUIUtility.TrTextContent("Renderer Type", "Controls the global renderer that LWRP uses for all cameras. Choose between the default Forward Renderer and a custom renderer.");
-            public static GUIContent rendererDataText = EditorGUIUtility.TrTextContent("Data", "A ScriptableObject with rendering data. Required when using a custom Renderer. If none is assigned, LWRP uses the Forward Renderer as default.");
+            public static GUIContent rendererTypeText = EditorGUIUtility.TrTextContent("Renderer Type", "Controls the global renderer that Universal RP uses for all cameras. Choose between the default Forward Renderer and a custom renderer.");
+            public static GUIContent rendererDataText = EditorGUIUtility.TrTextContent("Data", "A ScriptableObject with rendering data. Required when using a custom Renderer. If none is assigned, Universal RP uses the Forward Renderer as default.");
             public static GUIContent requireDepthTextureText = EditorGUIUtility.TrTextContent("Depth Texture", "If enabled the pipeline will generate camera's depth that can be bound in shaders as _CameraDepthTexture.");
             public static GUIContent requireOpaqueTextureText = EditorGUIUtility.TrTextContent("Opaque Texture", "If enabled the pipeline will copy the screen to texture after opaque objects are drawn. For transparent objects this can be bound in shaders as _CameraOpaqueTexture.");
             public static GUIContent opaqueDownsamplingText = EditorGUIUtility.TrTextContent("Opaque Downsampling", "The downsampling method that is used for the opaque texture");

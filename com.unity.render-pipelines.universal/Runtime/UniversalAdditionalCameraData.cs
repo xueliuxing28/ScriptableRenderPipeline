@@ -36,7 +36,7 @@ namespace UnityEngine.Rendering.Universal
         //TemporalAntialiasing
 	}
 	
-    public enum LWRPCameraType
+    public enum UniversalCameraType
     {
         Offscreen,
         Base,
@@ -52,13 +52,13 @@ namespace UnityEngine.Rendering.Universal
         High
 	}
 	
-    static class LWRPCameraTypeUtility
+    static class CameraTypeUtility
     {
-        static string[] s_LWRPCameraTypeNames = Enum.GetNames(typeof(LWRPCameraType)).ToArray();
+        static string[] s_CameraTypeNames = Enum.GetNames(typeof(UniversalCameraType)).ToArray();
 
-        public static string GetName(this LWRPCameraType type)
+        public static string GetName(this UniversalCameraType type)
         {
-            return s_LWRPCameraTypeNames[(int)type];
+            return s_CameraTypeNames[(int)type];
         }
     }
 
@@ -81,7 +81,7 @@ namespace UnityEngine.Rendering.Universal
 
         [SerializeField] RendererOverrideOption m_RendererOverrideOption = RendererOverrideOption.UsePipelineSettings;
         [SerializeField] ScriptableRendererData m_RendererData = null;
-		[SerializeField] LWRPCameraType m_CameraType = LWRPCameraType.Base;
+		[SerializeField] UniversalCameraType m_CameraType = UniversalCameraType.Base;
 		[SerializeField] List<Camera> m_Cameras = new List<Camera>();
 		
         ScriptableRenderer m_Renderer = null;
@@ -124,7 +124,7 @@ namespace UnityEngine.Rendering.Universal
             set => m_RequiresOpaqueTextureOption = value;
         }
 
-        public LWRPCameraType cameraType
+        public UniversalCameraType cameraType
         {
             get => m_CameraType;
             set => m_CameraType = value;
@@ -247,15 +247,15 @@ namespace UnityEngine.Rendering.Universal
         {
             string gizmoName = "Packages/com.unity.render-pipelines.lightweight/Editor/Gizmos/";
             Color tint = Color.white;
-            if (m_CameraType == LWRPCameraType.Base)
+            if (m_CameraType == UniversalCameraType.Base)
             {
                 gizmoName += "Camera_Base.png";
             }
-            else if (m_CameraType == LWRPCameraType.Overlay)
+            else if (m_CameraType == UniversalCameraType.Overlay)
             {
                 gizmoName += "Camera_Overlay.png";
             }
-            else if (m_CameraType == LWRPCameraType.Offscreen)
+            else if (m_CameraType == UniversalCameraType.Offscreen)
             {
                 gizmoName += "Camera_Offscreen.png";
             }

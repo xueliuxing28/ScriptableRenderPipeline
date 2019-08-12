@@ -270,7 +270,7 @@ namespace UnityEngine.Rendering.Universal
             cameraClearFlags = CameraClearFlags.SolidColor;
 #endif
 
-            // LWRP doesn't support CameraClearFlags.DepthOnly and CameraClearFlags.Nothing.
+            // Universal RP doesn't support CameraClearFlags.DepthOnly and CameraClearFlags.Nothing.
             // CameraClearFlags.DepthOnly has the same effect of CameraClearFlags.SolidColor
             // CameraClearFlags.Nothing clears Depth on PC/Desktop and in mobile it clears both
             // depth and color.

@@ -358,7 +358,7 @@ namespace UnityEngine.Rendering.Universal
 
                         Light light = visibleLights[i].light;
 
-                        // LWRP doesn't support additional directional lights or point light shadows yet
+                        // UniversalRP doesn't support additional directional lights or point light shadows yet
                         if (visibleLights[i].lightType == LightType.Spot && light != null && light.shadows != LightShadows.None)
                         {
                             additionalLightsCastShadows = true;
@@ -395,7 +395,7 @@ namespace UnityEngine.Rendering.Universal
 #if UNITY_2019_3_OR_NEWER
                     light.gameObject.TryGetComponent(out data);
 #else
-                    data = light.gameObject.GetComponent<LWRPAdditionalLightData>();
+                    data = light.gameObject.GetComponent<UniversalAdditionalLightData>();
 #endif
                 }
 

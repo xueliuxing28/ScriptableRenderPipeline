@@ -269,7 +269,7 @@ namespace UnityEditor.Rendering.Universal
                     settings.DrawBakedShadowAngle();
 
             // Runtime shadows - shadow strength, resolution and near plane offset
-            // Bias is handled differently in LWRP
+            // Bias is handled differently in UniversalRP
             using (var group = new EditorGUILayout.FadeGroupScope(show * m_AnimRuntimeOptions.faded))
             {
                 if (group.visible)

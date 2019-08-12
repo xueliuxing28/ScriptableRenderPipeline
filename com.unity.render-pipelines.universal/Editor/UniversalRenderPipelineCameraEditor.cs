@@ -95,8 +95,8 @@ namespace UnityEditor.Rendering.Universal
 
             // Camera Types
             public static List<GUIContent> m_CameraTypeNames = null;
-            public static readonly string[] cameraTypeNames = Enum.GetNames(typeof(LWRPCameraType));
-            public static int[] additionalDataCameraTypeOptions = Enum.GetValues(typeof(LWRPCameraType)) as int[];
+            public static readonly string[] cameraTypeNames = Enum.GetNames(typeof(UniversalCameraType));
+            public static int[] additionalDataCameraTypeOptions = Enum.GetValues(typeof(UniversalCameraType)) as int[];
 			
 			// Beautified anti-aliasing options
             public static GUIContent[] antialiasingOptions =
@@ -127,7 +127,7 @@ namespace UnityEditor.Rendering.Universal
 
         List<Camera> validCameras = new List<Camera>();
         // This is the valid list of types, so if we need to add more types we just add it here.
-        List<LWRPCameraType> validCameraTypes = new List<LWRPCameraType>{LWRPCameraType.Overlay};
+        List<UniversalCameraType> validCameraTypes = new List<UniversalCameraType>{UniversalCameraType.Overlay};
         List<Camera> errorCameras = new List<Camera>();
         Texture2D m_ErrorIcon;
 
@@ -232,8 +232,8 @@ namespace UnityEditor.Rendering.Universal
             var o = new PropertyFetcher<UniversalAdditionalCameraData>(m_AdditionalCameraDataSO);
             m_AdditionalCameraDataCameras = o.Find(x => x.cameras);
 
-            var camType = (LWRPCameraType)m_AdditionalCameraDataCameraTypeProp.intValue;
-            if (camType == LWRPCameraType.Base)
+            var camType = (UniversalCameraType)m_AdditionalCameraDataCameraTypeProp.intValue;
+            if (camType == UniversalCameraType.Base)
             {
                 m_LayerList = new ReorderableList(m_AdditionalCameraDataSO, m_AdditionalCameraDataCameras, true, false, true, true);
                 //m_LayerList.drawHeaderCallback = rect => { EditorGUI.LabelField(rect, "Stack"); };
@@ -402,7 +402,7 @@ namespace UnityEditor.Rendering.Universal
                 case CameraClearFlags.Nothing:
                     return BackgroundType.DontCare;
 
-                // DepthOnly is not supported by design in LWRP. We upgrade it to SolidColor
+                // DepthOnly is not supported by design in UniversalRP. We upgrade it to SolidColor
                 default:
                     return BackgroundType.SolidColor;
             }
@@ -420,10 +420,10 @@ namespace UnityEditor.Rendering.Universal
             EditorGUILayout.Space();
 
             // Get the type of Camera we are using
-            var camType = (LWRPCameraType)m_AdditionalCameraDataCameraTypeProp.intValue;
+            var camType = (UniversalCameraType)m_AdditionalCameraDataCameraTypeProp.intValue;
 
             // Offscreen Camera
-            if (camType == LWRPCameraType.Offscreen)
+            if (camType == UniversalCameraType.Offscreen)
             {
                 DrawCommonSettings();
                 DrawRenderingSettings();
@@ -432,7 +432,7 @@ namespace UnityEditor.Rendering.Universal
             }
 
             // Game Camera
-            if (camType == LWRPCameraType.Base)
+            if (camType == UniversalCameraType.Base)
             {
                 DrawCommonSettings();
                 DrawRenderingSettings();
@@ -443,14 +443,14 @@ namespace UnityEditor.Rendering.Universal
             }
 
             // Overlay Camera
-            if (camType == LWRPCameraType.Overlay)
+            if (camType == UniversalCameraType.Overlay)
             {
                 DrawCommonSettings();
                 DrawRenderingSettings();
             }
 
             // UI Camera
-            if (camType == LWRPCameraType.ScreenSpaceUI)
+            if (camType == UniversalCameraType.ScreenSpaceUI)
             {
                 DrawCommonSettings();
             }
@@ -528,9 +528,9 @@ namespace UnityEditor.Rendering.Universal
             m_RenderingSettingsFoldout.value = EditorGUILayout.BeginFoldoutHeaderGroup(m_RenderingSettingsFoldout.value, Styles.renderingSettingsText);
             if (m_RenderingSettingsFoldout.value)
             {
-                var selectedCameraType = (LWRPCameraType)m_AdditionalCameraDataCameraTypeProp.intValue;
+                var selectedCameraType = (UniversalCameraType)m_AdditionalCameraDataCameraTypeProp.intValue;
 
-                if (selectedCameraType == LWRPCameraType.Overlay)
+                if (selectedCameraType == UniversalCameraType.Overlay)
                 {
                     settings.DrawCullingMask();
                     settings.DrawOcclusionCulling();
@@ -557,9 +557,9 @@ namespace UnityEditor.Rendering.Universal
             m_OutputSettingsFoldout.value = EditorGUILayout.BeginFoldoutHeaderGroup(m_OutputSettingsFoldout.value, Styles.outputSettingsText);
             if (m_OutputSettingsFoldout.value)
             {
-                var selectedCameraType = (LWRPCameraType)m_AdditionalCameraDataCameraTypeProp.intValue;
+                var selectedCameraType = (UniversalCameraType)m_AdditionalCameraDataCameraTypeProp.intValue;
 
-                if (selectedCameraType == LWRPCameraType.Base)
+                if (selectedCameraType == UniversalCameraType.Base)
                 {
                     DrawHDR();
                     DrawMSAA();
@@ -567,7 +567,7 @@ namespace UnityEditor.Rendering.Universal
                     settings.DrawDynamicResolution();
                     settings.DrawMultiDisplay();
                 }
-                else if (selectedCameraType == LWRPCameraType.Offscreen)
+                else if (selectedCameraType == UniversalCameraType.Offscreen)
                 {
                     DrawTargetTexture();
                 }
@@ -579,8 +579,8 @@ namespace UnityEditor.Rendering.Universal
 
         void DrawCameraType()
         {
-            LWRPCameraType selectedCameraType;
-            selectedCameraType = (LWRPCameraType)m_AdditionalCameraDataCameraTypeProp.intValue;
+            UniversalCameraType selectedCameraType;
+            selectedCameraType = (UniversalCameraType)m_AdditionalCameraDataCameraTypeProp.intValue;
 
             EditorGUI.BeginChangeCheck();
             int selCameraType = EditorGUILayout.IntPopup(Styles.cameraType, (int)selectedCameraType, Styles.m_CameraTypeNames.ToArray(), Styles.additionalDataCameraTypeOptions);
