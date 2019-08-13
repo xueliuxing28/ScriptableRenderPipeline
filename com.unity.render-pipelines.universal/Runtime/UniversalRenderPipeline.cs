@@ -1,5 +1,6 @@
 using System;
 using Unity.Collections;
+using System.Collections.Generic;
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.Rendering.Universal;
@@ -160,13 +161,23 @@ namespace UnityEngine.Rendering.Universal
             GraphicsSettings.useScriptableRenderPipelineBatching = asset.useSRPBatcher;
             SetupPerFrameShaderConstants();
 
-            SortCameras(cameras);
-            foreach (Camera camera in cameras)
+            CameraData[] cameraDataArray = new CameraData[cameras.Length];
+            for (int i = 0; i < cameras.Length; ++i)
             {
+                cameras[i].gameObject.TryGetComponent<UniversalAdditionalCameraData>(out var additionalCameraData);
+                InitializeCameraData(asset, cameras[i], additionalCameraData, out var cameraData);
+                cameraDataArray[i] = cameraData;
+            }
+
+            SortCameras(cameraDataArray);
+            foreach (CameraData cameraData in cameraDataArray)
+            {
+                Camera camera = cameraData.camera;
                 BeginCameraRendering(renderContext, camera);
 
                 VFX.VFXManager.ProcessCamera(camera); //Visual Effect Graph is not yet a required package but calling this method when there isn't any VisualEffect component has no effect (but needed for Camera sorting in Visual Effect Graph context)
-                RenderSingleCamera(renderContext, camera);
+
+                RenderSingleCamera(renderContext, cameraData.renderer, cameraData);
 
                 EndCameraRendering(renderContext, camera);
             }
@@ -176,23 +187,27 @@ namespace UnityEngine.Rendering.Universal
 
         public static void RenderSingleCamera(ScriptableRenderContext context, Camera camera)
         {
-            if (!camera.TryGetCullingParameters(IsStereoEnabled(camera), out var cullingParameters))
-                return;
-
-            var settings = asset;
             UniversalAdditionalCameraData additionalCameraData = null;
             if (camera.cameraType == CameraType.Game || camera.cameraType == CameraType.VR)
                 camera.gameObject.TryGetComponent(out additionalCameraData);
 
-                InitializeCameraData(settings, camera, additionalCameraData, out var cameraData);
-            SetupPerCameraShaderConstants(cameraData);
+            InitializeCameraData(asset, camera, additionalCameraData, out var cameraData);
+            RenderSingleCamera(context, cameraData.renderer, cameraData);
+        }
 
-            ScriptableRenderer renderer = (additionalCameraData != null) ? additionalCameraData.scriptableRenderer : settings.scriptableRenderer;
+        static void RenderSingleCamera(ScriptableRenderContext context, ScriptableRenderer renderer, CameraData cameraData)
+        {
+            Camera camera = cameraData.camera;
             if (renderer == null)
             {
                 Debug.LogWarning(string.Format("Trying to render {0} with an invalid renderer. Camera rendering will be skipped.", camera.name));
                 return;
             }
+
+            if (!camera.TryGetCullingParameters(IsStereoEnabled(camera), out var cullingParameters))
+                return;
+
+            SetupPerCameraShaderConstants(cameraData);
 
 #if UNITY_EDITOR
             string tag = camera.name;
@@ -216,7 +231,7 @@ namespace UnityEngine.Rendering.Universal
 #endif
 
                 var cullResults = context.Cull(ref cullingParameters);
-                InitializeRenderingData(settings, ref cameraData, ref cullResults, out var renderingData);
+                InitializeRenderingData(asset, ref cameraData, ref cullResults, out var renderingData);
 
                 renderer.Setup(context, ref renderingData);
                 renderer.Execute(context, ref renderingData);
@@ -225,6 +240,11 @@ namespace UnityEngine.Rendering.Universal
             context.ExecuteCommandBuffer(cmd);
             CommandBufferPool.Release(cmd);
             context.Submit();
+        }
+
+        static void RenderCameraStack(ScriptableRenderContext context, Camera[] cameras)
+        {
+
         }
 
         static void SetSupportedRenderingFeatures()
@@ -281,6 +301,7 @@ namespace UnityEngine.Rendering.Universal
             
             if (additionalCameraData != null)
             {
+                cameraData.renderType = additionalCameraData.renderType;
                 cameraData.maxShadowDistance = (additionalCameraData.renderShadows) ? cameraData.maxShadowDistance : 0.0f;
                 cameraData.requiresDepthTexture = additionalCameraData.requiresDepthTexture;
                 cameraData.requiresOpaqueTexture = additionalCameraData.requiresColorTexture;
@@ -291,9 +312,11 @@ namespace UnityEngine.Rendering.Universal
                 cameraData.isDitheringEnabled = cameraData.postProcessEnabled && additionalCameraData.dithering;
                 cameraData.antialiasing = cameraData.postProcessEnabled ? additionalCameraData.antialiasing : AntialiasingMode.None;
                 cameraData.antialiasingQuality = additionalCameraData.antialiasingQuality;
+                cameraData.renderer = additionalCameraData.scriptableRenderer;
             }
             else if(camera.cameraType == CameraType.SceneView)
             {
+                cameraData.renderType = CameraRenderType.Base;
                 cameraData.requiresDepthTexture = settings.supportsCameraDepthTexture;
                 cameraData.requiresOpaqueTexture = settings.supportsCameraOpaqueTexture;
                 cameraData.volumeLayerMask = 1; // "Default"
@@ -303,9 +326,11 @@ namespace UnityEngine.Rendering.Universal
                 cameraData.isDitheringEnabled = false;
                 cameraData.antialiasing = AntialiasingMode.None;
                 cameraData.antialiasingQuality = AntialiasingQuality.High;
+                cameraData.renderer = UniversalRenderPipeline.asset.scriptableRenderer;
             }
             else
             {
+                cameraData.renderType = CameraRenderType.Base;
                 cameraData.requiresDepthTexture = settings.supportsCameraDepthTexture;
                 cameraData.requiresOpaqueTexture = settings.supportsCameraOpaqueTexture;
                 cameraData.volumeLayerMask = 1; // "Default"
@@ -315,6 +340,7 @@ namespace UnityEngine.Rendering.Universal
                 cameraData.isDitheringEnabled = false;
                 cameraData.antialiasing = AntialiasingMode.None;
                 cameraData.antialiasingQuality = AntialiasingQuality.High;
+                cameraData.renderer = UniversalRenderPipeline.asset.scriptableRenderer;
             }
 
             // Disables post if GLes2

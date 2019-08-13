@@ -37,6 +37,7 @@ namespace UnityEngine.Rendering.Universal
     [MovedFrom("UnityEngine.Rendering.LWRP")] public struct CameraData
     {
         public Camera camera;
+        public CameraRenderType renderType;
         public RenderTextureDescriptor cameraTargetDescriptor;
         public float renderScale;
         public bool isSceneViewCamera;
@@ -66,6 +67,7 @@ namespace UnityEngine.Rendering.Universal
         public bool isDitheringEnabled;
         public AntialiasingMode antialiasing;
         public AntialiasingQuality antialiasingQuality;
+        internal ScriptableRenderer renderer;
     }
 
     [MovedFrom("UnityEngine.Rendering.LWRP")] public struct ShadowData
@@ -88,6 +90,21 @@ namespace UnityEngine.Rendering.Universal
     {
         public ColorGradingMode gradingMode;
         public int lutSize;
+    }
+
+    class CameraDataComparer : IComparer<CameraData>
+    {
+        public int Compare(CameraData lhs, CameraData rhs)
+        {
+            if (lhs.renderType != rhs.renderType)
+                return lhs.renderType - rhs.renderType;
+
+            if (lhs.renderType == CameraRenderType.Overlay ||
+                lhs.renderType == CameraRenderType.Base)
+                return (int)lhs.camera.depth - (int)rhs.camera.depth;
+
+            return -1;
+        }
     }
 
     public static class ShaderKeywordStrings
@@ -142,9 +159,11 @@ namespace UnityEngine.Rendering.Universal
             return XRGraphics.enabled && isGameCamera && (camera.stereoTargetEye == StereoTargetEyeMask.Both);
         }
 
-        void SortCameras(Camera[] cameras)
+        void SortCameras(CameraData[] cameras)
         {
-            Array.Sort(cameras, (lhs, rhs) => (int)(lhs.depth - rhs.depth));
+            if (cameras.Length <= 1)
+                return;
+            Array.Sort(cameras, new CameraDataComparer());
         }
 
         static RenderTextureDescriptor CreateRenderTextureDescriptor(Camera camera, float renderScale,

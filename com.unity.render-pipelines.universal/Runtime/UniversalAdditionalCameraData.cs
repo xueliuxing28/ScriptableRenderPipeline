@@ -36,7 +36,7 @@ namespace UnityEngine.Rendering.Universal
         //TemporalAntialiasing
 	}
 	
-    public enum UniversalCameraType
+    public enum CameraRenderType
     {
         Offscreen,
         Base,
@@ -54,9 +54,9 @@ namespace UnityEngine.Rendering.Universal
 	
     static class CameraTypeUtility
     {
-        static string[] s_CameraTypeNames = Enum.GetNames(typeof(UniversalCameraType)).ToArray();
+        static string[] s_CameraTypeNames = Enum.GetNames(typeof(CameraRenderType)).ToArray();
 
-        public static string GetName(this UniversalCameraType type)
+        public static string GetName(this CameraRenderType type)
         {
             return s_CameraTypeNames[(int)type];
         }
@@ -81,7 +81,7 @@ namespace UnityEngine.Rendering.Universal
 
         [SerializeField] RendererOverrideOption m_RendererOverrideOption = RendererOverrideOption.UsePipelineSettings;
         [SerializeField] ScriptableRendererData m_RendererData = null;
-		[SerializeField] UniversalCameraType m_CameraType = UniversalCameraType.Base;
+		[SerializeField] CameraRenderType m_CameraType = CameraRenderType.Base;
 		[SerializeField] List<Camera> m_Cameras = new List<Camera>();
 		
         ScriptableRenderer m_Renderer = null;
@@ -106,6 +106,18 @@ namespace UnityEngine.Rendering.Universal
 
         public float version => m_Version;
 
+        static UniversalAdditionalCameraData s_DefaultAdditionalCameraData = null;
+        internal static UniversalAdditionalCameraData defaultAdditionalCameraData
+        {
+            get
+            {
+                if (s_DefaultAdditionalCameraData == null)
+                    s_DefaultAdditionalCameraData = new UniversalAdditionalCameraData();
+
+                return s_DefaultAdditionalCameraData;
+            }
+        }
+
         public bool renderShadows
         {
             get => m_RenderShadows;
@@ -124,7 +136,7 @@ namespace UnityEngine.Rendering.Universal
             set => m_RequiresOpaqueTextureOption = value;
         }
 
-        public UniversalCameraType cameraType
+        public CameraRenderType renderType
         {
             get => m_CameraType;
             set => m_CameraType = value;
@@ -247,15 +259,15 @@ namespace UnityEngine.Rendering.Universal
         {
             string gizmoName = "Packages/com.unity.render-pipelines.lightweight/Editor/Gizmos/";
             Color tint = Color.white;
-            if (m_CameraType == UniversalCameraType.Base)
+            if (m_CameraType == CameraRenderType.Base)
             {
                 gizmoName += "Camera_Base.png";
             }
-            else if (m_CameraType == UniversalCameraType.Overlay)
+            else if (m_CameraType == CameraRenderType.Overlay)
             {
                 gizmoName += "Camera_Overlay.png";
             }
-            else if (m_CameraType == UniversalCameraType.Offscreen)
+            else if (m_CameraType == CameraRenderType.Offscreen)
             {
                 gizmoName += "Camera_Offscreen.png";
             }
