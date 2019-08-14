@@ -112,7 +112,7 @@ namespace UnityEngine.Rendering.Universal
             bool mainLightShadows = m_MainLightShadowCasterPass.Setup(ref renderingData);
             bool additionalLightShadows = m_AdditionalLightsShadowCasterPass.Setup(ref renderingData);
             bool resolveShadowsInScreenSpace = mainLightShadows && renderingData.shadowData.requiresScreenSpaceShadowResolve;
-            
+
             // Depth prepass is generated in the following cases:
             // - We resolve shadows in screen space
             // - Scene view camera always requires a depth texture. We do a depth pre-pass to simplify it and it shouldn't matter much for editor.
@@ -132,13 +132,15 @@ namespace UnityEngine.Rendering.Universal
             // If camera requires depth and there's no depth pre-pass we create a depth texture that can be read
             // later by effect requiring it.
             bool createDepthTexture = renderingData.cameraData.requiresDepthTexture && !requiresDepthPrepass;
-            bool postProcessEnabled = renderingData.cameraData.postProcessEnabled;
+            bool postProcessEnabled = renderingData.cameraData.postProcessEnabled && renderingData.resolveFinalTarget;
 
-            m_ActiveCameraColorAttachment = (createColorTexture) ? m_CameraColorAttachment : RenderTargetHandle.CameraTarget;
+            m_ActiveCameraColorAttachment = (createColorTexture || renderingData.cameraData.renderType == CameraRenderType.Overlay) ? m_CameraColorAttachment : RenderTargetHandle.CameraTarget;
             m_ActiveCameraDepthAttachment = (createDepthTexture) ? m_CameraDepthAttachment : RenderTargetHandle.CameraTarget;
             bool intermediateRenderTexture = createColorTexture || createDepthTexture;
-            
-            if (intermediateRenderTexture)
+
+            // Doesn't create texture for Overlay cameras as they are already overlaying on top of created textures.
+            bool createTextures = intermediateRenderTexture && renderingData.cameraData.renderType != CameraRenderType.Overlay;
+            if (createTextures)
                 CreateCameraRenderTarget(context, ref renderingData.cameraData);
             
             ConfigureCameraTarget(m_ActiveCameraColorAttachment.Identifier(), m_ActiveCameraDepthAttachment.Identifier());
@@ -210,8 +212,9 @@ namespace UnityEngine.Rendering.Universal
             EnqueuePass(m_RenderTransparentForwardPass);
             EnqueuePass(m_OnRenderObjectCallbackPass);
 
-            bool afterRenderExists = renderingData.cameraData.captureActions != null ||
-                                     hasAfterRendering;
+            bool resolveFinalTarget = renderingData.resolveFinalTarget;
+            bool hasCaptureActions = renderingData.cameraData.captureActions != null && resolveFinalTarget;
+            bool afterRenderExists = hasCaptureActions || hasAfterRendering;
 
             bool requiresFinalPostProcessPass = postProcessEnabled &&
                                      renderingData.cameraData.antialiasing == AntialiasingMode.FastApproximateAntialiasing;
@@ -265,7 +268,7 @@ namespace UnityEngine.Rendering.Universal
                         EnqueuePass(m_PostProcessPass);
                     }
                 }
-                else if (m_ActiveCameraColorAttachment != RenderTargetHandle.CameraTarget)
+                else if (m_ActiveCameraColorAttachment != RenderTargetHandle.CameraTarget && resolveFinalTarget)
                 {
                     m_FinalBlitPass.Setup(cameraTargetDescriptor, m_ActiveCameraColorAttachment);
                     EnqueuePass(m_FinalBlitPass);
@@ -275,6 +278,8 @@ namespace UnityEngine.Rendering.Universal
 #if UNITY_EDITOR
             if (renderingData.cameraData.isSceneViewCamera)
             {
+                // Scene view camera should always resolve target (not stacked)
+                Assertions.Assert.IsTrue(resolveFinalTarget);
                 m_SceneViewDepthCopyPass.Setup(m_DepthTexture);
                 EnqueuePass(m_SceneViewDepthCopyPass);
             }
@@ -361,6 +366,9 @@ namespace UnityEngine.Rendering.Universal
         
         bool RequiresIntermediateColorTexture(ref RenderingData renderingData, RenderTextureDescriptor baseDescriptor)
         {
+            if (!renderingData.resolveFinalTarget)
+                return true;
+
             ref CameraData cameraData = ref renderingData.cameraData;
             int msaaSamples = cameraData.cameraTargetDescriptor.msaaSamples;
             bool isStereoEnabled = renderingData.cameraData.isStereoEnabled;

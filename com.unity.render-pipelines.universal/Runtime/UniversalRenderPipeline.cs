@@ -172,12 +172,19 @@ namespace UnityEngine.Rendering.Universal
             SortCameras(cameraDataArray);
             foreach (CameraData cameraData in cameraDataArray)
             {
+                // Overlay cameras will be rendered stacked while rendering base cameras
+                if (cameraData.renderType == CameraRenderType.Overlay)
+                    continue;
+
                 Camera camera = cameraData.camera;
                 BeginCameraRendering(renderContext, camera);
 
                 VFX.VFXManager.ProcessCamera(camera); //Visual Effect Graph is not yet a required package but calling this method when there isn't any VisualEffect component has no effect (but needed for Camera sorting in Visual Effect Graph context)
 
-                RenderSingleCamera(renderContext, cameraData.renderer, cameraData);
+                if (cameraData.renderType == CameraRenderType.Base)
+                    RenderCameraStack(renderContext, cameraData.renderer, cameraData);
+                else 
+                    RenderSingleCamera(renderContext, cameraData.renderer, cameraData, true);
 
                 EndCameraRendering(renderContext, camera);
             }
@@ -192,10 +199,34 @@ namespace UnityEngine.Rendering.Universal
                 camera.gameObject.TryGetComponent(out additionalCameraData);
 
             InitializeCameraData(asset, camera, additionalCameraData, out var cameraData);
-            RenderSingleCamera(context, cameraData.renderer, cameraData);
+            RenderSingleCamera(context, cameraData.renderer, cameraData, true);
         }
 
-        static void RenderSingleCamera(ScriptableRenderContext context, ScriptableRenderer renderer, CameraData cameraData)
+        static void RenderCameraStack(ScriptableRenderContext context, ScriptableRenderer renderer, CameraData cameraData)
+        {
+            cameraData.camera.gameObject.TryGetComponent<UniversalAdditionalCameraData>(out var additionalCameraData);
+            List<Camera> cameraStack = additionalCameraData?.cameras;
+
+            bool isStackedRendering = cameraStack != null && cameraStack.Count > 0;
+            RenderSingleCamera(context, renderer, cameraData, !isStackedRendering);
+
+            if (!isStackedRendering)
+                return;
+
+            for (int i = 0; i < cameraStack.Count; ++i)
+            {
+                var currCamera = cameraStack[i];
+                if (currCamera.isActiveAndEnabled)
+                {
+                    bool lastCamera = i == cameraStack.Count - 1;
+                    currCamera.gameObject.TryGetComponent<UniversalAdditionalCameraData>(out var currCameraAdditionalData);
+                    InitializeCameraData(asset, currCamera, currCameraAdditionalData, out var currCameraData);
+                    RenderSingleCamera(context, renderer, currCameraData, lastCamera);
+                }
+            }
+        }
+
+        static void RenderSingleCamera(ScriptableRenderContext context, ScriptableRenderer renderer, CameraData cameraData, bool requiresBlitToBackbuffer)
         {
             Camera camera = cameraData.camera;
             if (renderer == null)
@@ -231,7 +262,7 @@ namespace UnityEngine.Rendering.Universal
 #endif
 
                 var cullResults = context.Cull(ref cullingParameters);
-                InitializeRenderingData(asset, ref cameraData, ref cullResults, out var renderingData);
+                InitializeRenderingData(asset, ref cameraData, ref cullResults, requiresBlitToBackbuffer, out var renderingData);
 
                 renderer.Setup(context, ref renderingData);
                 renderer.Execute(context, ref renderingData);
@@ -240,11 +271,6 @@ namespace UnityEngine.Rendering.Universal
             context.ExecuteCommandBuffer(cmd);
             CommandBufferPool.Release(cmd);
             context.Submit();
-        }
-
-        static void RenderCameraStack(ScriptableRenderContext context, Camera[] cameras)
-        {
-
         }
 
         static void SetSupportedRenderingFeatures()
@@ -361,7 +387,7 @@ namespace UnityEngine.Rendering.Universal
         }
 
         static void InitializeRenderingData(UniversalRenderPipelineAsset settings, ref CameraData cameraData, ref CullingResults cullResults,
-            out RenderingData renderingData)
+            bool requiresBlitToBackbuffer, out RenderingData renderingData)
         {
             var visibleLights = cullResults.visibleLights;
 
@@ -406,6 +432,7 @@ namespace UnityEngine.Rendering.Universal
                 Application.platform == RuntimePlatform.Android ||
                 Application.platform == RuntimePlatform.tvOS;
             renderingData.killAlphaInFinalBlit = !Graphics.preserveFramebufferAlpha && platformNeedsToKillAlpha;
+            renderingData.resolveFinalTarget = requiresBlitToBackbuffer;
         }
 
         static void InitializeShadowData(UniversalRenderPipelineAsset settings, NativeArray<VisibleLight> visibleLights, bool mainLightCastShadows, bool additionalLightsCastShadows, out ShadowData shadowData)

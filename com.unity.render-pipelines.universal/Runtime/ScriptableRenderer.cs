@@ -243,7 +243,8 @@ namespace UnityEngine.Rendering.Universal
 
             DrawGizmos(context, camera, GizmoSubset.PostImageEffects);
 
-            InternalFinishRendering(context);
+            if (renderingData.resolveFinalTarget)
+                InternalFinishRendering(context);
             blockRanges.Dispose();
         }
 
@@ -365,6 +366,11 @@ namespace UnityEngine.Rendering.Universal
 
                 Camera camera = cameraData.camera;
                 ClearFlag clearFlag = GetCameraClearFlag(camera.clearFlags);
+
+                // Overlay cameras composite on top of previous ones. They don't clear.
+                if (renderingData.cameraData.renderType == CameraRenderType.Overlay)
+                    clearFlag = ClearFlag.None;
+
                 SetRenderTarget(cmd, m_CameraColorTarget, m_CameraDepthTarget, clearFlag,
                     CoreUtils.ConvertSRGBToActiveColorSpace(camera.backgroundColor));
 
