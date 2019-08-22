@@ -131,11 +131,12 @@ namespace UnityEngine.Rendering.Universal
 
             // If camera requires depth and there's no depth pre-pass we create a depth texture that can be read
             // later by effect requiring it.
-            bool createDepthTexture = renderingData.cameraData.requiresDepthTexture && !requiresDepthPrepass;
+            bool createDepthTexture = (renderingData.cameraData.requiresDepthTexture && !requiresDepthPrepass);
+            createDepthTexture |= (renderingData.cameraData.renderType == CameraRenderType.Base && !renderingData.resolveFinalTarget);
             bool postProcessEnabled = renderingData.cameraData.postProcessEnabled && renderingData.resolveFinalTarget;
 
             m_ActiveCameraColorAttachment = (createColorTexture || renderingData.cameraData.renderType == CameraRenderType.Overlay) ? m_CameraColorAttachment : RenderTargetHandle.CameraTarget;
-            m_ActiveCameraDepthAttachment = (createDepthTexture) ? m_CameraDepthAttachment : RenderTargetHandle.CameraTarget;
+            m_ActiveCameraDepthAttachment = (createDepthTexture || renderingData.cameraData.renderType == CameraRenderType.Overlay) ? m_CameraDepthAttachment : RenderTargetHandle.CameraTarget;
             bool intermediateRenderTexture = createColorTexture || createDepthTexture;
 
             // Doesn't create texture for Overlay cameras as they are already overlaying on top of created textures.
@@ -194,7 +195,7 @@ namespace UnityEngine.Rendering.Universal
                 EnqueuePass(m_DrawSkyboxPass);
 
             // If a depth texture was created we necessarily need to copy it, otherwise we could have render it to a renderbuffer
-            if (createDepthTexture)
+            if (renderingData.cameraData.requiresDepthTexture && createDepthTexture)
             {
                 m_CopyDepthPass.Setup(m_ActiveCameraDepthAttachment, m_DepthTexture);
                 EnqueuePass(m_CopyDepthPass);
@@ -366,7 +367,7 @@ namespace UnityEngine.Rendering.Universal
         
         bool RequiresIntermediateColorTexture(ref RenderingData renderingData, RenderTextureDescriptor baseDescriptor)
         {
-            if (!renderingData.resolveFinalTarget)
+            if (renderingData.cameraData.renderType == CameraRenderType.Base && !renderingData.resolveFinalTarget)
                 return true;
 
             ref CameraData cameraData = ref renderingData.cameraData;
