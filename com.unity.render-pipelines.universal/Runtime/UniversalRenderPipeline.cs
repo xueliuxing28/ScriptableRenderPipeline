@@ -181,7 +181,7 @@ namespace UnityEngine.Rendering.Universal
 
                 VFX.VFXManager.ProcessCamera(camera); //Visual Effect Graph is not yet a required package but calling this method when there isn't any VisualEffect component has no effect (but needed for Camera sorting in Visual Effect Graph context)
 
-                if (cameraData.renderType == CameraRenderType.Base)
+                if (cameraData.renderType == CameraRenderType.Base && !cameraData.isSceneViewCamera)
                     RenderCameraStack(renderContext, cameraData.renderer, cameraData);
                 else 
                     RenderSingleCamera(renderContext, cameraData.renderer, cameraData, true);

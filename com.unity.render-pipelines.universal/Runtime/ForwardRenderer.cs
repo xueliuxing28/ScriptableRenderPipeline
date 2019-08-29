@@ -137,6 +137,9 @@ namespace UnityEngine.Rendering.Universal
 
             m_ActiveCameraColorAttachment = (createColorTexture || renderingData.cameraData.renderType == CameraRenderType.Overlay) ? m_CameraColorAttachment : RenderTargetHandle.CameraTarget;
             m_ActiveCameraDepthAttachment = (createDepthTexture || renderingData.cameraData.renderType == CameraRenderType.Overlay) ? m_CameraDepthAttachment : RenderTargetHandle.CameraTarget;
+            m_ActiveCameraColorAttachment = (createColorTexture) ? m_CameraColorAttachment : RenderTargetHandle.CameraTarget;
+            m_ActiveCameraDepthAttachment = (createDepthTexture) ? m_CameraDepthAttachment : RenderTargetHandle.CameraTarget;
+
             bool intermediateRenderTexture = createColorTexture || createDepthTexture;
 
             // Doesn't create texture for Overlay cameras as they are already overlaying on top of created textures.
@@ -280,7 +283,7 @@ namespace UnityEngine.Rendering.Universal
             if (renderingData.cameraData.isSceneViewCamera)
             {
                 // Scene view camera should always resolve target (not stacked)
-                Assertions.Assert.IsTrue(resolveFinalTarget);
+                Assertions.Assert.IsTrue(resolveFinalTarget, "Editor camera must resolve target upon finish rendering.");
                 m_SceneViewDepthCopyPass.Setup(m_DepthTexture);
                 EnqueuePass(m_SceneViewDepthCopyPass);
             }
