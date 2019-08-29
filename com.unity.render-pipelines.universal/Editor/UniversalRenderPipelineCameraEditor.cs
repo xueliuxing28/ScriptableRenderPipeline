@@ -670,10 +670,6 @@ namespace UnityEditor.Rendering.Universal
         void DrawAdditionalData()
         {
             bool hasChanged = false;
-            bool selectedValueShadows;
-            CameraOverrideOption selectedDepthOption;
-            CameraOverrideOption selectedOpaqueOption;
-            RendererOverrideOption selectedRendererOption;
             LayerMask selectedVolumeLayerMask;
             Transform selectedVolumeTrigger;
             bool selectedRenderPostProcessing;
@@ -684,10 +680,6 @@ namespace UnityEditor.Rendering.Universal
 
             if (m_AdditionalCameraDataSO == null)
             {
-                selectedValueShadows = true;
-                selectedDepthOption = CameraOverrideOption.UsePipelineSettings;
-                selectedOpaqueOption = CameraOverrideOption.UsePipelineSettings;
-                selectedRendererOption = RendererOverrideOption.UsePipelineSettings;
                 selectedVolumeLayerMask = 1; // "Default"
                 selectedVolumeTrigger = null;
                 selectedRenderPostProcessing = false;
@@ -699,10 +691,6 @@ namespace UnityEditor.Rendering.Universal
             else
             {
                 m_AdditionalCameraDataSO.Update();
-                selectedValueShadows = m_AdditionalCameraData.renderShadows;
-                selectedDepthOption = (CameraOverrideOption)m_AdditionalCameraDataRenderDepthProp.intValue;
-                selectedOpaqueOption =(CameraOverrideOption)m_AdditionalCameraDataRenderOpaqueProp.intValue;
-                selectedRendererOption = (RendererOverrideOption) m_AdditionalCameraDataRendererProp.intValue;
                 selectedVolumeLayerMask = m_AdditionalCameraDataVolumeLayerMask.intValue;
                 selectedVolumeTrigger = (Transform)m_AdditionalCameraDataVolumeTrigger.objectReferenceValue;
                 selectedRenderPostProcessing = m_AdditionalCameraDataRenderPostProcessing.boolValue;
@@ -714,25 +702,6 @@ namespace UnityEditor.Rendering.Universal
 
             hasChanged |= DrawLayerMask(m_AdditionalCameraDataVolumeLayerMask, ref selectedVolumeLayerMask, Styles.volumeLayerMask);
             hasChanged |= DrawObjectField(m_AdditionalCameraDataVolumeTrigger, ref selectedVolumeTrigger, Styles.volumeTrigger);
-            hasChanged |= DrawIntPopup(m_AdditionalCameraDataRendererProp, ref selectedRendererOption, Styles.rendererType, Styles.displayedRendererTypeOverride, Styles.rendererTypeOptions);
-
-            if (selectedRendererOption == RendererOverrideOption.Custom && m_AdditionalCameraDataSO != null)
-            {
-                EditorGUI.indentLevel++;
-                EditorGUI.BeginChangeCheck();
-                EditorGUILayout.PropertyField(m_AdditionalCameraDataRendererDataProp, Styles.rendererData);
-                if (EditorGUI.EndChangeCheck())
-                    hasChanged = true;
-                EditorGUI.indentLevel--;
-            }
-
-            // TODO: Fix this for lw/postfx
-            bool defaultDrawOfDepthTextureUI = true;
-            if (defaultDrawOfDepthTextureUI)
-                hasChanged |= DrawIntPopup(m_AdditionalCameraDataRenderDepthProp, ref selectedDepthOption, Styles.requireDepthTexture, Styles.displayedAdditionalDataOptions, Styles.additionalDataOptions);
-
-            hasChanged |= DrawIntPopup(m_AdditionalCameraDataRenderOpaqueProp, ref selectedOpaqueOption, Styles.requireOpaqueTexture, Styles.displayedAdditionalDataOptions, Styles.additionalDataOptions);
-            hasChanged |= DrawToggle(m_AdditionalCameraDataRenderShadowsProp, ref selectedValueShadows, Styles.renderingShadows);
             hasChanged |= DrawToggle(m_AdditionalCameraDataRenderPostProcessing, ref selectedRenderPostProcessing, Styles.renderPostProcessing);
 
             if (selectedRenderPostProcessing)
@@ -766,10 +735,6 @@ namespace UnityEditor.Rendering.Universal
                     init(m_AdditionalCameraData);
                 }
 
-                m_AdditionalCameraDataRenderShadowsProp.boolValue = selectedValueShadows;
-                m_AdditionalCameraDataRenderDepthProp.intValue = (int)selectedDepthOption;
-                m_AdditionalCameraDataRenderOpaqueProp.intValue = (int)selectedOpaqueOption;
-                m_AdditionalCameraDataRendererProp.intValue = (int)selectedRendererOption;
                 m_AdditionalCameraDataVolumeLayerMask.intValue = selectedVolumeLayerMask;
                 m_AdditionalCameraDataVolumeTrigger.objectReferenceValue = selectedVolumeTrigger;
                 m_AdditionalCameraDataRenderPostProcessing.boolValue = selectedRenderPostProcessing;
