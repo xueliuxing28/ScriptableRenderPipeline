@@ -22,6 +22,7 @@ namespace UnityEngine.Rendering.Universal
         UsePipelineSettings,
     }
 
+    //[Obsolete("Renderer override is no longer used, renderers are referenced by index on the pipeline asset.")]
     [MovedFrom("UnityEngine.Rendering.LWRP")] public enum RendererOverrideOption
     {
         Custom,
@@ -79,12 +80,9 @@ namespace UnityEngine.Rendering.Universal
         [SerializeField]
         CameraOverrideOption m_RequiresOpaqueTextureOption = CameraOverrideOption.UsePipelineSettings;
 
-        [SerializeField] RendererOverrideOption m_RendererOverrideOption = RendererOverrideOption.UsePipelineSettings;
-        [SerializeField] ScriptableRendererData m_RendererData = null;
-		[SerializeField] CameraRenderType m_CameraType = CameraRenderType.Base;
+        [SerializeField] CameraRenderType m_CameraType = CameraRenderType.Base;
 		[SerializeField] List<Camera> m_Cameras = new List<Camera>();
-		
-        ScriptableRenderer m_Renderer = null;
+		[SerializeField] int m_RendererIndex = -1;
 
         [SerializeField] LayerMask m_VolumeLayerMask = 1; // "Default"
         [SerializeField] Transform m_VolumeTrigger = null;
@@ -158,8 +156,7 @@ namespace UnityEngine.Rendering.Universal
             {
                 if (m_RequiresDepthTextureOption == CameraOverrideOption.UsePipelineSettings)
                 {
-                    UniversalRenderPipelineAsset asset = GraphicsSettings.renderPipelineAsset as UniversalRenderPipelineAsset;
-                    return asset.supportsCameraDepthTexture;
+                    return UniversalRenderPipeline.asset.supportsCameraDepthTexture;
                 }
                 else
                 {
@@ -175,8 +172,7 @@ namespace UnityEngine.Rendering.Universal
             {
                 if (m_RequiresOpaqueTextureOption == CameraOverrideOption.UsePipelineSettings)
                 {
-                    UniversalRenderPipelineAsset asset = GraphicsSettings.renderPipelineAsset as UniversalRenderPipelineAsset;
-                    return asset.supportsCameraOpaqueTexture;
+                    return UniversalRenderPipeline.asset.supportsCameraOpaqueTexture;
                 }
                 else
                 {
@@ -188,16 +184,16 @@ namespace UnityEngine.Rendering.Universal
 
         public ScriptableRenderer scriptableRenderer
         {
-            get
-            {
-                if (m_RendererOverrideOption == RendererOverrideOption.UsePipelineSettings || m_RendererData == null)
-                    return UniversalRenderPipeline.asset.scriptableRenderer;
+            get => UniversalRenderPipeline.asset.GetRenderer(m_RendererIndex);
+        }
 
-                if (m_RendererData.isInvalidated || m_Renderer == null)
-                    m_Renderer = m_RendererData.InternalCreateRenderer();
-
-                return m_Renderer;
-            }
+        /// <summary>
+        /// Use this to set this Camera's current ScriptableRenderer to one listed on the Render Pipeline Asset. Takes an index that maps to the list on the Render Pipeline Asset.
+        /// </summary>
+        /// <param name="index">The index that maps to the RendererData list on the currently assigned Render Pipeline Asset</param>
+        public void SetRenderer(int index)
+        {
+            m_RendererIndex = index;
         }
 
         public LayerMask volumeLayerMask

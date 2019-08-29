@@ -38,8 +38,7 @@ namespace UnityEditor.Rendering.Universal
             public static GUIContent allowHDR = EditorGUIUtility.TrTextContent("HDR", "High Dynamic Range gives you a wider range of light intensities, so your lighting looks more realistic. With it, you can still see details and experience less saturation even with bright light.", (Texture) null);
             public static GUIContent priority = EditorGUIUtility.TrTextContent("Priority", "A camera with a higher priority is drawn on top of a camera with a lower priority [ -100, 100 ].");
 
-            public static GUIContent rendererType = EditorGUIUtility.TrTextContent("Renderer Type", "Controls which renderer this camera uses.");
-            public static GUIContent rendererData = EditorGUIUtility.TrTextContent("Renderer Data", "Required by a custom renderer. If none is assigned, this camera uses the one assigned in the Pipeline Settings.");
+            public static GUIContent rendererType = EditorGUIUtility.TrTextContent("Renderer", "Controls which renderer this camera uses.");
 
             public static GUIContent volumeLayerMask = EditorGUIUtility.TrTextContent("Volume Mask", "This camera will only be affected by volumes in the selected scene-layers.");
             public static GUIContent volumeTrigger = EditorGUIUtility.TrTextContent("Volume Trigger", "A transform that will act as a trigger for volume blending. If none is set, the camera itself will act as a trigger.");
@@ -50,17 +49,12 @@ namespace UnityEditor.Rendering.Universal
             public static GUIContent stopNaN = EditorGUIUtility.TrTextContent("Stop NaN", "Automatically replaces NaN/Inf in shaders by a black pixel to avoid breaking some effects. This will affect performances and should only be used if you experience NaN issues that you can't fix. Has no effect on GLES2 platforms.");
             public static GUIContent dithering = EditorGUIUtility.TrTextContent("Dithering", "Applies 8-bit dithering to the final render to reduce color banding.");
 
-            public readonly GUIContent[] renderingPathOptions = { EditorGUIUtility.TrTextContent("Forward") };
             public readonly string hdrDisabledWarning = "HDR rendering is disabled in the Universal Render Pipeline asset.";
             public readonly string mssaDisabledWarning = "Anti-aliasing is disabled in the Universal Render Pipeline asset.";
 
-            public static GUIContent[] displayedRendererTypeOverride =
-            {
-                new GUIContent("Custom"),
-                new GUIContent("Use Pipeline Settings"),
-            };
+            public static readonly string missingRendererWarning = "The currently selected Renderer is missing form the Universal Render Pipeline asset.";
+            public static readonly string noRendererError = "There are no valid Renderers available on the Universal Render Pipeline asset.";
 
-            public static int[] rendererTypeOptions = Enum.GetValues(typeof(RendererOverrideOption)) as int[];
             public static GUIContent[] cameraBackgroundType =
             {
                 new GUIContent("Skybox"),
@@ -156,8 +150,7 @@ namespace UnityEditor.Rendering.Universal
         SerializedProperty m_AdditionalCameraDataRenderDepthProp;
         SerializedProperty m_AdditionalCameraDataRenderOpaqueProp;
         SerializedProperty m_AdditionalCameraDataRendererProp;
-        SerializedProperty m_AdditionalCameraDataRendererDataProp;
-		SerializedProperty m_AdditionalCameraDataCameraTypeProp;
+        SerializedProperty m_AdditionalCameraDataCameraTypeProp;
 		SerializedProperty m_AdditionalCameraDataCameras;
         SerializedProperty m_AdditionalCameraDataVolumeLayerMask;
         SerializedProperty m_AdditionalCameraDataVolumeTrigger;
@@ -370,8 +363,7 @@ namespace UnityEditor.Rendering.Universal
             m_AdditionalCameraDataRenderShadowsProp = m_AdditionalCameraDataSO.FindProperty("m_RenderShadows");
             m_AdditionalCameraDataRenderDepthProp = m_AdditionalCameraDataSO.FindProperty("m_RequiresDepthTextureOption");
             m_AdditionalCameraDataRenderOpaqueProp = m_AdditionalCameraDataSO.FindProperty("m_RequiresOpaqueTextureOption");
-            m_AdditionalCameraDataRendererProp = m_AdditionalCameraDataSO.FindProperty("m_RendererOverrideOption");
-            m_AdditionalCameraDataRendererDataProp = m_AdditionalCameraDataSO.FindProperty("m_RendererData");
+            m_AdditionalCameraDataRendererProp = m_AdditionalCameraDataSO.FindProperty("m_RendererIndex");
             m_AdditionalCameraDataVolumeLayerMask = m_AdditionalCameraDataSO.FindProperty("m_VolumeLayerMask");
             m_AdditionalCameraDataVolumeTrigger = m_AdditionalCameraDataSO.FindProperty("m_VolumeTrigger");
             m_AdditionalCameraDataRenderPostProcessing = m_AdditionalCameraDataSO.FindProperty("m_RenderPostProcessing");
@@ -540,7 +532,7 @@ namespace UnityEditor.Rendering.Universal
                     settings.DrawCullingMask();
                     settings.DrawOcclusionCulling();
 
-                    DrawRendererType();
+                    //DrawRendererType();
                     DrawOpaqueTexture();
                     DrawDepthTexture();
                     DrawRenderShadows();
@@ -670,6 +662,7 @@ namespace UnityEditor.Rendering.Universal
         void DrawAdditionalData()
         {
             bool hasChanged = false;
+            int selectedRendererOption;
             LayerMask selectedVolumeLayerMask;
             Transform selectedVolumeTrigger;
             bool selectedRenderPostProcessing;
@@ -680,6 +673,7 @@ namespace UnityEditor.Rendering.Universal
 
             if (m_AdditionalCameraDataSO == null)
             {
+                selectedRendererOption = -1;
                 selectedVolumeLayerMask = 1; // "Default"
                 selectedVolumeTrigger = null;
                 selectedRenderPostProcessing = false;
@@ -691,6 +685,7 @@ namespace UnityEditor.Rendering.Universal
             else
             {
                 m_AdditionalCameraDataSO.Update();
+                selectedRendererOption = m_AdditionalCameraDataRendererProp.intValue;
                 selectedVolumeLayerMask = m_AdditionalCameraDataVolumeLayerMask.intValue;
                 selectedVolumeTrigger = (Transform)m_AdditionalCameraDataVolumeTrigger.objectReferenceValue;
                 selectedRenderPostProcessing = m_AdditionalCameraDataRenderPostProcessing.boolValue;
@@ -702,6 +697,18 @@ namespace UnityEditor.Rendering.Universal
 
             hasChanged |= DrawLayerMask(m_AdditionalCameraDataVolumeLayerMask, ref selectedVolumeLayerMask, Styles.volumeLayerMask);
             hasChanged |= DrawObjectField(m_AdditionalCameraDataVolumeTrigger, ref selectedVolumeTrigger, Styles.volumeTrigger);
+
+            hasChanged |= DrawBasicIntPopup(m_AdditionalCameraDataRendererProp, ref selectedRendererOption, Styles.rendererType, UniversalRenderPipeline.asset.rendererDisplayList,
+                UniversalRenderPipeline.asset.rendererIndexList);
+            if (!UniversalRenderPipeline.asset.ValidateRendererDataList())
+            {
+                EditorGUILayout.HelpBox(Styles.noRendererError, MessageType.Error);
+            }
+            else if (!UniversalRenderPipeline.asset.ValidateRendererData(selectedRendererOption))
+            {
+                EditorGUILayout.HelpBox(Styles.missingRendererWarning, MessageType.Warning);
+            }
+
             hasChanged |= DrawToggle(m_AdditionalCameraDataRenderPostProcessing, ref selectedRenderPostProcessing, Styles.renderPostProcessing);
 
             if (selectedRenderPostProcessing)
@@ -731,7 +738,7 @@ namespace UnityEditor.Rendering.Universal
             {
                 if (m_AdditionalCameraDataSO == null)
                 {
-                    m_AdditionalCameraData = camera.gameObject.AddComponent<UniversalAdditionalCameraData>();
+                    m_AdditionalCameraData = Undo.AddComponent<UniversalAdditionalCameraData>(camera.gameObject);
                     init(m_AdditionalCameraData);
                 }
 
@@ -777,36 +784,39 @@ namespace UnityEditor.Rendering.Universal
         bool DrawObjectField<T>(SerializedProperty prop, ref T value, GUIContent style)
             where T : UnityEngine.Object
         {
+            var defaultVal = value;
             bool hasChanged = false;
             var controlRect = BeginProperty(prop, style);
 
             EditorGUI.BeginChangeCheck();
             value = (T)EditorGUI.ObjectField(controlRect, style, value, typeof(T), true);
-            if (EditorGUI.EndChangeCheck())
+            if (EditorGUI.EndChangeCheck() && !Equals(defaultVal, value))
+            {
                 hasChanged = true;
+            }
 
             EndProperty();
             return hasChanged;
 		}
         
-		void DrawRendererType()
-        {
-            RendererOverrideOption selectedRendererOption;
-            m_AdditionalCameraDataSO.Update();
-            selectedRendererOption = (RendererOverrideOption) m_AdditionalCameraDataRendererProp.intValue;
+		// void DrawRendererType()
+  //       {
+  //           RendererOverrideOption selectedRendererOption;
+  //           m_AdditionalCameraDataSO.Update();
+  //           selectedRendererOption = (RendererOverrideOption) m_AdditionalCameraDataRendererProp.intValue;
 
-            Rect controlRectRendererType = EditorGUILayout.GetControlRect(true);
+  //           Rect controlRectRendererType = EditorGUILayout.GetControlRect(true);
 
-            EditorGUI.BeginProperty(controlRectRendererType, Styles.rendererType, m_AdditionalCameraDataRendererProp);
-            EditorGUI.BeginChangeCheck();
-            selectedRendererOption = (RendererOverrideOption)EditorGUI.IntPopup(controlRectRendererType, Styles.rendererType, (int)selectedRendererOption, Styles.displayedRendererTypeOverride, Styles.rendererTypeOptions);
-            if (EditorGUI.EndChangeCheck())
-            {
-                m_AdditionalCameraDataRendererProp.intValue = (int)selectedRendererOption;
-                m_AdditionalCameraDataSO.ApplyModifiedProperties();
-            }
-            EditorGUI.EndProperty();
-        }
+  //           EditorGUI.BeginProperty(controlRectRendererType, Styles.rendererType, m_AdditionalCameraDataRendererProp);
+  //           EditorGUI.BeginChangeCheck();
+  //           selectedRendererOption = (RendererOverrideOption)EditorGUI.IntPopup(controlRectRendererType, Styles.rendererType, (int)selectedRendererOption, Styles.displayedRendererTypeOverride, Styles.rendererTypeOptions);
+  //           if (EditorGUI.EndChangeCheck())
+  //           {
+  //               m_AdditionalCameraDataRendererProp.intValue = (int)selectedRendererOption;
+  //               m_AdditionalCameraDataSO.ApplyModifiedProperties();
+  //           }
+  //           EditorGUI.EndProperty();
+  //       }
 
         void DrawDepthTexture()
         {
@@ -867,13 +877,33 @@ namespace UnityEditor.Rendering.Universal
         bool DrawIntPopup<T>(SerializedProperty prop, ref T value, GUIContent style, GUIContent[] optionNames, int[] optionValues)
             where T : Enum
         {
+            var defaultVal = value;
             bool hasChanged = false;
             var controlRect = BeginProperty(prop, style);
 
             EditorGUI.BeginChangeCheck();
             value = (T)(object)EditorGUI.IntPopup(controlRect, style, (int)(object)value, optionNames, optionValues);
-            if (EditorGUI.EndChangeCheck())
+            if (EditorGUI.EndChangeCheck() && !Equals(defaultVal, value))
+            {
                 hasChanged = true;
+            }
+
+            EndProperty();
+            return hasChanged;
+        }
+
+        bool DrawBasicIntPopup(SerializedProperty prop, ref int value, GUIContent style, GUIContent[] optionNames, int[] optionValues)
+        {
+            var defaultVal = value;
+            bool hasChanged = false;
+            var controlRect = BeginProperty(prop, style);
+
+            EditorGUI.BeginChangeCheck();
+            value = EditorGUI.IntPopup(controlRect, style, value, optionNames, optionValues);
+            if (EditorGUI.EndChangeCheck() && !Equals(defaultVal, value))
+            {
+                hasChanged = true;
+            }
 
             EndProperty();
             return hasChanged;

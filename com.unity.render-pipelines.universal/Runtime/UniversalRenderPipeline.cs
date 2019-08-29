@@ -98,6 +98,16 @@ namespace UnityEngine.Rendering.Universal
             }
         }
 
+        // Internal max count for how many ScriptableRendererData can be added to a single Universal RP asset
+        internal static int maxScriptableRenderers
+        {
+            get => 8;
+        }
+
+        /// <summary>
+        /// Returns the current render pipeline asset for the current quality setting.
+        /// If no render pipeline asset is assigned in QualitySettings, then returns the one assigned in GraphicsSettings.
+        /// </summary>
         public static UniversalRenderPipelineAsset asset
         {
             get
@@ -131,8 +141,10 @@ namespace UnityEngine.Rendering.Universal
             // For compatibility reasons we also match old LightweightPipeline tag.
             Shader.globalRenderPipeline = "UniversalPipeline,LightweightPipeline";
 
+            // Editor only.
+#if UNITY_EDITOR
             Lightmapping.SetDelegate(lightsDelegate);
-
+#endif
             CameraCaptureBridge.enabled = true;
 
             RenderingUtils.ClearSystemInfoCache();
@@ -192,15 +204,6 @@ namespace UnityEngine.Rendering.Universal
             EndFrameRendering(renderContext, cameras);
         }
 
-        public static void RenderSingleCamera(ScriptableRenderContext context, Camera camera)
-        {
-            UniversalAdditionalCameraData additionalCameraData = null;
-            if (camera.cameraType == CameraType.Game || camera.cameraType == CameraType.VR)
-                camera.gameObject.TryGetComponent(out additionalCameraData);
-
-            InitializeCameraData(asset, camera, additionalCameraData, out var cameraData);
-            RenderSingleCamera(context, cameraData.renderer, cameraData, true);
-        }
 
         static void RenderCameraStack(ScriptableRenderContext context, ScriptableRenderer renderer, CameraData cameraData)
         {
@@ -234,17 +237,13 @@ namespace UnityEngine.Rendering.Universal
                 Debug.LogWarning(string.Format("Trying to render {0} with an invalid renderer. Camera rendering will be skipped.", camera.name));
                 return;
             }
-
+            
             if (!camera.TryGetCullingParameters(IsStereoEnabled(camera), out var cullingParameters))
                 return;
 
             SetupPerCameraShaderConstants(cameraData);
 
-#if UNITY_EDITOR
-            string tag = camera.name;
-#else
-            string tag = k_RenderCameraTag;
-#endif
+            string tag = (asset.debugLevel >= PipelineDebugLevel.Profiling) ? camera.name: k_RenderCameraTag;
             CommandBuffer cmd = CommandBufferPool.Get(tag);
             using (new ProfilingSample(cmd, tag))
             {
@@ -291,6 +290,13 @@ namespace UnityEngine.Rendering.Universal
             SceneViewDrawMode.SetupDrawMode();
 #endif
         }
+		
+		static bool PlatformNeedsToKillAlpha()
+		{
+			return Application.platform == RuntimePlatform.IPhonePlayer ||
+                Application.platform == RuntimePlatform.Android ||
+                Application.platform == RuntimePlatform.tvOS;
+		}
 
         static void InitializeCameraData(UniversalRenderPipelineAsset settings, Camera camera, UniversalAdditionalCameraData additionalCameraData, out CameraData cameraData)
         {
@@ -302,7 +308,7 @@ namespace UnityEngine.Rendering.Universal
             int msaaSamples = 1;
             if (camera.allowMSAA && settings.msaaSampleCount > 1)
                 msaaSamples = (camera.targetTexture != null) ? camera.targetTexture.antiAliasing : settings.msaaSampleCount;
-            
+
             cameraData.isSceneViewCamera = camera.cameraType == CameraType.SceneView;
             cameraData.isHdrEnabled = camera.allowHDR && settings.supportsHDR;
 
@@ -323,8 +329,10 @@ namespace UnityEngine.Rendering.Universal
             cameraData.renderScale = (camera.cameraType == CameraType.Game) ? cameraData.renderScale : 1.0f;
 
             bool anyShadowsEnabled = settings.supportsMainLightShadows || settings.supportsAdditionalLightShadows;
-            cameraData.maxShadowDistance = (anyShadowsEnabled) ? settings.shadowDistance : 0.0f;
-            
+            cameraData.maxShadowDistance = Mathf.Min(settings.shadowDistance, camera.farClipPlane);
+            cameraData.maxShadowDistance = (anyShadowsEnabled && cameraData.maxShadowDistance >= camera.nearClipPlane) ?
+                cameraData.maxShadowDistance : 0.0f;
+
             if (additionalCameraData != null)
             {
                 cameraData.renderType = additionalCameraData.renderType;
@@ -382,8 +390,9 @@ namespace UnityEngine.Rendering.Universal
             cameraData.defaultOpaqueSortFlags = canSkipFrontToBackSorting ? noFrontToBackOpaqueFlags : commonOpaqueFlags;
             cameraData.captureActions = CameraCaptureBridge.GetCaptureActions(camera);
 
+			bool needsAlphaChannel = camera.targetTexture == null && Graphics.preserveFramebufferAlpha && PlatformNeedsToKillAlpha();
             cameraData.cameraTargetDescriptor = CreateRenderTextureDescriptor(camera, cameraData.renderScale,
-                cameraData.isStereoEnabled, cameraData.isHdrEnabled, msaaSamples);
+                cameraData.isStereoEnabled, cameraData.isHdrEnabled, msaaSamples, needsAlphaChannel);
         }
 
         static void InitializeRenderingData(UniversalRenderPipelineAsset settings, ref CameraData cameraData, ref CullingResults cullResults,
@@ -428,10 +437,8 @@ namespace UnityEngine.Rendering.Universal
             renderingData.supportsDynamicBatching = settings.supportsDynamicBatching;
             renderingData.perObjectData = GetPerObjectLightFlags(renderingData.lightData.additionalLightsCount);
 
-            bool platformNeedsToKillAlpha = Application.platform == RuntimePlatform.IPhonePlayer ||
-                Application.platform == RuntimePlatform.Android ||
-                Application.platform == RuntimePlatform.tvOS;
-            renderingData.killAlphaInFinalBlit = !Graphics.preserveFramebufferAlpha && platformNeedsToKillAlpha;
+			bool isOffscreenCamera = cameraData.camera.targetTexture != null && !cameraData.isSceneViewCamera;
+            renderingData.killAlphaInFinalBlit = !Graphics.preserveFramebufferAlpha && PlatformNeedsToKillAlpha() && !isOffscreenCamera;
             renderingData.resolveFinalTarget = requiresBlitToBackbuffer;
         }
 
@@ -626,6 +633,8 @@ namespace UnityEngine.Rendering.Universal
             Shader.SetGlobalMatrix(PerCameraBuffer._InvCameraViewProj, invViewProjMatrix);
         }
 
+        // Editor only.
+#if UNITY_EDITOR
         static Lightmapping.RequestLightsDelegate lightsDelegate = (Light[] requests, NativeArray<LightDataGI> lightsOutput) =>
         {
             LightDataGI lightData = new LightDataGI();
@@ -650,6 +659,12 @@ namespace UnityEngine.Rendering.Universal
                     case LightType.Area:
                         RectangleLight rectangleLight = new RectangleLight();
                         LightmapperUtils.Extract(light, ref rectangleLight); lightData.Init(ref rectangleLight);
+                        light.lightmapBakeType = LightmapBakeType.Baked;
+                        break;
+                    case LightType.Disc:
+                        DiscLight discLight = new DiscLight();
+                        LightmapperUtils.Extract(light, ref discLight); lightData.Init(ref discLight);
+                        light.lightmapBakeType = LightmapBakeType.Baked;
                         break;
                     default:
                         lightData.InitNoBake(light.GetInstanceID());
@@ -660,5 +675,6 @@ namespace UnityEngine.Rendering.Universal
                 lightsOutput[i] = lightData;
             }
         };
+#endif
     }
 }
