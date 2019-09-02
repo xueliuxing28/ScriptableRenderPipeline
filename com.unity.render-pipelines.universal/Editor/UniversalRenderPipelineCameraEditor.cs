@@ -28,6 +28,7 @@ namespace UnityEditor.Rendering.Universal
             public static GUIContent outputSettingsText = EditorGUIUtility.TrTextContent("Output", "These settings control how the camera output is formatted.");
             public static GUIContent renderingSettingsText = EditorGUIUtility.TrTextContent("Rendering", "These settings coltrol for the specific rendering features for this camera.");
             public static GUIContent stackSettingsText = EditorGUIUtility.TrTextContent("Stack", "The list of overlay cameras assigned to this camera. ");
+            public static GUIContent postProcessingActiveText = EditorGUIUtility.TrIconContent("PreTextureRGB", "Post Processing is active on this camera.");
 
             public static GUIContent backgroundType = EditorGUIUtility.TrTextContent("Background Type", "Controls how to initialize the Camera's background.\n\nSkybox initializes camera with Skybox, defaulting to a background color if no skybox is found.\n\nSolid Color initializes background with the background color.\n\nUninitialized has undefined values for the camera background. Use this only if you are rendering all pixels in the Camera's view.");
             public static GUIContent cameraType = EditorGUIUtility.TrTextContent("Render Mode", "Controls which type of camera this is.");
@@ -306,6 +307,13 @@ namespace UnityEditor.Rendering.Universal
                     EditorGUI.LabelField(rect, cam.name, type.ToString());
                 }
 
+                var renderPP = cam.gameObject.GetComponent<UniversalAdditionalCameraData>().renderPostProcessing;
+                if(renderPP)
+                {
+                    Rect selectRect = new Rect(rect.width, rect.y, 20, EditorGUIUtility.singleLineHeight);
+                    EditorGUI.LabelField(selectRect, Styles.postProcessingActiveText);
+                }
+
                 EditorGUIUtility.labelWidth = labelWidth;
             }
             else
@@ -342,11 +350,19 @@ namespace UnityEditor.Rendering.Universal
                 names[i] = new GUIContent( validCameras[i].name );
             }
 
+            if (!validCameras.Any())
+            {
+                names = new GUIContent[1];
+                names[0] = new GUIContent("No Overlay Cameras exists");
+            }
             EditorUtility.DisplayCustomMenu(rect, names, -1, AddCameraToCameraListMenuSelected, null);
         }
 
         void AddCameraToCameraListMenuSelected(object userData, string[] options, int selected)
         {
+            if(!validCameras.Any())
+                return;
+
             var length = m_AdditionalCameraDataCameras.arraySize;
             ++m_AdditionalCameraDataCameras.arraySize;
             m_AdditionalCameraDataCameras.serializedObject.ApplyModifiedProperties();

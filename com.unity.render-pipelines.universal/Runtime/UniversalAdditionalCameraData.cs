@@ -253,8 +253,9 @@ namespace UnityEngine.Rendering.Universal
 
         public void OnDrawGizmos()
         {
-            string gizmoName = "Packages/com.unity.render-pipelines.lightweight/Editor/Gizmos/";
+            string gizmoName = "Packages/com.unity.render-pipelines.universal/Editor/Gizmos/";
             Color tint = Color.white;
+
             if (m_CameraType == CameraRenderType.Base)
             {
                 gizmoName += "Camera_Base.png";
