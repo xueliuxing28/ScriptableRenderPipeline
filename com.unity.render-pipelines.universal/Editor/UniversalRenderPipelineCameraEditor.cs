@@ -131,7 +131,6 @@ namespace UnityEditor.Rendering.Universal
         SavedBool m_OutputSettingsFoldout;
         SavedBool m_RenderingSettingsFoldout;
         SavedBool m_StackSettingsFoldout;
-        SavedBool m_VolumeSettingsFoldout;
 
         // Animation Properties
         public bool isSameClearFlags { get { return !settings.clearFlags.hasMultipleDifferentValues; } }
@@ -202,7 +201,6 @@ namespace UnityEditor.Rendering.Universal
             m_OutputSettingsFoldout = new SavedBool($"{target.GetType()}.OutputSettingsFoldout", false);
             m_RenderingSettingsFoldout = new SavedBool($"{target.GetType()}.RenderingSettingsFoldout", false);
             m_StackSettingsFoldout = new SavedBool($"{target.GetType()}.StackSettingsFoldout", false);
-            m_VolumeSettingsFoldout = new SavedBool($"{target.GetType()}.VolumeSettingsFoldout", false);
             m_AdditionalCameraData = camera.gameObject.GetComponent<UniversalAdditionalCameraData>();
             m_ErrorIcon = EditorGUIUtility.Load("icons/console.erroricon.sml.png") as Texture2D;
             validCameras.Clear();
@@ -453,7 +451,6 @@ namespace UnityEditor.Rendering.Universal
             {
                 DrawCommonSettings();
                 DrawRenderingSettings();
-                DrawVolumesSettings();
             }
 
             // UI Camera
@@ -464,18 +461,6 @@ namespace UnityEditor.Rendering.Universal
 
             EditorGUI.indentLevel--;
 	        settings.ApplyModifiedProperties();
-        }
-
-        void DrawVolumesSettings()
-        {
-            m_VolumeSettingsFoldout.value = EditorGUILayout.BeginFoldoutHeaderGroup(m_VolumeSettingsFoldout.value, Styles.volumeSettingsText);
-            if (m_VolumeSettingsFoldout.value)
-            {
-                DrawVolumes();
-                EditorGUILayout.Space();
-                EditorGUILayout.Space();
-            }
-            EditorGUILayout.EndFoldoutHeaderGroup();
         }
 
         void DrawCommonSettings()
@@ -561,7 +546,7 @@ namespace UnityEditor.Rendering.Universal
                 }
                 else
                 {
-                    if (selectedCameraType == CameraRenderType.Base)
+                    if (selectedCameraType == CameraRenderType.Base || selectedCameraType == CameraRenderType.Offscreen)
                     {
                         DrawPostProcessing();
                     }
