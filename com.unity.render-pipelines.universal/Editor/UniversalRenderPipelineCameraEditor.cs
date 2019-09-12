@@ -411,7 +411,10 @@ namespace UnityEditor.Rendering.Universal
         public override void OnInspectorGUI()
         {
             if(m_UniversalRenderPipeline == null)
+			{
+				EditorGUILayout.HelpBox("Universal RP asset not assigned, assign one in the Graphics Settings.", MessageType.Error);
                 return;
+			}
 
             if (s_Styles == null)
                 s_Styles = new Styles();
@@ -663,7 +666,7 @@ namespace UnityEditor.Rendering.Universal
         {
             EditorGUILayout.PropertyField(settings.targetTexture);
 
-            if (!settings.targetTexture.hasMultipleDifferentValues)
+            if (!settings.targetTexture.hasMultipleDifferentValues && m_UniversalRenderPipeline != null)
             {
                 var texture = settings.targetTexture.objectReferenceValue as RenderTexture;
                 int pipelineSamplesCount = m_UniversalRenderPipeline.msaaSampleCount;
