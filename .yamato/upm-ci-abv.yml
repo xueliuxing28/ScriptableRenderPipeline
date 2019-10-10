@@ -1,6 +1,8 @@
 editors:
   - version: 2019.3
+    cmd: -u 2019.3/staging
   - version: fast-2019.3
+    cmd: -u 2019.3/staging --fast
 projects:
   - name: Universal
     folder: UniversalGraphicsTest
@@ -8,6 +10,10 @@ projects:
     folder: UniversalGfxTestStereo
   - name: ShaderGraph
     folder: ShaderGraph
+  - name: ShaderGraph_Stereo
+    folder: ShaderGraphUniversalStereo
+  - name: PostProcessing
+    folder: PostProcessing
   - name: HDRP
     folder: HDRP_Tests
   - name: HDRP_Standalone
@@ -21,6 +27,7 @@ projects:
 all_project_ci_{{ editor.version }}:
   name: ABV for SRP repository - {{ editor.version }}
   agent:
+    name: whatever
     type: Unity::VM
     image: cds-ops/ubuntu-18.04-agent:latest
     flavor: b1.small
@@ -31,11 +38,6 @@ all_project_ci_{{ editor.version }}:
     - path: .yamato/upm-ci-{{ project.name | downcase }}.yml#All_{{ project.name }}_{{ editor.version }}
       rerun: always
   {% endfor %}
-
-  artifacts:
-    logs:
-      paths:
-        - "**/test-results/**"
 {% endfor %}
 
 all_project_ci_nightly:
@@ -50,8 +52,7 @@ all_project_ci_nightly:
   {% for project in projects %}
     - path: .yamato/upm-ci-{{ project.name | downcase }}.yml#All_{{ project.name }}_2019.3
       rerun: always
-  {% endfor %}
-
+  {% endfor %}  
   triggers:
     recurring:
       - branch: release/2019.3
