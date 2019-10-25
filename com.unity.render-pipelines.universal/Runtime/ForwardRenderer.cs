@@ -143,8 +143,6 @@ namespace UnityEngine.Rendering.Universal
             var isOverlayCamera = renderingData.cameraData.renderType == CameraRenderType.Overlay;
             m_ActiveCameraColorAttachment = (createColorTexture || isOverlayCamera) ? m_CameraColorAttachment : RenderTargetHandle.CameraTarget;
             m_ActiveCameraDepthAttachment = (createDepthTexture || isOverlayCamera) ? m_CameraDepthAttachment : RenderTargetHandle.CameraTarget;
-            m_ActiveCameraColorAttachment = (createColorTexture) ? m_CameraColorAttachment : RenderTargetHandle.CameraTarget;
-            m_ActiveCameraDepthAttachment = (createDepthTexture) ? m_CameraDepthAttachment : RenderTargetHandle.CameraTarget;
 
             bool intermediateRenderTexture = createColorTexture || createDepthTexture;
 
