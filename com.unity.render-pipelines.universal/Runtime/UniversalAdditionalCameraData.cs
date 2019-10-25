@@ -98,6 +98,7 @@ namespace UnityEngine.Rendering.Universal
         [SerializeField] AntialiasingQuality m_AntialiasingQuality = AntialiasingQuality.High;
         [SerializeField] bool m_StopNaN = false;
         [SerializeField] bool m_Dithering = false;
+        [SerializeField] bool m_ClearDepth = true;
 
         // Deprecated:
         [FormerlySerializedAs("requiresDepthTexture"), SerializeField]
@@ -248,6 +249,11 @@ namespace UnityEngine.Rendering.Universal
         {
             get => m_Dithering;
             set => m_Dithering = value;
+        }
+
+        public bool clearDepth
+        {
+            get => m_ClearDepth;
         }
 
         public void OnBeforeSerialize()

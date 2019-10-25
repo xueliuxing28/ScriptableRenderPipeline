@@ -273,8 +273,10 @@ namespace UnityEngine.Rendering.Universal
         /// </summary>
         /// <param name="cameraClearFlags">Camera clear flags.</param>
         /// <returns>A clear flag that tells if color and/or depth should be cleared.</returns>
-        protected static ClearFlag GetCameraClearFlag(CameraClearFlags cameraClearFlags)
+        protected static ClearFlag GetCameraClearFlag(ref CameraData cameraData)
         {
+            var cameraClearFlags = cameraData.camera.clearFlags;
+
 #if UNITY_EDITOR
             // We need public API to tell if FrameDebugger is active and enabled. In that case
             // we want to force a clear to see properly the drawcall stepping.
@@ -300,6 +302,11 @@ namespace UnityEngine.Rendering.Universal
             // RenderBufferLoadAction.DontCare in PC/Desktop behaves as not clearing screen
             // RenderBufferLoadAction.DontCare in Vulkan/Metal behaves as DontCare load action
             // RenderBufferLoadAction.DontCare in GLES behaves as glInvalidateBuffer
+
+            // Overlay cameras composite on top of previous ones. They don't clear color.
+            // For overlay cameras we check if depth should be cleared on not.
+            if (cameraData.renderType == CameraRenderType.Overlay)
+                return (cameraData.clearDepth) ? ClearFlag.Depth : ClearFlag.None;
 
             // Always clear on first render pass in mobile as it's same perf of DontCare and avoid tile clearing issues.
             if (Application.isMobilePlatform)
@@ -387,11 +394,7 @@ namespace UnityEngine.Rendering.Universal
                 m_FirstCameraRenderPassExecuted = true;
 
                 Camera camera = cameraData.camera;
-                ClearFlag clearFlag = GetCameraClearFlag(camera.clearFlags);
-
-                // Overlay cameras composite on top of previous ones. They don't clear.
-                if (renderingData.cameraData.renderType == CameraRenderType.Overlay)
-                    clearFlag = ClearFlag.None;
+                ClearFlag clearFlag = GetCameraClearFlag(ref cameraData);
 
                 SetRenderTarget(cmd, m_CameraColorTarget, m_CameraDepthTarget, clearFlag,
                     CoreUtils.ConvertSRGBToActiveColorSpace(camera.backgroundColor));

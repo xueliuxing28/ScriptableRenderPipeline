@@ -44,6 +44,7 @@ namespace UnityEngine.Rendering.Universal
         public CameraRenderType renderType;
         public RenderTextureDescriptor cameraTargetDescriptor;
         public float renderScale;
+        public bool clearDepth;
         public bool isSceneViewCamera;
         public bool isDefaultViewport;
         public bool isHdrEnabled;

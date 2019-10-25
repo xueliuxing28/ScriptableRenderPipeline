@@ -39,6 +39,7 @@ namespace UnityEditor.Rendering.Universal
             public static GUIContent allowMSAA = EditorGUIUtility.TrTextContent("MSAA", "Use Multi Sample Anti-Aliasing to reduce aliasing.");
             public static GUIContent allowHDR = EditorGUIUtility.TrTextContent("HDR", "High Dynamic Range gives you a wider range of light intensities, so your lighting looks more realistic. With it, you can still see details and experience less saturation even with bright light.", (Texture) null);
             public static GUIContent priority = EditorGUIUtility.TrTextContent("Priority", "A camera with a higher priority is drawn on top of a camera with a lower priority [ -100, 100 ].");
+            public static GUIContent clearDepth = EditorGUIUtility.TrTextContent("Clear Depth", "If enabled, depth from the previous camera will be cleared.");
 
             public static GUIContent rendererType = EditorGUIUtility.TrTextContent("Renderer", "Controls which renderer this camera uses.");
 
@@ -169,6 +170,7 @@ namespace UnityEditor.Rendering.Universal
         SerializedProperty m_AdditionalCameraDataAntialiasingQuality;
         SerializedProperty m_AdditionalCameraDataStopNaN;
         SerializedProperty m_AdditionalCameraDataDithering;
+        SerializedProperty m_AdditionalCameraClearDepth;
 
         void SetAnimationTarget(AnimBool anim, bool initialize, bool targetValue)
         {
@@ -402,6 +404,7 @@ namespace UnityEditor.Rendering.Universal
             m_AdditionalCameraDataAntialiasingQuality = m_AdditionalCameraDataSO.FindProperty("m_AntialiasingQuality");
             m_AdditionalCameraDataStopNaN = m_AdditionalCameraDataSO.FindProperty("m_StopNaN");
             m_AdditionalCameraDataDithering = m_AdditionalCameraDataSO.FindProperty("m_Dithering");
+            m_AdditionalCameraClearDepth = m_AdditionalCameraDataSO.FindProperty("m_ClearDepth");
             m_AdditionalCameraDataCameraTypeProp = m_AdditionalCameraDataSO.FindProperty("m_CameraType");
             m_AdditionalCameraDataCameraOutputProp = m_AdditionalCameraDataSO.FindProperty("m_CameraOutput");
 
@@ -559,6 +562,8 @@ namespace UnityEditor.Rendering.Universal
 
                 if (selectedCameraType == CameraRenderType.Overlay)
                 {
+                    EditorGUILayout.PropertyField(m_AdditionalCameraClearDepth, Styles.clearDepth);
+                    m_AdditionalCameraDataSO.ApplyModifiedProperties();
                     settings.DrawCullingMask();
                     settings.DrawOcclusionCulling();
                 }

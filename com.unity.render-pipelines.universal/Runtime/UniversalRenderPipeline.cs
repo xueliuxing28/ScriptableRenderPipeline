@@ -345,6 +345,7 @@ namespace UnityEngine.Rendering.Universal
             if (additionalCameraData != null)
             {
                 cameraData.renderType = additionalCameraData.renderType;
+                cameraData.clearDepth = (additionalCameraData.renderType != CameraRenderType.Base) ? additionalCameraData.clearDepth : true;
                 cameraData.maxShadowDistance = (additionalCameraData.renderShadows) ? cameraData.maxShadowDistance : 0.0f;
                 cameraData.requiresDepthTexture = additionalCameraData.requiresDepthTexture;
                 cameraData.requiresOpaqueTexture = additionalCameraData.requiresColorTexture;
@@ -360,6 +361,7 @@ namespace UnityEngine.Rendering.Universal
             else if(camera.cameraType == CameraType.SceneView)
             {
                 cameraData.renderType = CameraRenderType.Base;
+                cameraData.clearDepth = true;
                 cameraData.requiresDepthTexture = settings.supportsCameraDepthTexture;
                 cameraData.requiresOpaqueTexture = settings.supportsCameraOpaqueTexture;
                 cameraData.volumeLayerMask = 1; // "Default"
@@ -374,6 +376,7 @@ namespace UnityEngine.Rendering.Universal
             else
             {
                 cameraData.renderType = CameraRenderType.Base;
+                cameraData.clearDepth = true;
                 cameraData.requiresDepthTexture = settings.supportsCameraDepthTexture;
                 cameraData.requiresOpaqueTexture = settings.supportsCameraOpaqueTexture;
                 cameraData.volumeLayerMask = 1; // "Default"
