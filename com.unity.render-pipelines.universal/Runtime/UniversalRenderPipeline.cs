@@ -207,7 +207,17 @@ namespace UnityEngine.Rendering.Universal
             cameraData.camera.gameObject.TryGetComponent<UniversalAdditionalCameraData>(out var additionalCameraData);
             List<Camera> cameraStack = additionalCameraData?.cameras;
 
-            bool isStackedRendering = cameraStack != null && cameraStack.Count > 0;
+            bool anyEnabledOverlayCamera = false;
+            for (int i = 0; i < cameraStack.Count; ++i)
+            {
+                if (cameraStack[i].isActiveAndEnabled)
+                {
+                    anyEnabledOverlayCamera = true;
+                    break;
+                }
+            }
+
+            bool isStackedRendering = cameraStack != null && cameraStack.Count > 0 && anyEnabledOverlayCamera;
             RenderSingleCamera(context, renderer, cameraData, !isStackedRendering);
 
             if (!isStackedRendering)

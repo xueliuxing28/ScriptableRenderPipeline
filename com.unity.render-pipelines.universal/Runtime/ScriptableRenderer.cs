@@ -255,8 +255,7 @@ namespace UnityEngine.Rendering.Universal
 
             DrawGizmos(context, camera, GizmoSubset.PostImageEffects);
 
-            if (renderingData.resolveFinalTarget)
-                InternalFinishRendering(context);
+            InternalFinishRendering(context, renderingData.resolveFinalTarget);
             blockRanges.Dispose();
         }
 
@@ -513,14 +512,15 @@ namespace UnityEngine.Rendering.Universal
             blockRanges[currRangeIndex] = m_ActiveRenderPassQueue.Count;
         }
 
-        void InternalFinishRendering(ScriptableRenderContext context)
+        void InternalFinishRendering(ScriptableRenderContext context, bool resolveFinalTarget)
         {
             CommandBuffer cmd = CommandBufferPool.Get(k_ReleaseResourcesTag);
 
             for (int i = 0; i < m_ActiveRenderPassQueue.Count; ++i)
                 m_ActiveRenderPassQueue[i].FrameCleanup(cmd);
 
-            FinishRendering(cmd);
+            if (resolveFinalTarget)
+                FinishRendering(cmd);
             Clear();
 
             context.ExecuteCommandBuffer(cmd);

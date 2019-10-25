@@ -140,15 +140,16 @@ namespace UnityEngine.Rendering.Universal
             createDepthTexture |= (renderingData.cameraData.renderType == CameraRenderType.Base && !renderingData.resolveFinalTarget);
             bool postProcessEnabled = renderingData.cameraData.postProcessEnabled && renderingData.resolveFinalTarget;
 
-            m_ActiveCameraColorAttachment = (createColorTexture || renderingData.cameraData.renderType == CameraRenderType.Overlay) ? m_CameraColorAttachment : RenderTargetHandle.CameraTarget;
-            m_ActiveCameraDepthAttachment = (createDepthTexture || renderingData.cameraData.renderType == CameraRenderType.Overlay) ? m_CameraDepthAttachment : RenderTargetHandle.CameraTarget;
+            var isOverlayCamera = renderingData.cameraData.renderType == CameraRenderType.Overlay;
+            m_ActiveCameraColorAttachment = (createColorTexture || isOverlayCamera) ? m_CameraColorAttachment : RenderTargetHandle.CameraTarget;
+            m_ActiveCameraDepthAttachment = (createDepthTexture || isOverlayCamera) ? m_CameraDepthAttachment : RenderTargetHandle.CameraTarget;
             m_ActiveCameraColorAttachment = (createColorTexture) ? m_CameraColorAttachment : RenderTargetHandle.CameraTarget;
             m_ActiveCameraDepthAttachment = (createDepthTexture) ? m_CameraDepthAttachment : RenderTargetHandle.CameraTarget;
 
             bool intermediateRenderTexture = createColorTexture || createDepthTexture;
 
             // Doesn't create texture for Overlay cameras as they are already overlaying on top of created textures.
-            bool createTextures = intermediateRenderTexture && renderingData.cameraData.renderType != CameraRenderType.Overlay;
+            bool createTextures = intermediateRenderTexture && !isOverlayCamera;
             if (createTextures)
                 CreateCameraRenderTarget(context, ref renderingData.cameraData);
             
@@ -199,7 +200,7 @@ namespace UnityEngine.Rendering.Universal
 
             EnqueuePass(m_RenderOpaqueForwardPass);
 
-            if (camera.clearFlags == CameraClearFlags.Skybox && RenderSettings.skybox != null)
+            if (camera.clearFlags == CameraClearFlags.Skybox && RenderSettings.skybox != null && !isOverlayCamera)
                 EnqueuePass(m_DrawSkyboxPass);
 
             // If a depth texture was created we necessarily need to copy it, otherwise we could have render it to a renderbuffer
