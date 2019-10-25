@@ -39,10 +39,15 @@ namespace UnityEngine.Rendering.Universal
 
     public enum CameraRenderType
     {
-        Offscreen,
         Base,
         Overlay,
-        ScreenSpaceUI,
+        //ScreenSpaceUI,
+    }
+
+    public enum CameraOutput
+    {
+        Camera,
+        Texture,
     }
 
     // Only used for SMAA right now
@@ -81,6 +86,7 @@ namespace UnityEngine.Rendering.Universal
         CameraOverrideOption m_RequiresOpaqueTextureOption = CameraOverrideOption.UsePipelineSettings;
 
         [SerializeField] CameraRenderType m_CameraType = CameraRenderType.Base;
+        [SerializeField] CameraOutput m_CameraOutput = CameraOutput.Camera;
 		[SerializeField] List<Camera> m_Cameras = new List<Camera>();
 		[SerializeField] int m_RendererIndex = -1;
 
@@ -138,6 +144,12 @@ namespace UnityEngine.Rendering.Universal
         {
             get => m_CameraType;
             set => m_CameraType = value;
+        }
+
+        public CameraOutput cameraOutput
+        {
+            get => m_CameraOutput;
+            set => m_CameraOutput = value;
         }
 
         public List<Camera> cameras
@@ -265,23 +277,26 @@ namespace UnityEngine.Rendering.Universal
             {
                 gizmoName = $"{path}Camera_Overlay.png";
             }
-            else if (m_CameraType == CameraRenderType.Offscreen)
-            {
-                gizmoName = $"{path}Camera_Offscreen.png";
-            }
-            else
-            {
-                gizmoName = $"{path}Camera_UI.png";
-            }
+            // MTT: Commented due to not implemented yet
+            //            else
+            //            {
+            //                gizmoName = $"{path}Camera_UI.png";
+            //            }
 
 
 #if UNITY_2019_2_OR_NEWER
+#if UNITY_EDITOR
             if (Selection.activeObject == gameObject)
             {
                 // Get the preferences selection color
                 tint = SceneView.selectedOutlineColor;
             }
-            Gizmos.DrawIcon(transform.position, gizmoName, true, tint);
+#endif
+            if (!string.IsNullOrEmpty(gizmoName))
+            {
+                Gizmos.DrawIcon(transform.position, gizmoName, true, tint);
+            }
+
             if (renderPostProcessing)
             {
                 Gizmos.DrawIcon(transform.position, $"{path}Camera_PostProcessing.png", true, tint);
