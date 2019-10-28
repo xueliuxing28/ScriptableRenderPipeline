@@ -185,24 +185,18 @@ namespace UnityEngine.Rendering.Universal
                     continue;
 
                 Camera camera = cameraData.camera;
-                BeginCameraRendering(renderContext, camera);
-#if VISUAL_EFFECT_GRAPH_0_0_1_OR_NEWER
-                //It should be called before culling to prepare material. When there isn't any VisualEffect component, this method has no effect.
-                VFX.VFXManager.PrepareCamera(camera);
-#endif
-                if (cameraData.renderType == CameraRenderType.Base && !cameraData.isSceneViewCamera)
-                    RenderCameraStack(renderContext, cameraData.renderer, cameraData);
-                else 
-                    RenderSingleCamera(renderContext, cameraData.renderer, cameraData, true);
 
-                EndCameraRendering(renderContext, camera);
+                if (cameraData.renderType == CameraRenderType.Base && !cameraData.isSceneViewCamera)
+                    RenderCameraStack(renderContext, cameraData);
+                else
+                    RenderSingleCamera(renderContext, cameraData, true);
             }
 
             EndFrameRendering(renderContext, cameras);
         }
 
 
-        static void RenderCameraStack(ScriptableRenderContext context, ScriptableRenderer renderer, CameraData cameraData)
+        static void RenderCameraStack(ScriptableRenderContext context, CameraData cameraData)
         {
             cameraData.camera.gameObject.TryGetComponent<UniversalAdditionalCameraData>(out var additionalCameraData);
             List<Camera> cameraStack = additionalCameraData?.cameras;
@@ -220,8 +214,8 @@ namespace UnityEngine.Rendering.Universal
                 }
             }
 
-            RenderSingleCamera(context, renderer, cameraData, !isStackedRendering);
-
+            RenderSingleCamera(context, cameraData, !isStackedRendering);
+            
             if (!isStackedRendering)
                 return;
 
@@ -233,20 +227,44 @@ namespace UnityEngine.Rendering.Universal
                     bool lastCamera = i == cameraStack.Count - 1;
                     currCamera.gameObject.TryGetComponent<UniversalAdditionalCameraData>(out var currCameraAdditionalData);
                     InitializeCameraData(asset, currCamera, currCameraAdditionalData, out var currCameraData);
-                    RenderSingleCamera(context, renderer, currCameraData, lastCamera);
+                    RenderSingleCamera(context, currCameraData, lastCamera);
                 }
             }
         }
 
-        static void RenderSingleCamera(ScriptableRenderContext context, ScriptableRenderer renderer, CameraData cameraData, bool requiresBlitToBackbuffer)
+        public static void RenderSingleCamera(ScriptableRenderContext context, Camera camera)
+        {
+            UniversalAdditionalCameraData additionalCameraData = null;
+            if (camera.cameraType == CameraType.Game || camera.cameraType == CameraType.VR)
+                camera.gameObject.TryGetComponent(out additionalCameraData);
+
+            InitializeCameraData(asset, camera, additionalCameraData, out var cameraData);
+
+            if (cameraData.renderType != CameraRenderType.Base)
+            {
+                Debug.LogWarning("Only Base cameras can be rendered with standalone RenderSingleCamera. Camera will be skipped.");
+                return;
+            }
+
+            RenderSingleCamera(context, cameraData, true);
+        }
+
+        static void RenderSingleCamera(ScriptableRenderContext context, CameraData cameraData, bool requiresBlitToBackbuffer)
         {
             Camera camera = cameraData.camera;
+            var renderer = cameraData.renderer;
             if (renderer == null)
             {
                 Debug.LogWarning(string.Format("Trying to render {0} with an invalid renderer. Camera rendering will be skipped.", camera.name));
                 return;
             }
-            
+
+            BeginCameraRendering(context, camera);
+#if VISUAL_EFFECT_GRAPH_0_0_1_OR_NEWER
+                //It should be called before culling to prepare material. When there isn't any VisualEffect component, this method has no effect.
+                VFX.VFXManager.PrepareCamera(camera);
+#endif
+
             if (!camera.TryGetCullingParameters(IsStereoEnabled(camera), out var cullingParameters))
                 return;
 
@@ -279,6 +297,8 @@ namespace UnityEngine.Rendering.Universal
             context.ExecuteCommandBuffer(cmd);
             CommandBufferPool.Release(cmd);
             context.Submit();
+
+            EndCameraRendering(context, camera);
         }
 
         static void SetSupportedRenderingFeatures()
