@@ -461,9 +461,9 @@ namespace UnityEditor.Rendering.Universal
             {
                 DrawCommonSettings();
                 DrawRenderingSettings();
-                DrawStackSettings();
                 DrawEnvironmentSettings();
                 DrawOutputSettings();
+                DrawStackSettings();
                 DrawVRSettings();
             }
 
@@ -560,13 +560,22 @@ namespace UnityEditor.Rendering.Universal
 
                 var selectedCameraType = (CameraRenderType)m_AdditionalCameraDataCameraTypeProp.intValue;
 
-                EditorGUILayout.PropertyField(m_AdditionalCameraClearDepth, Styles.clearDepth);
-                m_AdditionalCameraDataSO.ApplyModifiedProperties();
-                DrawPostProcessing();
-                settings.DrawCullingMask();
-                settings.DrawOcclusionCulling();
-                if (selectedCameraType != CameraRenderType.Overlay)
+                if (selectedCameraType == CameraRenderType.Overlay)
                 {
+                    EditorGUILayout.PropertyField(m_AdditionalCameraClearDepth, Styles.clearDepth);
+                    m_AdditionalCameraDataSO.ApplyModifiedProperties();
+                    settings.DrawCullingMask();
+                    settings.DrawOcclusionCulling();
+                }
+                else
+                {
+                    if (selectedCameraType == CameraRenderType.Base)
+                    {
+                        DrawPostProcessing();
+                    }
+                    settings.DrawCullingMask();
+                    settings.DrawOcclusionCulling();
+
                     DrawOpaqueTexture();
                     DrawDepthTexture();
                     DrawRenderShadows();
