@@ -97,18 +97,11 @@ namespace UnityEngine.Rendering.Universal
         public int lutSize;
     }
 
-    class CameraDataComparer : IComparer<CameraData>
+    class CameraDataComparer : IComparer<Camera>
     {
-        public int Compare(CameraData lhs, CameraData rhs)
+        public int Compare(Camera lhs, Camera rhs)
         {
-            if (lhs.renderType != rhs.renderType)
-                return lhs.renderType - rhs.renderType;
-
-            if (lhs.renderType == CameraRenderType.Overlay ||
-                lhs.renderType == CameraRenderType.Base)
-                return (int)lhs.camera.depth - (int)rhs.camera.depth;
-
-            return -1;
+            return (int)lhs.depth - (int)rhs.depth;
         }
     }
 
@@ -164,7 +157,7 @@ namespace UnityEngine.Rendering.Universal
             return XRGraphics.enabled && isGameCamera && (camera.stereoTargetEye == StereoTargetEyeMask.Both);
         }
 
-        void SortCameras(CameraData[] cameras)
+        void SortCameras(Camera[] cameras)
         {
             if (cameras.Length <= 1)
                 return;
