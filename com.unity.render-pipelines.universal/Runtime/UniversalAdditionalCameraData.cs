@@ -153,14 +153,61 @@ namespace UnityEngine.Rendering.Universal
             set => m_CameraOutput = value;
         }
 
-        public List<Camera> cameras
+        public List<Camera> cameraStack
         {
-            get => m_Cameras;
+            get
+            {
+                if (renderType != CameraRenderType.Overlay)
+                    return null;
+
+                return m_Cameras;
+            }
         }
 
-        public void AddCamera(Camera camera)
+        public void AddCameraToStack(Camera camera)
         {
+            if (renderType != CameraRenderType.Base)
+            {
+                Debug.LogWarning("You can only add cameras to a camera of type Base.");
+                return;
+            }
+
+            if (camera == null)
+            {
+                Debug.LogWarning("Trying to add an invalid camera.");
+                return;
+            }
+
+            camera.gameObject.TryGetComponent<UniversalAdditionalCameraData>(out var cameraAdditionalData);
+            if (cameraAdditionalData.renderType != CameraRenderType.Overlay)
+            {
+                Debug.LogWarning("You can only add Overlay camera types to a camera stack.");
+                return;
+            }
+
             m_Cameras.Add(camera);
+        }
+
+        public void RemoveCameraFromStack(Camera camera)
+        {
+            if (camera == null)
+            {
+                Debug.LogWarning("Trying to remove invalid camera.");
+                return;
+            }
+
+            if (m_Cameras == null)
+            {
+                Debug.Log("Trying to remove a camera that's not added to a camera stack.");
+                return;
+            }
+
+            bool removed = m_Cameras.Remove(camera);
+            if (!removed)
+            {
+                Debug.Log("Trying to remove a camera that's not added to a camera stack.");
+                return;
+            }
         }
 
         public bool requiresDepthTexture

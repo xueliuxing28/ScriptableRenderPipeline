@@ -263,7 +263,7 @@ namespace UnityEngine.Rendering.Universal
 
         static void RenderCameraStack(ScriptableRenderContext context, Camera baseCamera, UniversalAdditionalCameraData baseCameraAdditionalData)
         {
-            List<Camera> cameraStack = baseCameraAdditionalData?.cameras;
+            List<Camera> cameraStack = baseCameraAdditionalData?.cameraStack;
 
             bool isStackedRendering = false;
 
