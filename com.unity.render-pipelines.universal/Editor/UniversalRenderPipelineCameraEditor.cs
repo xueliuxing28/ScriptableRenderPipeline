@@ -248,7 +248,7 @@ namespace UnityEditor.Rendering.Universal
         void UpdateCameras()
         {
             var o = new PropertyFetcher<UniversalAdditionalCameraData>(m_AdditionalCameraDataSO);
-            m_AdditionalCameraDataCameras = o.Find(x => x.cameraStack);
+            m_AdditionalCameraDataCameras = o.Find("m_Cameras");
 
             var camType = (CameraRenderType)m_AdditionalCameraDataCameraTypeProp.intValue;
             if (camType == CameraRenderType.Base)
