@@ -157,7 +157,7 @@ namespace UnityEngine.Rendering.Universal
         {
             get
             {
-                if (renderType != CameraRenderType.Overlay)
+                if (renderType != CameraRenderType.Base)
                     return null;
 
                 return m_Cameras;
