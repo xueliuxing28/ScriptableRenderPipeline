@@ -28,16 +28,34 @@ namespace UnityEditor.Experimental.Rendering.Universal
 
         static void UpgradeGameObject(GameObject go)
         {
-            SpriteRenderer[] spriteRenderers = go.GetComponentsInChildren<SpriteRenderer>(true);
+            Renderer[] spriteRenderers = go.GetComponentsInChildren<Renderer>(true);
 
             bool upgraded = false;
-            foreach (SpriteRenderer renderer in spriteRenderers)
+            foreach (Renderer renderer in spriteRenderers)
             {
-                if (renderer.sharedMaterial != null && renderer.sharedMaterial.shader.name == "Sprites/Default")
+                if (renderer is UnityEngine.U2D.SpriteShapeRenderer)
+                    Debug.Log("Sprite Shape Found");
+
+                int materialCount = renderer.sharedMaterials.Length;
+                Material[] newMaterials = new Material[materialCount];
+
+                for (int i = 0; i < materialCount; i++)
                 {
-                    renderer.sharedMaterial = s_SpriteLitDefault;
-                    upgraded = true;
+                    Material mat = renderer.sharedMaterials[i];
+
+                    if (mat != null && mat.shader.name == "Sprites/Default")
+                    {
+                        newMaterials[i] = s_SpriteLitDefault;
+                        upgraded = true;
+                    }
+                    else
+                    {
+                        newMaterials[i] = renderer.sharedMaterials[i];
+                    }
                 }
+
+                if (upgraded)
+                    renderer.sharedMaterials = newMaterials;
             }
 
             if (upgraded)
