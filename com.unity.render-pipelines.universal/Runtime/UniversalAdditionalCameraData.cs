@@ -16,7 +16,7 @@ namespace UnityEngine.Rendering.LWRP
 namespace UnityEngine.Rendering.Universal
 {
     /// <summary>
-    /// Holds information about wether to override certain camera rendering options from the render pipeline asset.
+    /// Holds information about whether to override certain camera rendering options from the render pipeline asset.
     /// When set to <c>Off</c> option will be disabled regardless of what is set on the pipeline asset.
     /// When set to <c>On</c> option will be enabled regardless of what is set on the pipeline asset.
     /// When set to <c>UsePipelineSetting</c> value set in the <see cref="UniversalRenderPipelineAsset"/>.
