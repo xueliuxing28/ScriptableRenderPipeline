@@ -15,6 +15,12 @@ namespace UnityEngine.Rendering.LWRP
 
 namespace UnityEngine.Rendering.Universal
 {
+    /// <summary>
+    /// Holds information about wether to override certain camera rendering options from the render pipeline asset.
+    /// When set to <c>Off</c> option will be disabled regardless of what is set on the pipeline asset.
+    /// When set to <c>On</c> option will be enabled regardless of what is set on the pipeline asset.
+    /// When set to <c>UsePipelineSetting</c> value set in the <see cref="UniversalRenderPipelineAsset"/>.
+    /// </summary>
     [MovedFrom("UnityEngine.Rendering.LWRP")] public enum CameraOverrideOption
     {
         Off,
@@ -29,28 +35,44 @@ namespace UnityEngine.Rendering.Universal
         UsePipelineSettings,
     }
 
+    /// <summary>
+    /// Holds information about the post-processing anti-aliasing mode.
+    /// When set to <c>None</c> no post-processing anti-aliasing pass will be performed.
+    /// When set to <c>Fast</c> a fast approximated anti-aliasing pass will render when resolving the camera to screen.
+    /// When set to <c>SubpixelMorphologicalAntiAliasing</c> SMAA pass will render when resolving the camera to screen. You can choose the SMAA quality by setting <seealso cref="AntialiasingQuality"/>
+    /// </summary>
     public enum AntialiasingMode
     {
         None,
         FastApproximateAntialiasing,
         SubpixelMorphologicalAntiAliasing,
         //TemporalAntialiasing
-	}
+    }
 
+    /// <summary>
+    /// Holds information about the render type of a camera. Options are Base or Overlay.
+    /// Base rendering type allows the camera to render to either the screen or to a texture.
+    /// Overlay rendering type allows the camera to render on top of a previous camera output, thus compositing camera results.
+    /// </summary>
     public enum CameraRenderType
     {
         Base,
         Overlay,
-        //ScreenSpaceUI,
     }
 
+    /// <summary>
+    /// Holds information about the output target for a camera.
+    /// Only used for cameras of render type Base. <seealso cref="CameraRenderType"/>.
+    /// </summary>
     public enum CameraOutput
     {
         Camera,
         Texture,
     }
 
-    // Only used for SMAA right now
+    /// <summary>
+    /// Controls SMAA anti-aliasing quality.
+    /// </summary>
     public enum AntialiasingQuality
     {
         Low,
@@ -123,36 +145,62 @@ namespace UnityEngine.Rendering.Universal
             }
         }
 
+        /// <summary>
+        /// Controls if this camera should render shadows.
+        /// </summary>
         public bool renderShadows
         {
             get => m_RenderShadows;
             set => m_RenderShadows = value;
         }
 
+        /// <summary>
+        /// Controls if a camera should render depth.
+        /// The depth is available to be bound in shaders as _CameraDepthTexture.
+        /// <seealso cref="CameraOverrideOption"/>
+        /// </summary>
         public CameraOverrideOption requiresDepthOption
         {
             get => m_RequiresDepthTextureOption;
             set => m_RequiresDepthTextureOption = value;
         }
 
+        /// <summary>
+        /// Controls if a camera should copy the color contents of a camera after rendering opaques.
+        /// The color texture is available to be bound in shaders as _CameraOpaqueTexture.
+        /// </summary>
         public CameraOverrideOption requiresColorOption
         {
             get => m_RequiresOpaqueTextureOption;
             set => m_RequiresOpaqueTextureOption = value;
         }
 
+        /// <summary>
+        /// Returns the camera renderType.
+        /// <see cref="CameraRenderType"/>.
+        /// </summary>
         public CameraRenderType renderType
         {
             get => m_CameraType;
             set => m_CameraType = value;
         }
 
+        /// <summary>
+        /// Returns the camera output type. Only valid for Base cameras.
+        /// <see cref="CameraOutput"/>.
+        /// <seealso cref="CameraRenderType"/>.
+        /// </summary>
         public CameraOutput cameraOutput
         {
             get => m_CameraOutput;
             set => m_CameraOutput = value;
         }
 
+        /// <summary>
+        /// Returns the camera stack. Only valid for Base cameras.
+        /// Overlay cameras have no stack and will return null.
+        /// <seealso cref="CameraRenderType"/>.
+        /// </summary>
         public List<Camera> cameraStack
         {
             get
@@ -164,6 +212,11 @@ namespace UnityEngine.Rendering.Universal
             }
         }
 
+        /// <summary>
+        /// Adds a camera to the stack. Only Overlay camera types can be added to Base camera types.
+        /// <seealso cref="CameraRenderType"/>.
+        /// </summary>
+        /// <param name="camera"></param>
         public void AddCameraToStack(Camera camera)
         {
             if (renderType != CameraRenderType.Base)
@@ -188,6 +241,19 @@ namespace UnityEngine.Rendering.Universal
             m_Cameras.Add(camera);
         }
 
+        /// <summary>
+        /// If true, this camera will clear depth value before rendering. Only valid for Overlay cameras.
+        /// </summary>
+        public bool clearDepth
+        {
+            get => m_ClearDepth;
+        }
+
+        /// <summary>
+        /// Removes a camera from the stack. Only valid for Base cameras.
+        /// <seealso cref="CameraRenderType"/>.
+        /// </summary>
+        /// <param name="camera"></param>
         public void RemoveCameraFromStack(Camera camera)
         {
             if (camera == null)
@@ -210,6 +276,10 @@ namespace UnityEngine.Rendering.Universal
             }
         }
 
+        /// <summary>
+        /// Returns true if this camera needs to render depth information in a texture.
+        /// If enabled, depth texture is available to be bound and read from shaders as _CameraDepthTexture after rendering skybox.
+        /// </summary>
         public bool requiresDepthTexture
         {
             get
@@ -226,6 +296,10 @@ namespace UnityEngine.Rendering.Universal
             set { m_RequiresDepthTextureOption = (value) ? CameraOverrideOption.On : CameraOverrideOption.Off; }
         }
 
+        /// <summary>
+        /// Returns true if this camera requires to color information in a texture.
+        /// If enabled, color texture is available to be bound and read from shaders as _CameraOpaqueTexture after rendering skybox.
+        /// </summary>
         public bool requiresColorTexture
         {
             get
@@ -242,13 +316,16 @@ namespace UnityEngine.Rendering.Universal
             set { m_RequiresOpaqueTextureOption = (value) ? CameraOverrideOption.On : CameraOverrideOption.Off; }
         }
 
+        /// <summary>
+        /// Returns the <see cref="ScriptableRenderer"/> that is used to render this cameras.
+        /// </summary>
         public ScriptableRenderer scriptableRenderer
         {
             get => UniversalRenderPipeline.asset.GetRenderer(m_RendererIndex);
         }
 
         /// <summary>
-        /// Use this to set this Camera's current ScriptableRenderer to one listed on the Render Pipeline Asset. Takes an index that maps to the list on the Render Pipeline Asset.
+        /// Use this to set this Camera's current <see cref="ScriptableRenderer"/> to one listed on the Render Pipeline Asset. Takes an index that maps to the list on the Render Pipeline Asset.
         /// </summary>
         /// <param name="index">The index that maps to the RendererData list on the currently assigned Render Pipeline Asset</param>
         public void SetRenderer(int index)
@@ -268,18 +345,29 @@ namespace UnityEngine.Rendering.Universal
             set => m_VolumeTrigger = value;
         }
 
+        /// <summary>
+        /// Returns true if this camera should render post-processing.
+        /// </summary>
         public bool renderPostProcessing
         {
             get => m_RenderPostProcessing;
             set => m_RenderPostProcessing = value;
         }
 
+        /// <summary>
+        /// Returns the current anti-aliasing mode used by this camera.
+        /// <see cref="AntialiasingMode"/>.
+        /// </summary>
         public AntialiasingMode antialiasing
         {
             get => m_Antialiasing;
             set => m_Antialiasing = value;
         }
 
+        /// <summary>
+        /// Returns the current anti-aliasing quality used by this camera.
+        /// <seealso cref="antialiasingQuality"/>.
+        /// </summary>
         public AntialiasingQuality antialiasingQuality
         {
             get => m_AntialiasingQuality;
@@ -296,11 +384,6 @@ namespace UnityEngine.Rendering.Universal
         {
             get => m_Dithering;
             set => m_Dithering = value;
-        }
-
-        public bool clearDepth
-        {
-            get => m_ClearDepth;
         }
 
         public void OnBeforeSerialize()
