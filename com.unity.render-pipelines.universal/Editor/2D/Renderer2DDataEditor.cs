@@ -8,8 +8,13 @@ namespace UnityEditor.Experimental.Rendering.Universal
     {
         class Styles
         {
+            public static readonly GUIContent transparencySortMode = EditorGUIUtility.TrTextContent("Transparency Sort Mode", "Default sorting mode used for transparent objects");
+            public static readonly GUIContent transparencySortAxis = EditorGUIUtility.TrIconContent("Transparency Sort Axis", "Axis used for custom axis sorting mode");
             public static readonly GUIContent hdrEmulationScale = EditorGUIUtility.TrTextContent("HDR Emulation Scale", "Describes the scaling used by lighting to remap dynamic range between LDR and HDR");
             public static readonly GUIContent lightBlendStyles = EditorGUIUtility.TrTextContent("Light Blend Styles", "A Light Blend Style is a collection of properties that describe a particular way of applying lighting.");
+            public static readonly GUIContent defaultMaterialType = EditorGUIUtility.TrTextContent("Default Material Type", "Material to use when adding new objects to a scene");
+            public static readonly GUIContent defaultCustomMaterial = EditorGUIUtility.TrTextContent("Default Custom Material", "Material to use when adding new objects to a scene");
+
             public static readonly GUIContent name = EditorGUIUtility.TrTextContent("Name");
             public static readonly GUIContent maskTextureChannel = EditorGUIUtility.TrTextContent("Mask Texture Channel", "Which channel of the mask texture will affect this Light Blend Style.");
             public static readonly GUIContent renderTextureScale = EditorGUIUtility.TrTextContent("Render Texture Scale", "The resolution of the lighting buffer relative to the screen resolution. 1.0 means full screen size.");
@@ -32,11 +37,16 @@ namespace UnityEditor.Experimental.Rendering.Universal
             public SerializedProperty blendFactorAdditive;
         }
 
+
+        SerializedProperty m_TransparencySortMode;
+        SerializedProperty m_TransparencySortAxis;
         SerializedProperty m_HDREmulationScale;
         SerializedProperty m_LightBlendStyles;
         LightBlendStyleProps[] m_LightBlendStylePropsArray;
         SerializedProperty m_UseDepthStencilBuffer;
         SerializedProperty m_PostProcessData;
+        SerializedProperty m_DefaultMaterialType;
+        SerializedProperty m_DefaultCustomMaterial;
 
         Analytics.Renderer2DAnalytics m_Analytics = Analytics.Renderer2DAnalytics.instance;
         Renderer2DData m_Renderer2DData;
@@ -84,6 +94,8 @@ namespace UnityEditor.Experimental.Rendering.Universal
             m_WasModified = false;
             m_Renderer2DData = (Renderer2DData)serializedObject.targetObject;
 
+            m_TransparencySortMode = serializedObject.FindProperty("m_TransparencySortMode");
+            m_TransparencySortAxis = serializedObject.FindProperty("m_TransparencySortAxis");
             m_HDREmulationScale = serializedObject.FindProperty("m_HDREmulationScale");
             m_LightBlendStyles = serializedObject.FindProperty("m_LightBlendStyles");
 
@@ -111,6 +123,8 @@ namespace UnityEditor.Experimental.Rendering.Universal
 
             m_UseDepthStencilBuffer = serializedObject.FindProperty("m_UseDepthStencilBuffer");
             m_PostProcessData = serializedObject.FindProperty("m_PostProcessData");
+            m_DefaultMaterialType = serializedObject.FindProperty("m_DefaultMaterialType");
+            m_DefaultCustomMaterial = serializedObject.FindProperty("m_DefaultCustomMaterial");
         }
 
         private void OnDestroy()
@@ -123,6 +137,12 @@ namespace UnityEditor.Experimental.Rendering.Universal
             serializedObject.Update();
 
             EditorGUI.BeginChangeCheck();
+
+            
+            EditorGUILayout.PropertyField(m_TransparencySortMode, Styles.transparencySortMode);
+            if(m_TransparencySortMode.intValue == (int)TransparencySortMode.CustomAxis)
+                EditorGUILayout.PropertyField(m_TransparencySortAxis, Styles.transparencySortAxis);
+
             EditorGUILayout.PropertyField(m_HDREmulationScale, Styles.hdrEmulationScale);
             if (EditorGUI.EndChangeCheck() && m_HDREmulationScale.floatValue < 1.0f)
                 m_HDREmulationScale.floatValue = 1.0f;
@@ -185,6 +205,13 @@ namespace UnityEditor.Experimental.Rendering.Universal
             EditorGUI.indentLevel--;
             EditorGUILayout.PropertyField(m_UseDepthStencilBuffer, Styles.useDepthStencilBuffer);
             EditorGUILayout.PropertyField(m_PostProcessData, Styles.postProcessData);
+
+
+            EditorGUI.BeginChangeCheck();
+            EditorGUILayout.PropertyField(m_DefaultMaterialType, Styles.defaultMaterialType);
+            if(m_DefaultMaterialType.intValue == (int)Renderer2DData.Renderer2DDefaultMaterialType.Custom)
+                EditorGUILayout.PropertyField(m_DefaultCustomMaterial, Styles.defaultCustomMaterial);
+            
 
             m_WasModified |= serializedObject.hasModifiedProperties;
             serializedObject.ApplyModifiedProperties();
