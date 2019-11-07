@@ -85,6 +85,9 @@ namespace UnityEngine.Experimental.Rendering.Universal
         internal Shader shadowGroupShader => m_ShadowGroupShader;
         internal Shader removeSelfShadowShader => m_RemoveSelfShadowShader;
         internal PostProcessData postProcessData => m_PostProcessData;
+        internal TransparencySortMode transparencySortMode => m_TransparencySortMode;
+        internal Vector3 transparencySortAxis => m_TransparencySortAxis;
+
 
 
         protected override ScriptableRenderer Create()

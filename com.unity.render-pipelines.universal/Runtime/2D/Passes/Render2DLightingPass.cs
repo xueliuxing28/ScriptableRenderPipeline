@@ -23,6 +23,24 @@ namespace UnityEngine.Experimental.Rendering.Universal
             m_RendererData = rendererData;
         }
 
+        public void SetTransparencySortingMode(Camera camera, out TransparencySortMode sortingMode, out Vector3 sortingAxis)
+        {
+            sortingMode = camera.transparencySortMode;
+            sortingAxis = camera.transparencySortAxis;
+
+            if (camera.transparencySortMode == TransparencySortMode.Default)
+            {
+                TransparencySortMode defaultTransparencySortMode = camera.orthographic ? TransparencySortMode.Orthographic : TransparencySortMode.Perspective;
+                camera.transparencySortMode = m_RendererData.transparencySortMode == TransparencySortMode.Default ? defaultTransparencySortMode : m_RendererData.transparencySortMode;
+                camera.transparencySortAxis = m_RendererData.transparencySortAxis;
+            }
+        }
+
+        public void RestoreTransparencySortingMode(Camera camera, TransparencySortMode sortingMode, Vector3 sortingAxis)
+        {
+            camera.transparencySortMode = sortingMode;
+            camera.transparencySortAxis = sortingAxis;
+        }
 
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
         {
@@ -40,6 +58,11 @@ namespace UnityEngine.Experimental.Rendering.Universal
                 s_SortingLayers = SortingLayer.layers;
 #endif
             Camera camera = renderingData.cameraData.camera;
+
+            TransparencySortMode savedSortingMode;
+            Vector3 savedSortingAxis;
+            SetTransparencySortingMode(camera, out savedSortingMode, out savedSortingAxis);
+
             RendererLighting.Setup(m_RendererData);
 
             CommandBuffer cmd = CommandBufferPool.Get("Render 2D Lighting");
@@ -123,6 +146,8 @@ namespace UnityEngine.Experimental.Rendering.Universal
 
             filterSettings.sortingLayerRange = SortingLayerRange.all;
             RenderingUtils.RenderObjectsWithError(context, ref renderingData.cullResults, camera, filterSettings, SortingCriteria.None);
+
+            RestoreTransparencySortingMode(camera, savedSortingMode, savedSortingAxis);
         }
     }
 }
