@@ -280,7 +280,7 @@ namespace UnityEngine.Rendering.Universal.Internal
 
                 using (new ProfilingSample(cmd, markerName))
                 {
-                    DoDepthOfField(cameraData.camera, cmd, GetSource(), GetDestination());
+                    DoDepthOfField(cameraData.camera, cmd, GetSource(), GetDestination(), cameraData.baseCamera.pixelRect);
                     Swap();
                 }
             }
@@ -327,7 +327,7 @@ namespace UnityEngine.Rendering.Universal.Internal
                 SetupColorGrading(cmd, ref renderingData, m_Materials.uber);
 
                 // Only apply dithering & grain if there isn't a final pass.
-                SetupGrain(cameraData.camera, m_Materials.uber);
+                SetupGrain(cameraData.baseCamera, m_Materials.uber);
                 SetupDithering(ref cameraData, m_Materials.uber);
 				
                 if (Display.main.requiresSrgbBlitToBackbuffer && m_EnableSRGBConversionIfNeeded)
@@ -351,7 +351,7 @@ namespace UnityEngine.Rendering.Universal.Internal
                     cmd.SetViewProjectionMatrices(Matrix4x4.identity, Matrix4x4.identity);
 
                     if (m_Destination == RenderTargetHandle.CameraTarget)
-                        cmd.SetViewport(cameraData.camera.pixelRect);
+                        cmd.SetViewport(cameraData.baseCamera.pixelRect);
 
                     cmd.DrawMesh(RenderingUtils.fullscreenMesh, Matrix4x4.identity, m_Materials.uber);
                     cmd.SetViewProjectionMatrices(cameraData.camera.worldToCameraMatrix, cameraData.camera.projectionMatrix);
@@ -384,6 +384,7 @@ namespace UnityEngine.Rendering.Universal.Internal
         void DoSubpixelMorphologicalAntialiasing(ref CameraData cameraData, CommandBuffer cmd, int source, int destination)
         {
             var camera = cameraData.camera;
+            var pixelRect = cameraData.baseCamera.pixelRect;
             var material = m_Materials.subpixelMorphologicalAntialiasing;
             const int kStencilBit = 64;
 
@@ -426,7 +427,7 @@ namespace UnityEngine.Rendering.Universal.Internal
 
             // Prepare for manual blit
             cmd.SetViewProjectionMatrices(Matrix4x4.identity, Matrix4x4.identity);
-            cmd.SetViewport(camera.pixelRect);
+            cmd.SetViewport(pixelRect);
 
             // Pass 1: Edge detection
             cmd.SetRenderTarget(ShaderConstants._EdgeTexture, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store,
@@ -460,16 +461,16 @@ namespace UnityEngine.Rendering.Universal.Internal
 
         // TODO: CoC reprojection once TAA gets in LW
         // TODO: Proper LDR/gamma support
-        void DoDepthOfField(Camera camera, CommandBuffer cmd, int source, int destination)
+        void DoDepthOfField(Camera camera, CommandBuffer cmd, int source, int destination, Rect pixelRect)
         {
             if (m_DepthOfField.mode.value == DepthOfFieldMode.Gaussian)
-                DoGaussianDepthOfField(camera, cmd, source, destination);
+                DoGaussianDepthOfField(camera, cmd, source, destination, pixelRect);
             else if (m_DepthOfField.mode.value == DepthOfFieldMode.Bokeh)
-                DoBokehDepthOfField(cmd, source, destination);
+                DoBokehDepthOfField(cmd, source, destination, pixelRect);
         }
 
         // TODO: XR isn't working with Gaussian DOF
-        void DoGaussianDepthOfField(Camera camera, CommandBuffer cmd, int source, int destination)
+        void DoGaussianDepthOfField(Camera camera, CommandBuffer cmd, int source, int destination, Rect pixelRect)
         {
             var material = m_Materials.gaussianDepthOfField;
             int wh = m_Descriptor.width / 2;
@@ -501,7 +502,7 @@ namespace UnityEngine.Rendering.Universal.Internal
             m_MRT2[1] = ShaderConstants._PingTexture;
 
             cmd.SetViewProjectionMatrices(Matrix4x4.identity, Matrix4x4.identity);
-            cmd.SetViewport(camera.pixelRect);
+            cmd.SetViewport(pixelRect);
             cmd.SetGlobalTexture(ShaderConstants._ColorTexture, source);
             cmd.SetGlobalTexture(ShaderConstants._FullCoCTexture, ShaderConstants._FullCoCTexture);
             cmd.SetRenderTarget(m_MRT2, ShaderConstants._HalfCoCTexture);
@@ -575,7 +576,7 @@ namespace UnityEngine.Rendering.Universal.Internal
             return Mathf.Min(0.05f, kRadiusInPixels / viewportHeight);
         }
 
-        void DoBokehDepthOfField(CommandBuffer cmd, int source, int destination)
+        void DoBokehDepthOfField(CommandBuffer cmd, int source, int destination, Rect pixelRect)
         {
             var material = m_Materials.bokehDepthOfField;
             int wh = m_Descriptor.width / 2;
@@ -983,7 +984,7 @@ namespace UnityEngine.Rendering.Universal.Internal
                 m_DitheringTextureIndex = PostProcessUtils.ConfigureDithering(
                     m_Data,
                     m_DitheringTextureIndex,
-                    cameraData.camera,
+                    cameraData.baseCamera,
                     material
                 );
             }
@@ -1021,7 +1022,7 @@ namespace UnityEngine.Rendering.Universal.Internal
             else
             {
                 cmd.SetViewProjectionMatrices(Matrix4x4.identity, Matrix4x4.identity);
-                cmd.SetViewport(cameraData.camera.pixelRect);
+                cmd.SetViewport(cameraData.baseCamera.pixelRect);
                 cmd.DrawMesh(RenderingUtils.fullscreenMesh, Matrix4x4.identity, material);
                 cmd.SetViewProjectionMatrices(cameraData.camera.worldToCameraMatrix, cameraData.camera.projectionMatrix);
             }

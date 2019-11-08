@@ -41,6 +41,7 @@ namespace UnityEngine.Rendering.Universal
     [MovedFrom("UnityEngine.Rendering.LWRP")] public struct CameraData
     {
         public Camera camera;
+        public Camera baseCamera;
         public CameraRenderType renderType;
         public RenderTextureDescriptor cameraTargetDescriptor;
         public float renderScale;

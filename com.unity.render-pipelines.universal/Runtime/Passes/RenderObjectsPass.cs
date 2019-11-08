@@ -79,7 +79,10 @@ namespace UnityEngine.Experimental.Rendering.Universal
             drawingSettings.overrideMaterialPassIndex = overrideMaterialPassIndex;
 
             Camera camera = renderingData.cameraData.camera;
-            float cameraAspect = (float) camera.pixelWidth / (float) camera.pixelHeight;
+
+            // In case of camera stacking we need to take the viewport rect from base camera
+            Rect pixelRect = renderingData.cameraData.baseCamera.pixelRect;
+            float cameraAspect = (float) pixelRect.width / (float) pixelRect.height;
             CommandBuffer cmd = CommandBufferPool.Get(m_ProfilerTag);
             using (new ProfilingSample(cmd, m_ProfilerTag))
             {

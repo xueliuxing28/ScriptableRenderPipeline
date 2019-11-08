@@ -357,6 +357,7 @@ namespace UnityEngine.Rendering.Universal
         {
             var settings = asset;
             cameraData = new CameraData();
+            cameraData.baseCamera = baseCamera;
             cameraData.isStereoEnabled = IsStereoEnabled(baseCamera);
             cameraData.isSceneViewCamera = baseCamera.cameraType == CameraType.SceneView;
 
@@ -703,12 +704,13 @@ namespace UnityEngine.Rendering.Universal
         {
             Camera camera = cameraData.camera;
 
-            float scaledCameraWidth = (float)cameraData.camera.pixelWidth * cameraData.renderScale;
-            float scaledCameraHeight = (float)cameraData.camera.pixelHeight * cameraData.renderScale;
+            Rect pixelRect = cameraData.baseCamera.pixelRect;
+            float scaledCameraWidth = (float)pixelRect.width * cameraData.renderScale;
+            float scaledCameraHeight = (float)pixelRect.height * cameraData.renderScale;
             Shader.SetGlobalVector(PerCameraBuffer._ScaledScreenParams, new Vector4(scaledCameraWidth, scaledCameraHeight, 1.0f + 1.0f / scaledCameraWidth, 1.0f + 1.0f / scaledCameraHeight));
             Shader.SetGlobalVector(PerCameraBuffer._WorldSpaceCameraPos, camera.transform.position);
-            float cameraWidth = (float)cameraData.camera.pixelWidth;
-            float cameraHeight = (float)cameraData.camera.pixelHeight;
+            float cameraWidth = (float)pixelRect.width;
+            float cameraHeight = (float)pixelRect.height;
             Shader.SetGlobalVector(PerCameraBuffer._ScreenParams, new Vector4(cameraWidth, cameraHeight, 1.0f + 1.0f / cameraWidth, 1.0f + 1.0f / cameraHeight));
 
             Matrix4x4 projMatrix = GL.GetGPUProjectionMatrix(camera.projectionMatrix, false);
