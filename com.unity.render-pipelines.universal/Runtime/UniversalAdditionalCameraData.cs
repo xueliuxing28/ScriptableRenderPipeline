@@ -78,7 +78,30 @@ namespace UnityEngine.Rendering.Universal
         Low,
         Medium,
         High
-	}
+    }
+
+    /// <summary>
+    /// Contains extension methods for Camera class.
+    /// </summary>
+    public static class CameraExtensions
+    {
+        /// <summary>
+        /// Universal Render Pipeline exposes additional rendering data in a separate component.
+        /// This method returns the additional data component for the given camera or create one if it doesn't exists yet.
+        /// </summary>
+        /// <param name="camera"></param>
+        /// <returns>The <c>UniversalAdditinalCameraData</c> for this camera.</returns>
+        /// <see cref="UniversalAdditionalCameraData"/>
+        public static UniversalAdditionalCameraData GetUniversalAdditionalCameraData(this Camera camera)
+        {
+            var gameObject = camera.gameObject;
+            bool componentExists = gameObject.TryGetComponent<UniversalAdditionalCameraData>(out var cameraData);
+            if (!componentExists)
+                cameraData = gameObject.AddComponent<UniversalAdditionalCameraData>();
+
+            return cameraData;
+        }
+    }
 
     static class CameraTypeUtility
     {
@@ -213,67 +236,11 @@ namespace UnityEngine.Rendering.Universal
         }
 
         /// <summary>
-        /// Adds a camera to the stack. Only Overlay camera types can be added to Base camera types.
-        /// <seealso cref="CameraRenderType"/>.
-        /// </summary>
-        /// <param name="camera"></param>
-        public void AddCameraToStack(Camera camera)
-        {
-            if (renderType != CameraRenderType.Base)
-            {
-                Debug.LogWarning("You can only add cameras to a camera of type Base.");
-                return;
-            }
-
-            if (camera == null)
-            {
-                Debug.LogWarning("Trying to add an invalid camera.");
-                return;
-            }
-
-            camera.gameObject.TryGetComponent<UniversalAdditionalCameraData>(out var cameraAdditionalData);
-            if (cameraAdditionalData.renderType != CameraRenderType.Overlay)
-            {
-                Debug.LogWarning("You can only add Overlay camera types to a camera stack.");
-                return;
-            }
-
-            m_Cameras.Add(camera);
-        }
-
-        /// <summary>
         /// If true, this camera will clear depth value before rendering. Only valid for Overlay cameras.
         /// </summary>
         public bool clearDepth
         {
             get => m_ClearDepth;
-        }
-
-        /// <summary>
-        /// Removes a camera from the stack. Only valid for Base cameras.
-        /// <seealso cref="CameraRenderType"/>.
-        /// </summary>
-        /// <param name="camera"></param>
-        public void RemoveCameraFromStack(Camera camera)
-        {
-            if (camera == null)
-            {
-                Debug.LogWarning("Trying to remove invalid camera.");
-                return;
-            }
-
-            if (m_Cameras == null)
-            {
-                Debug.Log("Trying to remove a camera that's not added to a camera stack.");
-                return;
-            }
-
-            bool removed = m_Cameras.Remove(camera);
-            if (!removed)
-            {
-                Debug.Log("Trying to remove a camera that's not added to a camera stack.");
-                return;
-            }
         }
 
         /// <summary>
@@ -413,12 +380,6 @@ namespace UnityEngine.Rendering.Universal
             {
                 gizmoName = $"{path}Camera_Overlay.png";
             }
-            // MTT: Commented due to not implemented yet
-            //            else
-            //            {
-            //                gizmoName = $"{path}Camera_UI.png";
-            //            }
-
 
 #if UNITY_2019_2_OR_NEWER
 #if UNITY_EDITOR
