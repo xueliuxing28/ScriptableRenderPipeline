@@ -559,28 +559,25 @@ namespace UnityEditor.Rendering.Universal
                 DrawRenderer();
 
                 var selectedCameraType = (CameraRenderType)m_AdditionalCameraDataCameraTypeProp.intValue;
+                if (selectedCameraType == CameraRenderType.Base)
+                    DrawPostProcessing();
 
                 if (selectedCameraType == CameraRenderType.Overlay)
                 {
                     EditorGUILayout.PropertyField(m_AdditionalCameraClearDepth, Styles.clearDepth);
                     m_AdditionalCameraDataSO.ApplyModifiedProperties();
-                    settings.DrawCullingMask();
-                    settings.DrawOcclusionCulling();
                 }
-                else
-                {
-                    if (selectedCameraType == CameraRenderType.Base)
-                    {
-                        DrawPostProcessing();
-                    }
-                    settings.DrawCullingMask();
-                    settings.DrawOcclusionCulling();
 
-                    DrawOpaqueTexture();
-                    DrawDepthTexture();
-                    DrawRenderShadows();
+                DrawOpaqueTexture();
+                DrawDepthTexture();
+                DrawRenderShadows();
+
+                if (selectedCameraType == CameraRenderType.Base)
                     DrawPriority();
-                }
+
+                settings.DrawCullingMask();
+                settings.DrawOcclusionCulling();
+
                 EditorGUILayout.Space();
                 EditorGUILayout.Space();
             }
