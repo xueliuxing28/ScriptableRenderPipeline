@@ -175,20 +175,8 @@ namespace UnityEngine.Rendering.Universal
             SetupPerFrameShaderConstants();
 
             SortCameras(cameras);
-            UniversalAdditionalCameraData[] cameraDataArray = new UniversalAdditionalCameraData[cameras.Length];
             for (int i = 0; i < cameras.Length; ++i)
-                cameraDataArray[i] = cameras[i].GetUniversalAdditionalCameraData();
-
-            for (int i = 0; i < cameras.Length; ++i)
-            {
-                var additionalCameraDataComponent = cameraDataArray[i];
-
-                // Overlay cameras will be rendered stacked while rendering base cameras
-                if (additionalCameraDataComponent != null && additionalCameraDataComponent.renderType == CameraRenderType.Overlay)
-                    continue;
-
-                RenderCameraStack(renderContext, cameras[i], additionalCameraDataComponent);
-            }
+                RenderCameraStack(renderContext, cameras[i], cameras[i].GetUniversalAdditionalCameraData());
 
             EndFrameRendering(renderContext, cameras);
         }
@@ -263,7 +251,14 @@ namespace UnityEngine.Rendering.Universal
 
         static void RenderCameraStack(ScriptableRenderContext context, Camera baseCamera, UniversalAdditionalCameraData baseCameraAdditionalData)
         {
-            List<Camera> cameraStack = baseCameraAdditionalData?.cameraStack;
+            Debug.Assert(baseCameraAdditionalData != null);
+
+            // Overlay cameras will be rendered stacked while rendering base cameras
+            if (baseCameraAdditionalData.renderType == CameraRenderType.Overlay)
+                return;
+
+            List<Camera> cameraStack = baseCameraAdditionalData.cameraStack;
+            UniversalAdditionalCameraData[] cameraStackData = null;
 
             // We need to know the last active camera in the stack to be able to resolve
             // rendering to screen when rendering it. The last camera in the stack is not
@@ -272,10 +267,24 @@ namespace UnityEngine.Rendering.Universal
             int lastActiveOverlayCameraIndex = -1;
             if (cameraStack != null && baseCamera.cameraType == CameraType.Game)
             {
+                cameraStackData = new UniversalAdditionalCameraData[cameraStack.Count];
                 for (int i = 0; i < cameraStack.Count; ++i)
-                { 
-                    if (cameraStack[i].isActiveAndEnabled)
-                        lastActiveOverlayCameraIndex = i;
+                {
+                    Camera currCamera = cameraStack[i];
+                    cameraStackData[i] = null;
+                    if (currCamera != null && currCamera.isActiveAndEnabled)
+                    {
+                        var data = currCamera.GetUniversalAdditionalCameraData();
+                        if (data.renderType == CameraRenderType.Overlay)
+                        {
+                            lastActiveOverlayCameraIndex = i;
+                            cameraStackData[i] = data;
+                        }
+                        else
+                        {
+                            Debug.LogWarning(string.Format("Stack can only contain Overlay cameras. {0} will skip rendering.", currCamera.name));
+                        }
+                    }
                 }
             }
 
@@ -289,18 +298,14 @@ namespace UnityEngine.Rendering.Universal
             for (int i = 0; i < cameraStack.Count; ++i)
             {
                 var currCamera = cameraStack[i];
-                if (currCamera.isActiveAndEnabled)
-                {
-                    var currCameraAdditionalData = currCamera.GetUniversalAdditionalCameraData();
-                    if (currCameraAdditionalData.renderType != CameraRenderType.Overlay)
-                    {
-                        Debug.LogWarning(string.Format("Stack can only contain Overlay cameras. {0} will skip rendering.", currCamera.name));
-                        continue;
-                    }
+                var currCameraData = cameraStackData[i];
 
+                // Camera is overlay and enabled
+                if (currCameraData != null)
+                {
                     // Copy base settings from base camera data and initialize initialize remaining specific settings for this camera type. 
                     CameraData overlayCameraData = baseCameraData;
-                    InitializeAdditionalCameraData(currCamera, currCameraAdditionalData, ref overlayCameraData);
+                    InitializeAdditionalCameraData(currCamera, currCameraData, ref overlayCameraData);
 
                     bool lastCamera = i == lastActiveOverlayCameraIndex;
                     RenderSingleCamera(context, overlayCameraData, lastCamera);
