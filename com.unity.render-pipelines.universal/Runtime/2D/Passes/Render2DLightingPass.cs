@@ -168,7 +168,7 @@ namespace UnityEngine.Experimental.Rendering.Universal
                 context.ExecuteCommandBuffer(cmd);
                 CommandBufferPool.Release(cmd);
 
-                Profiler.BeginSample("RenderSpritesWithLighting - Draw Transparent Renderers");
+                Profiler.BeginSample("Render Sprites Unlit");
                 context.DrawRenderers(renderingData.cullResults, ref unlitDrawSettings, ref filterSettings);
                 Profiler.EndSample();
 
