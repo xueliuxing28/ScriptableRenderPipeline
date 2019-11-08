@@ -284,6 +284,20 @@ namespace UnityEngine.Experimental.Rendering.Universal
             Light2DManager.cullingGroup.SetBoundingSphereCount(currentLightCullingIndex);
         }
 
+        internal static bool IsSceneLit(Camera camera)
+        {
+            for (int layer = 0; layer < Light2DManager.lights.Length; layer++)
+            {
+                List<Light2D> lightList = Light2DManager.lights[layer];
+                for (int lightIndex = 0; lightIndex < lightList.Count; lightIndex++)
+                {
+                    if (lightList[lightIndex].IsLightVisible(camera))
+                        return true;
+                }
+            }
+            return false;
+        }
+
         internal static List<Light2D> GetLightsByBlendStyle(int blendStyleIndex)
         {
             return Light2DManager.lights[blendStyleIndex];
