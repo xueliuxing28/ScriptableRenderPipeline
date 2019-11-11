@@ -438,7 +438,7 @@ namespace UnityEngine.Rendering.Universal
             m_ActiveColorAttachment = colorAttachment;
             m_ActiveDepthAttachment = depthAttachment;
 
-            RenderBufferLoadAction colorLoadAction = clearFlag != ClearFlag.None ?
+            RenderBufferLoadAction colorLoadAction = ((uint)clearFlag & (uint)ClearFlag.Color) != 0 ?
                 RenderBufferLoadAction.DontCare : RenderBufferLoadAction.Load;
 
             RenderBufferLoadAction depthLoadAction = ((uint)clearFlag & (uint)ClearFlag.Depth) != 0 ?
