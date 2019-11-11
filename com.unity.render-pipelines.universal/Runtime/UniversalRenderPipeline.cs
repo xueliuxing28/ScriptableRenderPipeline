@@ -332,13 +332,6 @@ namespace UnityEngine.Rendering.Universal
 #endif
         }
 
-		static bool PlatformNeedsToKillAlpha()
-		{
-			return Application.platform == RuntimePlatform.IPhonePlayer ||
-                Application.platform == RuntimePlatform.Android ||
-                Application.platform == RuntimePlatform.tvOS;
-		}
-
         static void InitializeCameraData(Camera camera, UniversalAdditionalCameraData additionalCameraData, out CameraData cameraData)
         {
             cameraData = new CameraData();
@@ -395,11 +388,6 @@ namespace UnityEngine.Rendering.Universal
                 cameraData.antialiasingQuality = AntialiasingQuality.High;
             }
 
-            // Disables postprocessing in mobile VR. It's not stable on mobile yet.
-            // TODO: enable postfx for stereo rendering
-            if (cameraData.isStereoEnabled && Application.isMobilePlatform)
-                cameraData.postProcessEnabled = false;
-
             // Disables post if GLes2
             cameraData.postProcessEnabled &= SystemInfo.graphicsDeviceType != GraphicsDeviceType.OpenGLES2;
 
@@ -431,7 +419,7 @@ namespace UnityEngine.Rendering.Universal
             cameraData.defaultOpaqueSortFlags = canSkipFrontToBackSorting ? noFrontToBackOpaqueFlags : commonOpaqueFlags;
             cameraData.captureActions = CameraCaptureBridge.GetCaptureActions(baseCamera);
 
-            bool needsAlphaChannel = baseCamera.targetTexture == null && Graphics.preserveFramebufferAlpha && PlatformNeedsToKillAlpha();
+            bool needsAlphaChannel = baseCamera.targetTexture == null && Graphics.preserveFramebufferAlpha;
             cameraData.cameraTargetDescriptor = CreateRenderTextureDescriptor(baseCamera, cameraData.renderScale,
                 cameraData.isStereoEnabled, cameraData.isHdrEnabled, msaaSamples, needsAlphaChannel);
         }
@@ -524,8 +512,10 @@ namespace UnityEngine.Rendering.Universal
             renderingData.perObjectData = GetPerObjectLightFlags(renderingData.lightData.additionalLightsCount);
 
 			bool isOffscreenCamera = cameraData.camera.targetTexture != null && !cameraData.isSceneViewCamera;
-            renderingData.killAlphaInFinalBlit = !Graphics.preserveFramebufferAlpha && PlatformNeedsToKillAlpha() && !isOffscreenCamera;
             renderingData.resolveFinalTarget = requiresBlitToBackbuffer;
+#pragma warning disable // avoid warning because killAlphaInFinalBlit has attribute Obsolete
+            renderingData.killAlphaInFinalBlit = false;
+#pragma warning restore
         }
 
         static void InitializeShadowData(UniversalRenderPipelineAsset settings, NativeArray<VisibleLight> visibleLights, bool mainLightCastShadows, bool additionalLightsCastShadows, out ShadowData shadowData)
