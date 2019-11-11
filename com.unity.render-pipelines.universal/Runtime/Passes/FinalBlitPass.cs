@@ -51,7 +51,10 @@ namespace UnityEngine.Rendering.Universal.Internal
             else
                 cmd.DisableShaderKeyword(ShaderKeywordStrings.LinearToSRGBConversion);
 
+            // Note: We need to get the cameraData.targetTexture as this will get the targetTexture of the camera stack.
+            // Overlay cameras need to output to the target described in the base camera while doing camera stack.
             ref CameraData cameraData = ref renderingData.cameraData;
+            RenderTargetIdentifier cameraTarget = new RenderTargetIdentifier(cameraData.targetTexture);
 
             // Use default blit for XR as we are not sure the UniversalRP blit handles stereo.
             // The blit will be reworked for stereo along the XRSDK work.
@@ -63,7 +66,7 @@ namespace UnityEngine.Rendering.Universal.Internal
                 cmd.SetRenderTarget(BuiltinRenderTextureType.CameraTarget,
                     RenderBufferLoadAction.DontCare, RenderBufferStoreAction.Store,     // color
                     RenderBufferLoadAction.DontCare, RenderBufferStoreAction.DontCare); // depth
-                cmd.Blit(m_Source.Identifier(), BuiltinRenderTextureType.CameraTarget, blitMaterial);
+                cmd.Blit(m_Source.Identifier(), cameraTarget, blitMaterial);
             }
             else
             {
@@ -72,7 +75,7 @@ namespace UnityEngine.Rendering.Universal.Internal
                 // meanwhile we set to load so split screen case works.
                 SetRenderTarget(
                     cmd,
-                    BuiltinRenderTextureType.CameraTarget,
+                    cameraTarget,
                     RenderBufferLoadAction.Load,
                     RenderBufferStoreAction.Store,
                     ClearFlag.None,

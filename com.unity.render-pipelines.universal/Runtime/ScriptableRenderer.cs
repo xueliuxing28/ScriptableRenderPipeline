@@ -348,9 +348,6 @@ namespace UnityEngine.Rendering.Universal
 
         internal void Clear()
         {
-            m_CameraColorTarget = BuiltinRenderTextureType.CameraTarget;
-            m_CameraDepthTarget = BuiltinRenderTextureType.CameraTarget;
-
             m_ActiveColorAttachment = BuiltinRenderTextureType.CameraTarget;
             m_ActiveDepthAttachment = BuiltinRenderTextureType.CameraTarget;
 
@@ -530,7 +527,11 @@ namespace UnityEngine.Rendering.Universal
                 m_ActiveRenderPassQueue[i].FrameCleanup(cmd);
 
             if (resolveFinalTarget)
+            {
+                m_CameraColorTarget = BuiltinRenderTextureType.CameraTarget;
+                m_CameraDepthTarget = BuiltinRenderTextureType.CameraTarget;
                 FinishRendering(cmd);
+            }
             Clear();
 
             context.ExecuteCommandBuffer(cmd);

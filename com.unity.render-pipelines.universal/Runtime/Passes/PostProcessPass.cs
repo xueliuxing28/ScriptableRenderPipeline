@@ -343,7 +343,10 @@ namespace UnityEngine.Rendering.Universal.Internal
                 if (m_Destination == RenderTargetHandle.CameraTarget && !cameraData.isDefaultViewport)
                     colorLoadAction = RenderBufferLoadAction.Load;
 
-                cmd.SetRenderTarget(m_Destination.Identifier(), colorLoadAction, RenderBufferStoreAction.Store, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.DontCare);
+                // Note: We rendering to "camera target" we need to get the cameraData.targetTexture as this will get the targetTexture of the camera stack.
+                // Overlay cameras need to output to the target described in the base camera while doing camera stack.
+                RenderTargetIdentifier cameraTarget = (m_Destination == RenderTargetHandle.CameraTarget) ? new RenderTargetIdentifier(cameraData.targetTexture) : m_Destination.Identifier();
+                cmd.SetRenderTarget(cameraTarget, colorLoadAction, RenderBufferStoreAction.Store, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.DontCare);
 
                 if (m_IsStereo)
                 {
@@ -1023,7 +1026,11 @@ namespace UnityEngine.Rendering.Universal.Internal
             cmd.SetGlobalTexture("_BlitTex", m_Source.Identifier());
 
             var colorLoadAction = cameraData.isDefaultViewport ? RenderBufferLoadAction.DontCare : RenderBufferLoadAction.Load;
-            cmd.SetRenderTarget(m_Destination.Identifier(), colorLoadAction, RenderBufferStoreAction.Store, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.DontCare);
+
+            // Note: We need to get the cameraData.targetTexture as this will get the targetTexture of the camera stack.
+            // Overlay cameras need to output to the target described in the base camera while doing camera stack.
+            RenderTargetIdentifier cameraTarget = new RenderTargetIdentifier(cameraData.targetTexture);
+            cmd.SetRenderTarget(cameraTarget, colorLoadAction, RenderBufferStoreAction.Store, RenderBufferLoadAction.DontCare, RenderBufferStoreAction.DontCare);
 
             if (cameraData.isStereoEnabled)
             {
