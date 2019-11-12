@@ -283,7 +283,7 @@ namespace UnityEngine.Rendering.Universal.Internal
 
                 using (new ProfilingSample(cmd, markerName))
                 {
-                    DoDepthOfField(cameraData.camera, cmd, GetSource(), GetDestination(), cameraData.baseCamera.pixelRect);
+                    DoDepthOfField(cameraData.camera, cmd, GetSource(), GetDestination(), cameraData.pixelRect);
                     Swap();
                 }
             }
@@ -330,8 +330,8 @@ namespace UnityEngine.Rendering.Universal.Internal
                 SetupColorGrading(cmd, ref renderingData, m_Materials.uber);
 
                 // Only apply dithering & grain if there isn't a final pass.
-                SetupGrain(cameraData.baseCamera, m_Materials.uber);
-                SetupDithering(ref cameraData, m_Materials.uber);
+                SetupGrain(cameraData, m_Materials.uber);
+                SetupDithering(cameraData, m_Materials.uber);
 				
                 if (Display.main.requiresSrgbBlitToBackbuffer && m_EnableSRGBConversionIfNeeded)
                     m_Materials.uber.EnableKeyword(ShaderKeywordStrings.LinearToSRGBConversion);
@@ -357,7 +357,7 @@ namespace UnityEngine.Rendering.Universal.Internal
                     cmd.SetViewProjectionMatrices(Matrix4x4.identity, Matrix4x4.identity);
 
                     if (m_Destination == RenderTargetHandle.CameraTarget)
-                        cmd.SetViewport(cameraData.baseCamera.pixelRect);
+                        cmd.SetViewport(cameraData.pixelRect);
 
                     cmd.DrawMesh(RenderingUtils.fullscreenMesh, Matrix4x4.identity, m_Materials.uber);
                     cmd.SetViewProjectionMatrices(cameraData.camera.worldToCameraMatrix, cameraData.camera.projectionMatrix);
@@ -390,7 +390,7 @@ namespace UnityEngine.Rendering.Universal.Internal
         void DoSubpixelMorphologicalAntialiasing(ref CameraData cameraData, CommandBuffer cmd, int source, int destination)
         {
             var camera = cameraData.camera;
-            var pixelRect = cameraData.baseCamera.pixelRect;
+            var pixelRect = cameraData.pixelRect;
             var material = m_Materials.subpixelMorphologicalAntialiasing;
             const int kStencilBit = 64;
 
@@ -971,7 +971,7 @@ namespace UnityEngine.Rendering.Universal.Internal
 
         #region Film Grain
 
-        void SetupGrain(Camera camera, Material material)
+        void SetupGrain(in CameraData cameraData, Material material)
         {
             if (!m_HasFinalPass && m_FilmGrain.IsActive())
             {
@@ -979,7 +979,7 @@ namespace UnityEngine.Rendering.Universal.Internal
                 PostProcessUtils.ConfigureFilmGrain(
                     m_Data,
                     m_FilmGrain,
-                    camera,
+                    cameraData.pixelWidth, cameraData.pixelHeight,
                     material
                 );
             }
@@ -989,7 +989,7 @@ namespace UnityEngine.Rendering.Universal.Internal
 
         #region 8-bit Dithering
 
-        void SetupDithering(ref CameraData cameraData, Material material)
+        void SetupDithering(in CameraData cameraData, Material material)
         {
             if (!m_HasFinalPass && cameraData.isDitheringEnabled)
             {
@@ -997,7 +997,7 @@ namespace UnityEngine.Rendering.Universal.Internal
                 m_DitheringTextureIndex = PostProcessUtils.ConfigureDithering(
                     m_Data,
                     m_DitheringTextureIndex,
-                    cameraData.baseCamera,
+                    cameraData.pixelWidth, cameraData.pixelHeight,
                     material
                 );
             }
@@ -1017,9 +1017,9 @@ namespace UnityEngine.Rendering.Universal.Internal
             if (cameraData.antialiasing == AntialiasingMode.FastApproximateAntialiasing)
                 material.EnableKeyword(ShaderKeywordStrings.Fxaa);
 
-            SetupGrain(cameraData.camera, material);
-            SetupDithering(ref cameraData, material);
-			
+            SetupGrain(cameraData, material);
+            SetupDithering(cameraData, material);
+
             if (Display.main.requiresSrgbBlitToBackbuffer && m_EnableSRGBConversionIfNeeded)
                 material.EnableKeyword(ShaderKeywordStrings.LinearToSRGBConversion);
 
@@ -1039,7 +1039,7 @@ namespace UnityEngine.Rendering.Universal.Internal
             else
             {
                 cmd.SetViewProjectionMatrices(Matrix4x4.identity, Matrix4x4.identity);
-                cmd.SetViewport(cameraData.baseCamera.pixelRect);
+                cmd.SetViewport(cameraData.pixelRect);
                 cmd.DrawMesh(RenderingUtils.fullscreenMesh, Matrix4x4.identity, material);
                 cmd.SetViewProjectionMatrices(cameraData.camera.worldToCameraMatrix, cameraData.camera.projectionMatrix);
             }

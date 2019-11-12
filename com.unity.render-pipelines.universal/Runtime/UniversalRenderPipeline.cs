@@ -350,7 +350,6 @@ namespace UnityEngine.Rendering.Universal
         {
             var settings = asset;
             cameraData = new CameraData();
-            cameraData.baseCamera = baseCamera;
             cameraData.targetTexture = baseCamera.targetTexture;
             cameraData.isStereoEnabled = IsStereoEnabled(baseCamera);
             cameraData.isSceneViewCamera = baseCamera.cameraType == CameraType.SceneView;
@@ -401,6 +400,9 @@ namespace UnityEngine.Rendering.Universal
             cameraData.isHdrEnabled = baseCamera.allowHDR && settings.supportsHDR;
 
             Rect cameraRect = baseCamera.rect;
+            cameraData.pixelRect = baseCamera.pixelRect;
+            cameraData.pixelWidth = baseCamera.pixelWidth;
+            cameraData.pixelHeight = baseCamera.pixelHeight;
             cameraData.isDefaultViewport = (!(Math.Abs(cameraRect.x) > 0.0f || Math.Abs(cameraRect.y) > 0.0f ||
                 Math.Abs(cameraRect.width) < 1.0f || Math.Abs(cameraRect.height) < 1.0f));
 
@@ -698,11 +700,11 @@ namespace UnityEngine.Rendering.Universal
             Shader.SetGlobalVector(PerFrameBuffer._SubtractiveShadowColor, CoreUtils.ConvertSRGBToActiveColorSpace(RenderSettings.subtractiveShadowColor));
         }
 
-        static void SetupPerCameraShaderConstants(CameraData cameraData)
+        static void SetupPerCameraShaderConstants(in CameraData cameraData)
         {
             Camera camera = cameraData.camera;
 
-            Rect pixelRect = cameraData.baseCamera.pixelRect;
+            Rect pixelRect = cameraData.pixelRect;
             float scaledCameraWidth = (float)pixelRect.width * cameraData.renderScale;
             float scaledCameraHeight = (float)pixelRect.height * cameraData.renderScale;
             Shader.SetGlobalVector(PerCameraBuffer._ScaledScreenParams, new Vector4(scaledCameraWidth, scaledCameraHeight, 1.0f + 1.0f / scaledCameraWidth, 1.0f + 1.0f / scaledCameraHeight));
