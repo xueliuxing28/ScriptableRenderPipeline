@@ -179,6 +179,7 @@ namespace UnityEngine.Experimental.Rendering.Universal
             public int totalLights;
             public int totalNormalMapUsage;
             public int totalVolumetricUsage;
+            public uint blendStylesUsed;
         }
 
         /// <summary>
@@ -505,6 +506,9 @@ namespace UnityEngine.Experimental.Rendering.Universal
                         if (light.volumeOpacity > 0)
                             returnStats.totalVolumetricUsage++;
                     }
+
+                    uint blendStyleUsed = (uint)(1 << light.blendStyleIndex);
+                    returnStats.blendStylesUsed |= blendStyleUsed;
                 }
 
             }

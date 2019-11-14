@@ -139,6 +139,78 @@ namespace UnityEngine.Experimental.Rendering.Universal
             cmd.GetTemporaryRT(s_ShadowsRenderTarget.id, descriptor, FilterMode.Bilinear); // Needs to be switch to R8 color format...            
         }
 
+
+        static public void CreateNormalMapRenderTexture(CommandBuffer cmd, int width, int height)
+        {
+            if (!s_HasSetupRenderTextureFormatToUse)
+            {
+                if (SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.RGB111110Float))
+                    s_RenderTextureFormatToUse = RenderTextureFormat.RGB111110Float;
+                else if (SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.ARGBHalf))
+                    s_RenderTextureFormatToUse = RenderTextureFormat.ARGBHalf;
+
+                s_HasSetupRenderTextureFormatToUse = true;
+            }
+
+            RenderTextureDescriptor descriptor = new RenderTextureDescriptor(width, height);
+            descriptor.colorFormat = s_RenderTextureFormatToUse;
+            descriptor.sRGB = false;
+            descriptor.useMipMap = false;
+            descriptor.autoGenerateMips = false;
+            descriptor.depthBufferBits = 0;
+            descriptor.msaaSamples = 1;
+            descriptor.dimension = TextureDimension.Tex2D;
+
+            cmd.GetTemporaryRT(s_NormalsTarget.id, descriptor, FilterMode.Bilinear);
+        }
+
+
+        static void CreateRenderTextureByBlendStyleIndex(CommandBuffer cmd, int blendStyleIndex, int width, int height)
+        {
+            if (!s_HasSetupRenderTextureFormatToUse)
+            {
+                if (SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.RGB111110Float))
+                    s_RenderTextureFormatToUse = RenderTextureFormat.RGB111110Float;
+                else if (SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.ARGBHalf))
+                    s_RenderTextureFormatToUse = RenderTextureFormat.ARGBHalf;
+
+                s_HasSetupRenderTextureFormatToUse = true;
+            }
+
+            RenderTextureDescriptor descriptor = new RenderTextureDescriptor(width, height);
+            descriptor.colorFormat = s_RenderTextureFormatToUse;
+            descriptor.sRGB = false;
+            descriptor.useMipMap = false;
+            descriptor.autoGenerateMips = false;
+            descriptor.depthBufferBits = 0;
+            descriptor.msaaSamples = 1;
+            descriptor.dimension = TextureDimension.Tex2D;
+
+            float renderTextureScale = Mathf.Clamp(s_BlendStyles[blendStyleIndex].renderTextureScale, 0.01f, 1.0f);
+            descriptor.width = (int)(width * renderTextureScale);
+            descriptor.height = (int)(height * renderTextureScale);
+            cmd.GetTemporaryRT(s_LightRenderTargets[blendStyleIndex].id, descriptor, FilterMode.Bilinear);
+
+        }
+
+        static public void CreateBlendStyleRenderTexture(CommandBuffer cmd, int blendStyleIndex, int width, int height)
+        {
+            float renderTextureScale = Mathf.Clamp(s_BlendStyles[blendStyleIndex].renderTextureScale, 0.01f, 1.0f);
+            CreateRenderTextureByBlendStyleIndex(cmd, blendStyleIndex, (int)(width * renderTextureScale), (int)(height * renderTextureScale));
+            s_LightRenderTargetsDirty[blendStyleIndex] = true;
+        }
+
+        static public void CreateShadowRenderTexture(CommandBuffer cmd, int blendStyleIndex, int width, int height)
+        {
+            float renderTextureScale = Mathf.Clamp(s_BlendStyles[blendStyleIndex].renderTextureScale, 0.01f, 1.0f);
+            CreateRenderTextureByBlendStyleIndex(cmd, s_ShadowsRenderTarget.id, (int)(width * renderTextureScale), (int)(height * renderTextureScale));
+        }
+
+        static public void ReleaseShadowRenderTexture(CommandBuffer cmd)
+        {
+            cmd.ReleaseTemporaryRT(s_ShadowsRenderTarget.id);
+        }
+
         static public void ReleaseRenderTextures(CommandBuffer cmd)
         {
             for (int i = 0; i < s_BlendStyles.Length; ++i)
@@ -231,7 +303,6 @@ namespace UnityEngine.Experimental.Rendering.Universal
                                     }
                                 }
                             }
-
                         }
                     }
                 }
@@ -467,12 +538,11 @@ namespace UnityEngine.Experimental.Rendering.Universal
             renderContext.DrawRenderers(cullResults, ref drawSettings, ref filterSettings);
         }
 
-        static public void RenderLights(Camera camera, CommandBuffer cmdBuffer, int layerToRender)
+        static public void RenderLights(Camera camera, CommandBuffer cmdBuffer, int layerToRender, uint blendStylesUsed)
         {
             for (int i = 0; i < s_BlendStyles.Length; ++i)
             {
-
-                if (!s_BlendStyles[i].enabled)
+                if ((blendStylesUsed & (uint)(1<<i)) == 0)
                     continue;
 
                 string sampleName = s_BlendStyles[i].name;
@@ -505,11 +575,11 @@ namespace UnityEngine.Experimental.Rendering.Universal
             }
         }
 
-        static public void RenderLightVolumes(Camera camera, CommandBuffer cmdBuffer, int layerToRender, RenderTargetIdentifier renderTarget)
+        static public void RenderLightVolumes(Camera camera, CommandBuffer cmdBuffer, int layerToRender, RenderTargetIdentifier renderTarget, uint blendStylesUsed)
         {
             for (int i = 0; i < s_BlendStyles.Length; ++i)
             {
-                if (!s_BlendStyles[i].enabled)
+                if ((blendStylesUsed & (uint)(1 << i)) == 0)
                     continue;
 
                 string sampleName = s_BlendStyles[i].name;

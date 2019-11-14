@@ -80,11 +80,15 @@ namespace UnityEngine.Experimental.Rendering.Universal
                 CommandBuffer cmd = CommandBufferPool.Get("Render 2D Lighting");
                 cmd.Clear();
 
+
                 Profiler.BeginSample("RenderSpritesWithLighting - Create Render Textures");
                 ref var targetDescriptor = ref renderingData.cameraData.cameraTargetDescriptor;
                 RendererLighting.CreateRenderTextures(cmd, targetDescriptor.width, targetDescriptor.height);
                 Profiler.EndSample();
 
+                //ref var targetDescriptor = ref renderingData.cameraData.cameraTargetDescriptor;
+                //RendererLighting.CreateNormalMapRenderTexture(cmd, targetDescriptor.width, targetDescriptor.height);
+                
                 cmd.SetGlobalFloat("_HDREmulationScale", m_RendererData.hdrEmulationScale);
                 cmd.SetGlobalFloat("_InverseHDREmulationScale", 1.0f / m_RendererData.hdrEmulationScale);
                 cmd.SetGlobalFloat("_UseSceneLighting", isLitView ? 1.0f : 0.0f);
@@ -113,13 +117,25 @@ namespace UnityEngine.Experimental.Rendering.Universal
                     Light2D.LightStats lightStats;
                     lightStats = Light2D.GetLightStatsByLayer(layerToRender);
 
+                    // Allocate our blend style textures
+                    //const int blendStylesCount = 4;
+                    //for(int styleIndex=0;styleIndex<blendStylesCount;styleIndex++)
+                    //{
+                    //    uint blendStyleMask = (uint)(1 << styleIndex);
+                    //    if((lightStats.blendStylesUsed & blendStyleMask) > 0)
+                    //    {
+                    //        RendererLighting.CreateBlendStyleRenderTexture(cmd, styleIndex, targetDescriptor.width, targetDescriptor.height);
+                    //    }
+                    //}
+
+                    // Start Rendering
                     if (lightStats.totalNormalMapUsage > 0)
                         RendererLighting.RenderNormals(context, renderingData.cullResults, normalsDrawSettings, filterSettings);
 
                     cmd.Clear();
                     if (lightStats.totalLights > 0)
                     {
-                        RendererLighting.RenderLights(camera, cmd, layerToRender);
+                        RendererLighting.RenderLights(camera, cmd, layerToRender, lightStats.blendStylesUsed);
                     }
                     else
                     {
@@ -137,7 +153,7 @@ namespace UnityEngine.Experimental.Rendering.Universal
                     {
 
                         cmd.Clear();
-                        RendererLighting.RenderLightVolumes(camera, cmd, layerToRender, colorAttachment);
+                        RendererLighting.RenderLightVolumes(camera, cmd, layerToRender, colorAttachment, lightStats.blendStylesUsed);
                         context.ExecuteCommandBuffer(cmd);
                         cmd.Clear();
                     }
