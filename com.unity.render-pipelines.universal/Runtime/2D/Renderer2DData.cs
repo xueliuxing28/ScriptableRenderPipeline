@@ -41,13 +41,13 @@ namespace UnityEngine.Experimental.Rendering.Universal
         Renderer2DDefaultMaterialType m_DefaultMaterialType = Renderer2DDefaultMaterialType.Lit;
 
         [SerializeField, Reload("Runtime/Materials/Sprite-Lit-Default.mat")]
-        Material m_DefaultCustomMaterial;
+        Material m_DefaultCustomMaterial = null;
 
         [SerializeField, Reload("Runtime/Materials/Sprite-Lit-Default.mat")]
-        Material m_DefaultLitMaterial;
+        Material m_DefaultLitMaterial = null;
 
         [SerializeField, Reload("Runtime/Materials/Sprite-Unlit-Default.mat")]
-        Material m_DefaultUnlitMaterial;
+        Material m_DefaultUnlitMaterial = null;
 
         [SerializeField, Reload("Shaders/2D/Light2D-Shape.shader")]
         Shader m_ShapeLightShader = null;
