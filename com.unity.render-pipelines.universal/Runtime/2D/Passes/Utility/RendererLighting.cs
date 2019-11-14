@@ -162,6 +162,7 @@ namespace UnityEngine.Experimental.Rendering.Universal
             descriptor.dimension = TextureDimension.Tex2D;
 
             cmd.GetTemporaryRT(s_NormalsTarget.id, descriptor, FilterMode.Bilinear);
+            cmd.GetTemporaryRT(s_ShadowsRenderTarget.id, descriptor, FilterMode.Bilinear); // Needs to be switch to R8 color format...            
         }
 
 
@@ -190,7 +191,6 @@ namespace UnityEngine.Experimental.Rendering.Universal
             descriptor.width = (int)(width * renderTextureScale);
             descriptor.height = (int)(height * renderTextureScale);
             cmd.GetTemporaryRT(s_LightRenderTargets[blendStyleIndex].id, descriptor, FilterMode.Bilinear);
-
         }
 
         static public void CreateBlendStyleRenderTexture(CommandBuffer cmd, int blendStyleIndex, int width, int height)

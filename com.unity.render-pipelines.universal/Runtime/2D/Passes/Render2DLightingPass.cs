@@ -80,15 +80,9 @@ namespace UnityEngine.Experimental.Rendering.Universal
                 CommandBuffer cmd = CommandBufferPool.Get("Render 2D Lighting");
                 cmd.Clear();
 
-
-                Profiler.BeginSample("RenderSpritesWithLighting - Create Render Textures");
                 ref var targetDescriptor = ref renderingData.cameraData.cameraTargetDescriptor;
-                RendererLighting.CreateRenderTextures(cmd, targetDescriptor.width, targetDescriptor.height);
-                Profiler.EndSample();
+                RendererLighting.CreateNormalMapRenderTexture(cmd, targetDescriptor.width, targetDescriptor.height);
 
-                //ref var targetDescriptor = ref renderingData.cameraData.cameraTargetDescriptor;
-                //RendererLighting.CreateNormalMapRenderTexture(cmd, targetDescriptor.width, targetDescriptor.height);
-                
                 cmd.SetGlobalFloat("_HDREmulationScale", m_RendererData.hdrEmulationScale);
                 cmd.SetGlobalFloat("_InverseHDREmulationScale", 1.0f / m_RendererData.hdrEmulationScale);
                 cmd.SetGlobalFloat("_UseSceneLighting", isLitView ? 1.0f : 0.0f);
@@ -99,11 +93,25 @@ namespace UnityEngine.Experimental.Rendering.Universal
                 Profiler.BeginSample("RenderSpritesWithLighting - Prepare");
                 DrawingSettings combinedDrawSettings = CreateDrawingSettings(k_ShaderTags, ref renderingData, SortingCriteria.CommonTransparent);
                 DrawingSettings normalsDrawSettings = CreateDrawingSettings(k_NormalsRenderingPassName, ref renderingData, SortingCriteria.CommonTransparent);
-
                 Profiler.EndSample();
 
+                const int blendStylesCount = 4;
+                bool[] hasBeenInitialized = new bool[blendStylesCount];
                 for (int i = 0; i < s_SortingLayers.Length; i++)
                 {
+                    // Allocate our blend style textures
+                    cmd.Clear();
+                    for (int styleIndex = 0; styleIndex < blendStylesCount; styleIndex++)
+                    {
+                        uint blendStyleMask = (uint)(1 << styleIndex);
+                        if ((lightStats.blendStylesUsed & blendStyleMask) > 0 && !hasBeenInitialized[blendStyleIndex])
+                        {
+                            RendererLighting.CreateBlendStyleRenderTexture(cmd, styleIndex, targetDescriptor.width, targetDescriptor.height);
+                            hasBeenInitialized[blendStyleIndex] = true;
+                        }
+                    }
+                    context.ExecuteCommandBuffer(cmd);
+
                     // Some renderers override their sorting layer value with short.MinValue or short.MaxValue.
                     // When drawing the first sorting layer, we should include the range from short.MinValue to layerValue.
                     // Similarly, when drawing the last sorting layer, include the range from layerValue to short.MaxValue.
@@ -117,16 +125,7 @@ namespace UnityEngine.Experimental.Rendering.Universal
                     Light2D.LightStats lightStats;
                     lightStats = Light2D.GetLightStatsByLayer(layerToRender);
 
-                    // Allocate our blend style textures
-                    //const int blendStylesCount = 4;
-                    //for(int styleIndex=0;styleIndex<blendStylesCount;styleIndex++)
-                    //{
-                    //    uint blendStyleMask = (uint)(1 << styleIndex);
-                    //    if((lightStats.blendStylesUsed & blendStyleMask) > 0)
-                    //    {
-                    //        RendererLighting.CreateBlendStyleRenderTexture(cmd, styleIndex, targetDescriptor.width, targetDescriptor.height);
-                    //    }
-                    //}
+
 
                     // Start Rendering
                     if (lightStats.totalNormalMapUsage > 0)
