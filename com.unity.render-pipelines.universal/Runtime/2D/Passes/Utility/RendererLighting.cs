@@ -86,60 +86,6 @@ namespace UnityEngine.Experimental.Rendering.Universal
                 s_RemoveSelfShadowMaterials = new Material[totalMaterials];
         }
 
-        static public void CreateRenderTextures(CommandBuffer cmd, int width, int height)
-        {
-            if (!s_HasSetupRenderTextureFormatToUse)
-            {
-                if (SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.RGB111110Float))
-                    s_RenderTextureFormatToUse = RenderTextureFormat.RGB111110Float;
-                else if (SystemInfo.SupportsRenderTextureFormat(RenderTextureFormat.ARGBHalf))
-                    s_RenderTextureFormatToUse = RenderTextureFormat.ARGBHalf;
-
-                s_HasSetupRenderTextureFormatToUse = true;
-            }
-
-            RenderTextureDescriptor descriptor = new RenderTextureDescriptor(width, height);
-            descriptor.colorFormat = s_RenderTextureFormatToUse;
-            descriptor.sRGB = false;
-            descriptor.useMipMap = false;
-            descriptor.autoGenerateMips = false;
-            descriptor.depthBufferBits = 0;
-            descriptor.msaaSamples = 1;
-            descriptor.dimension = TextureDimension.Tex2D;
-
-            cmd.GetTemporaryRT(s_NormalsTarget.id, descriptor, FilterMode.Bilinear);
-            
-            for (int i = 0; i < s_BlendStyles.Length; ++i)
-            {
-                if (!s_BlendStyles[i].enabled)
-                    continue;
-
-                float renderTextureScale = Mathf.Clamp(s_BlendStyles[i].renderTextureScale, 0.01f, 1.0f);
-
-                descriptor.width = (int)(width * renderTextureScale);
-                descriptor.height = (int)(height * renderTextureScale);
-                cmd.GetTemporaryRT(s_LightRenderTargets[i].id, descriptor, FilterMode.Bilinear);
-                s_LightRenderTargetsDirty[i] = true;
-            }
-
-            descriptor.colorFormat = RenderTextureFormat.ARGB32;
-            descriptor.sRGB = false;
-            descriptor.useMipMap = false;
-            descriptor.autoGenerateMips = false;
-            descriptor.depthBufferBits = 24;
-            descriptor.msaaSamples = 1;
-            descriptor.graphicsFormat = GraphicsFormat.R8G8B8A8_UNorm;
-            descriptor.dimension = TextureDimension.Tex2D;
-
-            //TODO: Scale this based on the light's texture scale
-            descriptor.width = width;
-            descriptor.height = height;
-
-
-            cmd.GetTemporaryRT(s_ShadowsRenderTarget.id, descriptor, FilterMode.Bilinear); // Needs to be switch to R8 color format...            
-        }
-
-
         static public void CreateNormalMapRenderTexture(CommandBuffer cmd, int width, int height)
         {
             if (!s_HasSetupRenderTextureFormatToUse)
@@ -197,6 +143,7 @@ namespace UnityEngine.Experimental.Rendering.Universal
         {
             float renderTextureScale = Mathf.Clamp(s_BlendStyles[blendStyleIndex].renderTextureScale, 0.01f, 1.0f);
             CreateRenderTextureByBlendStyleIndex(cmd, blendStyleIndex, (int)(width * renderTextureScale), (int)(height * renderTextureScale));
+            cmd.EnableShaderKeyword(k_UseBlendStyleKeywords[blendStyleIndex]);
             s_LightRenderTargetsDirty[blendStyleIndex] = true;
         }
 
@@ -215,9 +162,6 @@ namespace UnityEngine.Experimental.Rendering.Universal
         {
             for (int i = 0; i < s_BlendStyles.Length; ++i)
             {
-                if (!s_BlendStyles[i].enabled)
-                    continue;
-
                 cmd.ReleaseTemporaryRT(s_LightRenderTargets[i].id);
             }
 
@@ -423,18 +367,10 @@ namespace UnityEngine.Experimental.Rendering.Universal
                     break;
 
                 string keyword = k_UseBlendStyleKeywords[i];
-                if (!s_BlendStyles[i].enabled)
-                {
-                    cmdBuffer.DisableShaderKeyword(keyword);
-                    continue;
-                }
-                else
-                {
-                    cmdBuffer.EnableShaderKeyword(keyword);
-                    cmdBuffer.SetGlobalVector(k_BlendFactorsPropNames[i], s_BlendStyles[i].blendFactors);
-                    cmdBuffer.SetGlobalVector(k_MaskFilterPropNames[i], s_BlendStyles[i].maskTextureChannelFilter.mask);
-                    cmdBuffer.SetGlobalVector(k_InvertedFilterPropNames[i], s_BlendStyles[i].maskTextureChannelFilter.inverted);
-                }
+                cmdBuffer.DisableShaderKeyword(keyword);
+                cmdBuffer.SetGlobalVector(k_BlendFactorsPropNames[i], s_BlendStyles[i].blendFactors);
+                cmdBuffer.SetGlobalVector(k_MaskFilterPropNames[i], s_BlendStyles[i].maskTextureChannelFilter.mask);
+                cmdBuffer.SetGlobalVector(k_InvertedFilterPropNames[i], s_BlendStyles[i].maskTextureChannelFilter.inverted);
             }
 
             cmdBuffer.SetGlobalTexture("_FalloffLookup", GetFalloffLookupTexture());

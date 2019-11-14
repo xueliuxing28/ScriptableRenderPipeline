@@ -99,18 +99,6 @@ namespace UnityEngine.Experimental.Rendering.Universal
                 bool[] hasBeenInitialized = new bool[blendStylesCount];
                 for (int i = 0; i < s_SortingLayers.Length; i++)
                 {
-                    // Allocate our blend style textures
-                    cmd.Clear();
-                    for (int styleIndex = 0; styleIndex < blendStylesCount; styleIndex++)
-                    {
-                        uint blendStyleMask = (uint)(1 << styleIndex);
-                        if ((lightStats.blendStylesUsed & blendStyleMask) > 0 && !hasBeenInitialized[blendStyleIndex])
-                        {
-                            RendererLighting.CreateBlendStyleRenderTexture(cmd, styleIndex, targetDescriptor.width, targetDescriptor.height);
-                            hasBeenInitialized[blendStyleIndex] = true;
-                        }
-                    }
-                    context.ExecuteCommandBuffer(cmd);
 
                     // Some renderers override their sorting layer value with short.MinValue or short.MaxValue.
                     // When drawing the first sorting layer, we should include the range from short.MinValue to layerValue.
@@ -125,6 +113,18 @@ namespace UnityEngine.Experimental.Rendering.Universal
                     Light2D.LightStats lightStats;
                     lightStats = Light2D.GetLightStatsByLayer(layerToRender);
 
+                    // Allocate our blend style textures
+                    cmd.Clear();
+                    for (int blendStyleIndex = 0; blendStyleIndex < blendStylesCount; blendStyleIndex++)
+                    {
+                        uint blendStyleMask = (uint)(1 << blendStyleIndex);
+                        if ((lightStats.blendStylesUsed & blendStyleMask) > 0 && !hasBeenInitialized[blendStyleIndex])
+                        {
+                            RendererLighting.CreateBlendStyleRenderTexture(cmd, blendStyleIndex, targetDescriptor.width, targetDescriptor.height);
+                            hasBeenInitialized[blendStyleIndex] = true;
+                        }
+                    }
+                    context.ExecuteCommandBuffer(cmd);
 
 
                     // Start Rendering

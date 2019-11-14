@@ -28,7 +28,6 @@ namespace UnityEditor.Experimental.Rendering.Universal
 
         struct LightBlendStyleProps
         {
-            public SerializedProperty enabled;
             public SerializedProperty name;
             public SerializedProperty maskTextureChannel;
             public SerializedProperty renderTextureScale;
@@ -55,11 +54,11 @@ namespace UnityEditor.Experimental.Rendering.Universal
         int GetNumberOfUsedBlendingLayers(Renderer2DData rendererData)
         {
             int count = 0;
-            foreach (var lightBlendStyle in rendererData.lightBlendStyles)
-            {
-                if (lightBlendStyle.enabled)
-                    count++;
-            }
+            //foreach (var lightBlendStyle in rendererData.lightBlendStyles)
+            //{
+            //    if (lightBlendStyle.enabled)
+            //        count++;
+            //}
 
             return count;
         }
@@ -67,11 +66,11 @@ namespace UnityEditor.Experimental.Rendering.Universal
         int GetBlendingModesUsed(Renderer2DData rendererData)
         {
             int modesUsed = 0;
-            foreach (var lightBlendStyle in rendererData.lightBlendStyles)
-            {
-                if (lightBlendStyle.enabled)
-                    modesUsed |= 1 << (int)lightBlendStyle.blendMode;
-            }
+            //foreach (var lightBlendStyle in rendererData.lightBlendStyles)
+            //{
+            //    if (lightBlendStyle.enabled)
+            //        modesUsed |= 1 << (int)lightBlendStyle.blendMode;
+            //}
 
             return modesUsed;
         }
@@ -107,7 +106,6 @@ namespace UnityEditor.Experimental.Rendering.Universal
                 SerializedProperty blendStyleProp = m_LightBlendStyles.GetArrayElementAtIndex(i);
                 ref LightBlendStyleProps props = ref m_LightBlendStylePropsArray[i];
 
-                props.enabled = blendStyleProp.FindPropertyRelative("enabled");
                 props.name = blendStyleProp.FindPropertyRelative("name");
                 props.maskTextureChannel = blendStyleProp.FindPropertyRelative("maskTextureChannel");
                 props.renderTextureScale = blendStyleProp.FindPropertyRelative("renderTextureScale");
@@ -159,12 +157,10 @@ namespace UnityEditor.Experimental.Rendering.Universal
                 
                 EditorGUILayout.BeginHorizontal();
                 blendStyleProp.isExpanded = EditorGUILayout.Foldout(blendStyleProp.isExpanded, props.name.stringValue, true);
-                props.enabled.boolValue = EditorGUILayout.Toggle(props.enabled.boolValue);
                 EditorGUILayout.EndHorizontal();
 
                 if (blendStyleProp.isExpanded)
                 {
-                    EditorGUI.BeginDisabledGroup(!props.enabled.boolValue);
                     EditorGUI.indentLevel++;
 
                     EditorGUILayout.PropertyField(props.name, Styles.name);
@@ -197,7 +193,6 @@ namespace UnityEditor.Experimental.Rendering.Universal
                     }
 
                     EditorGUI.indentLevel--;
-                    EditorGUI.EndDisabledGroup();
                 }
             }
 
