@@ -9,7 +9,7 @@ namespace UnityEditor.Experimental.Rendering.Universal
         class Styles
         {
             public static readonly GUIContent transparencySortMode = EditorGUIUtility.TrTextContent("Transparency Sort Mode", "Default sorting mode used for transparent objects");
-            public static readonly GUIContent transparencySortAxis = EditorGUIUtility.TrIconContent("Transparency Sort Axis", "Axis used for custom axis sorting mode");
+            public static readonly GUIContent transparencySortAxis = EditorGUIUtility.TrTextContent("Transparency Sort Axis", "Axis used for custom axis sorting mode");
             public static readonly GUIContent hdrEmulationScale = EditorGUIUtility.TrTextContent("HDR Emulation Scale", "Describes the scaling used by lighting to remap dynamic range between LDR and HDR");
             public static readonly GUIContent lightBlendStyles = EditorGUIUtility.TrTextContent("Light Blend Styles", "A Light Blend Style is a collection of properties that describe a particular way of applying lighting.");
             public static readonly GUIContent defaultMaterialType = EditorGUIUtility.TrTextContent("Default Material Type", "Material to use when adding new objects to a scene");
@@ -193,6 +193,7 @@ namespace UnityEditor.Experimental.Rendering.Universal
                     }
 
                     EditorGUI.indentLevel--;
+                    EditorGUI.EndDisabledGroup();
                 }
             }
 
