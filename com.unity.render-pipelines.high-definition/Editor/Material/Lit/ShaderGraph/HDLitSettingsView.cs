@@ -253,6 +253,15 @@ namespace UnityEditor.Rendering.HighDefinition.Drawing
                 });
             });
 
+            ps.Add(new PropertyRow(CreateLabel("Space of Normal Drop-Off", indentLevel)), (row) =>
+            {
+                row.Add(new EnumField(SpaceDropOffMode.TangentSpace), (field) =>
+                {
+                    field.value = m_Node.spaceDropOffMode;
+                    field.RegisterValueChangedCallback(ChangeSpaceOfNormalDropOffMode);
+                });
+            });
+
             ps.Add(new PropertyRow(CreateLabel("Alpha Clipping", indentLevel)), (row) =>
             {
                 row.Add(new Toggle(), (toggle) =>
@@ -414,6 +423,15 @@ namespace UnityEditor.Rendering.HighDefinition.Drawing
 
             m_Node.owner.owner.RegisterCompleteObjectUndo("Double-Sided Mode Change");
             m_Node.doubleSidedMode = (DoubleSidedMode)evt.newValue;
+        }
+
+        void ChangeSpaceOfNormalDropOffMode(ChangeEvent<Enum> evt)
+        {
+              if (Equals(m_Node.spaceDropOffMode, evt.newValue))
+                return;
+
+            m_Node.owner.owner.RegisterCompleteObjectUndo("Normal Space Drop-Off Mode Change");
+            m_Node.spaceDropOffMode = (SpaceDropOffMode)evt.newValue;
         }
 
         void ChangeMaterialType(ChangeEvent<Enum> evt)

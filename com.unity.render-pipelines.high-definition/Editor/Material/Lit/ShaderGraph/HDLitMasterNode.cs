@@ -466,6 +466,22 @@ namespace UnityEditor.Rendering.HighDefinition
         }
 
         [SerializeField]
+        SpaceDropOffMode m_SpaceDropOffMode;
+        public SpaceDropOffMode spaceDropOffMode
+        {
+            get { return m_SpaceDropOffMode; }
+            set
+            {
+                if (m_SpaceDropOffMode == value)
+                    return;
+
+                m_SpaceDropOffMode = value;
+                Dirty(ModificationScope.Graph);
+            }
+        }
+
+
+        [SerializeField]
         MaterialType m_MaterialType;
 
         public MaterialType materialType
