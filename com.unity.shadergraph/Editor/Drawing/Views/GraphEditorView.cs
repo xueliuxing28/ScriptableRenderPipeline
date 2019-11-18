@@ -214,8 +214,8 @@ namespace UnityEditor.ShaderGraph.Drawing
                             m_UserViewSettings.colorProvider = m_ColorManager.activeProviderName;
                         }
 
-                        m_MasterPreviewView.visible = m_UserViewSettings.isPreviewVisible;
-                        m_BlackboardProvider.blackboard.visible = m_UserViewSettings.isBlackboardVisible;
+                        ToggleSubWindows();
+
                         var serializedViewSettings = JsonUtility.ToJson(m_UserViewSettings);
                         EditorUserSettings.SetConfigValue(k_UserViewSettings, serializedViewSettings);
                     }
@@ -238,9 +238,9 @@ namespace UnityEditor.ShaderGraph.Drawing
                 m_BlackboardProvider = new BlackboardProvider(graph);
                 m_GraphView.Add(m_BlackboardProvider.blackboard);
 
-                m_BlackboardProvider.blackboard.visible = m_UserViewSettings.isBlackboardVisible;
-
                 CreateMasterPreview();
+
+                ToggleSubWindows();
 
                 m_GraphView.graphViewChanged = GraphViewChanged;
 
@@ -280,6 +280,19 @@ namespace UnityEditor.ShaderGraph.Drawing
             Add(content);
         }
 
+        void ToggleSubWindows()
+        {
+            if (m_UserViewSettings.isBlackboardVisible)
+                m_GraphView.Insert(m_GraphView.childCount, m_BlackboardProvider.blackboard);
+            else
+                m_BlackboardProvider.blackboard.RemoveFromHierarchy();
+
+            if (m_UserViewSettings.isPreviewVisible)
+                m_GraphView.Insert(m_GraphView.childCount, m_MasterPreviewView);
+            else
+                m_MasterPreviewView.RemoveFromHierarchy();
+        }
+
         Action<Group, string> m_GraphViewGroupTitleChanged;
         Action<Group, IEnumerable<GraphElement>> m_GraphViewElementsAddedToGroup;
         Action<Group, IEnumerable<GraphElement>> m_GraphViewElementsRemovedFromGroup;
@@ -308,7 +321,6 @@ namespace UnityEditor.ShaderGraph.Drawing
 
             masterPreviewViewDraggable.OnDragFinished += UpdateSerializedWindowLayout;
             m_MasterPreviewView.previewResizeBorderFrame.OnResizeFinished += UpdateSerializedWindowLayout;
-            m_MasterPreviewView.visible = m_UserViewSettings.isPreviewVisible;
         }
 
         void OnKeyDown(KeyDownEvent evt)
