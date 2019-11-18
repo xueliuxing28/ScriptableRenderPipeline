@@ -466,17 +466,18 @@ namespace UnityEditor.Rendering.HighDefinition
         }
 
         [SerializeField]
-        SpaceDropOffMode m_SpaceDropOffMode;
-        public SpaceDropOffMode spaceDropOffMode
+        NormalDropOffSpace m_NormalDropOffSpace;
+        public NormalDropOffSpace normalDropOffSpace
         {
-            get { return m_SpaceDropOffMode; }
+            get { return m_NormalDropOffSpace; }
             set
             {
-                if (m_SpaceDropOffMode == value)
+                if (m_NormalDropOffSpace == value)
                     return;
 
-                m_SpaceDropOffMode = value;
-                Dirty(ModificationScope.Graph);
+                m_NormalDropOffSpace = value;
+                UpdateNodeAfterDeserialization();
+                Dirty(ModificationScope.Topological);
             }
         }
 
@@ -806,9 +807,22 @@ namespace UnityEditor.Rendering.HighDefinition
                 AddSlot(new ColorRGBMaterialSlot(AlbedoSlotId, AlbedoDisplaySlotName, AlbedoSlotName, SlotType.Input, Color.grey.gamma, ColorMode.Default, ShaderStageCapability.Fragment));
                 validSlots.Add(AlbedoSlotId);
             }
-            if (MaterialTypeUsesSlotMask(SlotMask.Normal))
+            if (MaterialTypeUsesSlotMask(SlotMask.Normal) && m_NormalDropOffSpace == NormalDropOffSpace.Tangent)
             {
+                RemoveSlot(NormalSlotId);
                 AddSlot(new NormalMaterialSlot(NormalSlotId, NormalSlotName, NormalSlotName, CoordinateSpace.Tangent, ShaderStageCapability.Fragment));
+                validSlots.Add(NormalSlotId);
+            }
+            if (MaterialTypeUsesSlotMask(SlotMask.Normal) && m_NormalDropOffSpace == NormalDropOffSpace.Object)
+            {
+                RemoveSlot(NormalSlotId);
+                AddSlot(new NormalMaterialSlot(NormalSlotId, NormalSlotName, NormalSlotName, CoordinateSpace.Object, ShaderStageCapability.Fragment));
+                validSlots.Add(NormalSlotId);
+            }
+            if (MaterialTypeUsesSlotMask(SlotMask.Normal) && m_NormalDropOffSpace == NormalDropOffSpace.World)
+            {
+                RemoveSlot(NormalSlotId);
+                AddSlot(new NormalMaterialSlot(NormalSlotId, NormalSlotName, NormalSlotName, CoordinateSpace.World, ShaderStageCapability.Fragment));
                 validSlots.Add(NormalSlotId);
             }
             if (MaterialTypeUsesSlotMask(SlotMask.BentNormal))

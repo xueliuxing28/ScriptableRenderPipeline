@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEditor.ShaderGraph;
+using UnityEditor.ShaderGraph.Internal;
 using UnityEngine.Rendering.HighDefinition;
 using UnityEngine.Rendering;
 using Data.Util;
@@ -891,19 +892,19 @@ namespace UnityEditor.Rendering.HighDefinition
                 }
             }
 
-            switch(masterNode.spaceDropOffMode)
+            switch(masterNode.normalDropOffSpace)
             {
-                case SpaceDropOffMode.TangentSpace:
+                case NormalDropOffSpace.Tangent:
                     baseActiveFields.AddAll("NormalDropOffTS");
                     break;
-                case SpaceDropOffMode.ObjectSpace:
+                case NormalDropOffSpace.Object:
                     baseActiveFields.AddAll("NormalDropOffOS");
                     break;
-                case SpaceDropOffMode.WorldSpace:
+                case NormalDropOffSpace.World:
                     baseActiveFields.AddAll("NormalDropOffWS");
                     break;
                 default:
-                    UnityEngine.Debug.LogError("Unknown normal drop off space: " + masterNode.spaceDropOffMode);
+                    UnityEngine.Debug.LogError("Unknown normal drop off space: " + masterNode.normalDropOffSpace);
                     break;
             }
 

@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using UnityEditor.Graphing.Util;
 using UnityEditor.ShaderGraph;
+using UnityEditor.ShaderGraph.Internal;
 using UnityEditor.ShaderGraph.Drawing;
 using UnityEditor.ShaderGraph.Drawing.Controls;
 using UnityEngine.Rendering.HighDefinition;
@@ -253,11 +254,11 @@ namespace UnityEditor.Rendering.HighDefinition.Drawing
                 });
             });
 
-            ps.Add(new PropertyRow(CreateLabel("Space of Normal Drop-Off", indentLevel)), (row) =>
+            ps.Add(new PropertyRow(CreateLabel("Fragment Normal Space", indentLevel)), (row) =>
             {
-                row.Add(new EnumField(SpaceDropOffMode.TangentSpace), (field) =>
+                row.Add(new EnumField(NormalDropOffSpace.Tangent), (field) =>
                 {
-                    field.value = m_Node.spaceDropOffMode;
+                    field.value = m_Node.normalDropOffSpace;
                     field.RegisterValueChangedCallback(ChangeSpaceOfNormalDropOffMode);
                 });
             });
@@ -427,11 +428,11 @@ namespace UnityEditor.Rendering.HighDefinition.Drawing
 
         void ChangeSpaceOfNormalDropOffMode(ChangeEvent<Enum> evt)
         {
-              if (Equals(m_Node.spaceDropOffMode, evt.newValue))
+              if (Equals(m_Node.normalDropOffSpace, evt.newValue))
                 return;
 
             m_Node.owner.owner.RegisterCompleteObjectUndo("Normal Space Drop-Off Mode Change");
-            m_Node.spaceDropOffMode = (SpaceDropOffMode)evt.newValue;
+            m_Node.normalDropOffSpace = (NormalDropOffSpace)evt.newValue;
         }
 
         void ChangeMaterialType(ChangeEvent<Enum> evt)
