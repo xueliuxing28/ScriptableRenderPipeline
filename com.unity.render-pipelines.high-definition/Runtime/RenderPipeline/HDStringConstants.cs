@@ -244,6 +244,7 @@ namespace UnityEngine.Rendering.HighDefinition
         public static readonly int _ContactShadowParamsParameters2 = Shader.PropertyToID("_ContactShadowParamsParameters2");
         public static readonly int _DirectionalContactShadowSampleCount = Shader.PropertyToID("_SampleCount");
         public static readonly int _MicroShadowOpacity = Shader.PropertyToID("_MicroShadowOpacity");
+        public static readonly int _DirectionalTransmissionMultiplier = Shader.PropertyToID("_DirectionalTransmissionMultiplier");
         public static readonly int _ShadowClipPlanes = Shader.PropertyToID("_ShadowClipPlanes");
 
         public static readonly int _StencilMask = Shader.PropertyToID("_StencilMask");
@@ -259,6 +260,9 @@ namespace UnityEngine.Rendering.HighDefinition
 
         public static readonly int _SSSHTile = Shader.PropertyToID("_SSSHTile");
         public static readonly int _StencilTexture = Shader.PropertyToID("_StencilTexture");
+
+        // Used in the stencil resolve pass
+        public static readonly int _OutputStencilBuffer = Shader.PropertyToID("_OutputStencilBuffer");
 
         // all decal properties
         public static readonly int _NormalToWorldID = Shader.PropertyToID("_NormalToWorld");
@@ -450,6 +454,12 @@ namespace UnityEngine.Rendering.HighDefinition
         public static readonly int _Cubemap = Shader.PropertyToID("_Cubemap");
         public static readonly int _InvOmegaP = Shader.PropertyToID("_InvOmegaP");
         public static readonly int _SkyParam = Shader.PropertyToID("_SkyParam");
+        public static readonly int _BackplateParameters0 = Shader.PropertyToID("_BackplateParameters0");
+        public static readonly int _BackplateParameters1 = Shader.PropertyToID("_BackplateParameters1");
+        public static readonly int _BackplateParameters2 = Shader.PropertyToID("_BackplateParameters2");
+        public static readonly int _BackplateShadowTint = Shader.PropertyToID("_BackplateShadowTint");
+        public static readonly int _BackplateShadowFilter = Shader.PropertyToID("_BackplateShadowFilter");
+        public static readonly int _SkyIntensity = Shader.PropertyToID("_SkyIntensity");
         public static readonly int _PixelCoordToViewDirWS = Shader.PropertyToID("_PixelCoordToViewDirWS");
 
         public static readonly int _Size = Shader.PropertyToID("_Size");
@@ -593,6 +603,7 @@ namespace UnityEngine.Rendering.HighDefinition
         public static readonly int _DenoiseOutputTextureRW          = Shader.PropertyToID("_DenoiseOutputTextureRW");
         public static readonly int _HalfResolutionFilter            = Shader.PropertyToID("_HalfResolutionFilter");
         public static readonly int _DenoisingHistorySlot            = Shader.PropertyToID("_DenoisingHistorySlot");
+        public static readonly int _HistoryValidity                 = Shader.PropertyToID("_HistoryValidity"); 
 
         // Reflections
         public static readonly int _ReflectionHistorybufferRW       = Shader.PropertyToID("_ReflectionHistorybufferRW");
@@ -898,6 +909,7 @@ namespace UnityEngine.Rendering.HighDefinition
         public const string kUVDetailsMappingMask = "_UVDetailsMappingMask";
         public const string kReceivesSSR = "_ReceivesSSR";
         public const string kAddPrecomputedVelocity = "_AddPrecomputedVelocity";
+        public const string kShadowMatteFilter = "_ShadowMatteFilter";
 
         public static readonly Color[] kLayerColors =
         {
