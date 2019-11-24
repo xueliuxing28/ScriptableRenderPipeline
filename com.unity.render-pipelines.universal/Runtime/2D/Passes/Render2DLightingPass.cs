@@ -8,7 +8,7 @@ namespace UnityEngine.Experimental.Rendering.Universal
     internal class Render2DLightingPass : ScriptableRenderPass
     {
         static SortingLayer[] s_SortingLayers;
-        Renderer2DData m_RendererData;
+        Renderer2DData m_Renderer2DData;
         static readonly ShaderTagId k_CombinedRenderingPassNameOld = new ShaderTagId("Lightweight2D");
         static readonly ShaderTagId k_CombinedRenderingPassName = new ShaderTagId("Universal2D");
         static readonly ShaderTagId k_NormalsRenderingPassName = new ShaderTagId("NormalsRendering");
@@ -23,7 +23,7 @@ namespace UnityEngine.Experimental.Rendering.Universal
                 s_SortingLayers = SortingLayer.layers;
 
             m_BlackTexture = rendererData.blackTexture;
-            m_RendererData = rendererData;
+            m_Renderer2DData = rendererData;
         }
 
         public void SetTransparencySortingMode(Camera camera, out TransparencySortMode sortingMode, out Vector3 sortingAxis)
@@ -34,8 +34,8 @@ namespace UnityEngine.Experimental.Rendering.Universal
             if (camera.transparencySortMode == TransparencySortMode.Default)
             {
                 TransparencySortMode defaultTransparencySortMode = camera.orthographic ? TransparencySortMode.Orthographic : TransparencySortMode.Perspective;
-                camera.transparencySortMode = m_RendererData.transparencySortMode == TransparencySortMode.Default ? defaultTransparencySortMode : m_RendererData.transparencySortMode;
-                camera.transparencySortAxis = m_RendererData.transparencySortAxis;
+                camera.transparencySortMode = m_Renderer2DData.transparencySortMode == TransparencySortMode.Default ? defaultTransparencySortMode : m_Renderer2DData.transparencySortMode;
+                camera.transparencySortAxis = m_Renderer2DData.transparencySortAxis;
             }
         }
 
@@ -75,16 +75,15 @@ namespace UnityEngine.Experimental.Rendering.Universal
             bool isSceneLit = Light2D.IsSceneLit(camera);
             if (isSceneLit)
             {
-                RendererLighting.Setup(m_RendererData);
+                RendererLighting.Setup(renderingData, m_Renderer2DData);
 
                 CommandBuffer cmd = CommandBufferPool.Get("Render 2D Lighting");
                 cmd.Clear();
 
-                ref var targetDescriptor = ref renderingData.cameraData.cameraTargetDescriptor;
-                RendererLighting.CreateNormalMapRenderTexture(cmd, targetDescriptor.width, targetDescriptor.height);
+                RendererLighting.CreateNormalMapRenderTexture(cmd);
 
-                cmd.SetGlobalFloat("_HDREmulationScale", m_RendererData.hdrEmulationScale);
-                cmd.SetGlobalFloat("_InverseHDREmulationScale", 1.0f / m_RendererData.hdrEmulationScale);
+                cmd.SetGlobalFloat("_HDREmulationScale", m_Renderer2DData.hdrEmulationScale);
+                cmd.SetGlobalFloat("_InverseHDREmulationScale", 1.0f / m_Renderer2DData.hdrEmulationScale);
                 cmd.SetGlobalFloat("_UseSceneLighting", isLitView ? 1.0f : 0.0f);
                 RendererLighting.SetShapeLightShaderGlobals(cmd);
 
@@ -120,7 +119,7 @@ namespace UnityEngine.Experimental.Rendering.Universal
                         uint blendStyleMask = (uint)(1 << blendStyleIndex);
                         if ((lightStats.blendStylesUsed & blendStyleMask) > 0 && !hasBeenInitialized[blendStyleIndex])
                         {
-                            RendererLighting.CreateBlendStyleRenderTexture(cmd, blendStyleIndex, targetDescriptor.width, targetDescriptor.height);
+                            RendererLighting.CreateBlendStyleRenderTexture(cmd, blendStyleIndex);
                             hasBeenInitialized[blendStyleIndex] = true;
                         }
                     }
