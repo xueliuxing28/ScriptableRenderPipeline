@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added support for additional Directional Lights. The amount of additional Directional Lights is limited by the maximum Per-object Lights in the Render Pipeline Asset.
 - Added default implementations of OnPreprocessMaterialDescription for FBX, Obj, Sketchup and 3DS file formats.
 - Added Transparency Sort Mode and Transparency Sort Axis to 2DRendererData.
-- Added support for default material to 2DRendererData.
+- Added support for a user defined default material to 2DRendererData.
 
 ### Changed
 - Moved the icon that indicates the type of a Light 2D from the Inspector header to the Light Type field.
@@ -53,6 +53,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fixed Renderer Features UI tooltips. [case 1191901](https://issuetracker.unity3d.com/issues/forward-renderers-render-objects-layer-mask-tooltip-is-incorrect-and-contains-a-typo)
 - Fixed multiple issues where Shader Graph shaders failed to build for XR in the Universal RP.
 - Fixed an issue when using the 2D Renderer where some types of renderers would not be assigned the correct material.
+- Fixed inconsistent lighting between the forward renderer and the deferred renderer, that was caused by a missing normalize operation on vertex normals on some speedtree shader variants.
+- Fixed issue where XR Multiview failed to render when using URP Shader Graph Shaders
 
 ## [7.1.1] - 2019-09-05
 ### Upgrade Guide
