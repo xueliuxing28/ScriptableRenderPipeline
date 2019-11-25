@@ -113,8 +113,7 @@ namespace UnityEngine.Experimental.Rendering.Universal
             cmd.GetTemporaryRT(s_NormalsTarget.id, descriptor, FilterMode.Bilinear);
         }
 
-
-        static void CreateRenderTextureByBlendStyleIndex(CommandBuffer cmd, int blendStyleIndex, int id)
+        static public void CreateBlendStyleRenderTexture(CommandBuffer cmd, int blendStyleIndex)
         {
             if (!s_HasSetupRenderTextureFormatToUse)
             {
@@ -138,19 +137,30 @@ namespace UnityEngine.Experimental.Rendering.Universal
             descriptor.depthBufferBits = 0;
             descriptor.msaaSamples = 1;
             descriptor.dimension = TextureDimension.Tex2D;
-            cmd.GetTemporaryRT(id, descriptor, FilterMode.Bilinear);
-        }
 
-        static public void CreateBlendStyleRenderTexture(CommandBuffer cmd, int blendStyleIndex)
-        {
-            CreateRenderTextureByBlendStyleIndex(cmd, blendStyleIndex, s_LightRenderTargets[blendStyleIndex].id);
+            cmd.GetTemporaryRT(s_LightRenderTargets[blendStyleIndex].id, descriptor, FilterMode.Bilinear);
+
             cmd.EnableShaderKeyword(k_UseBlendStyleKeywords[blendStyleIndex]);
             s_LightRenderTargetsDirty[blendStyleIndex] = true;
         }
 
         static public void CreateShadowRenderTexture(CommandBuffer cmd, int blendStyleIndex)
         {
-            CreateRenderTextureByBlendStyleIndex(cmd, blendStyleIndex, s_ShadowsRenderTarget.id);
+            float renderTextureScale = Mathf.Clamp(s_BlendStyles[blendStyleIndex].renderTextureScale, 0.01f, 1.0f);
+            int width = (int)(s_RenderingData.cameraData.cameraTargetDescriptor.width * renderTextureScale);
+            int height = (int)(s_RenderingData.cameraData.cameraTargetDescriptor.height * renderTextureScale);
+
+            RenderTextureDescriptor descriptor = new RenderTextureDescriptor(width, height);
+            descriptor.colorFormat = RenderTextureFormat.ARGB32;
+            descriptor.sRGB = false;
+            descriptor.useMipMap = false;
+            descriptor.autoGenerateMips = false;
+            descriptor.depthBufferBits = 24;
+            descriptor.graphicsFormat = GraphicsFormat.R8G8B8A8_UNorm;
+            descriptor.msaaSamples = 1;
+            descriptor.dimension = TextureDimension.Tex2D;
+
+            cmd.GetTemporaryRT(s_ShadowsRenderTarget.id, descriptor, FilterMode.Bilinear);
         }
 
         static public void ReleaseShadowRenderTexture(CommandBuffer cmd)
