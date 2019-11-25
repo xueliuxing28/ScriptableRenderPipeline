@@ -179,6 +179,7 @@ namespace UnityEngine.Experimental.Rendering.Universal
                 cmd.SetGlobalTexture("_ShapeLightTexture2", m_BlackTexture);
                 cmd.SetGlobalTexture("_ShapeLightTexture3", m_BlackTexture);
                 cmd.SetGlobalFloat("_UseSceneLighting", isLitView ? 1.0f : 0.0f);
+                cmd.EnableShaderKeyword("USE_SHAPE_LIGHT_TYPE_0");
                 context.ExecuteCommandBuffer(cmd);
                 CommandBufferPool.Release(cmd);
 
