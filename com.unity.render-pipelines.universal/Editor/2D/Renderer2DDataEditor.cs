@@ -51,30 +51,6 @@ namespace UnityEditor.Experimental.Rendering.Universal
         Renderer2DData m_Renderer2DData;
         bool m_WasModified;
 
-        int GetNumberOfUsedBlendingLayers(Renderer2DData rendererData)
-        {
-            int count = 0;
-            //foreach (var lightBlendStyle in rendererData.lightBlendStyles)
-            //{
-            //    if (lightBlendStyle.enabled)
-            //        count++;
-            //}
-
-            return count;
-        }
-
-        int GetBlendingModesUsed(Renderer2DData rendererData)
-        {
-            int modesUsed = 0;
-            //foreach (var lightBlendStyle in rendererData.lightBlendStyles)
-            //{
-            //    if (lightBlendStyle.enabled)
-            //        modesUsed |= 1 << (int)lightBlendStyle.blendMode;
-            //}
-
-            return modesUsed;
-        }
-
         void SendModifiedAnalytics(Analytics.IAnalytics analytics)
         {
             if (m_WasModified)
@@ -82,8 +58,8 @@ namespace UnityEditor.Experimental.Rendering.Universal
                 Analytics.RendererAssetData modifiedData = new Analytics.RendererAssetData();
                 modifiedData.instance_id = m_Renderer2DData.GetInstanceID();
                 modifiedData.was_create_event = false;
-                modifiedData.blending_layers_count = GetNumberOfUsedBlendingLayers(m_Renderer2DData);
-                modifiedData.blending_modes_used = GetBlendingModesUsed(m_Renderer2DData);
+                modifiedData.blending_layers_count = 0;
+                modifiedData.blending_modes_used = 0;
                 analytics.SendData(Analytics.AnalyticsDataTypes.k_Renderer2DDataString, modifiedData);
             }
         }
