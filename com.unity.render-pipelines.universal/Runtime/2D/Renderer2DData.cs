@@ -37,6 +37,7 @@ namespace UnityEngine.Experimental.Rendering.Universal
         [SerializeField]
         bool m_UseDepthStencilBuffer = true;
 
+#if UNITY_EDITOR
         [SerializeField]
         Renderer2DDefaultMaterialType m_DefaultMaterialType = Renderer2DDefaultMaterialType.Lit;
 
@@ -48,6 +49,7 @@ namespace UnityEngine.Experimental.Rendering.Universal
 
         [SerializeField, Reload("Runtime/Materials/Sprite-Unlit-Default.mat")]
         Material m_DefaultUnlitMaterial = null;
+#endif
 
         [SerializeField, Reload("Shaders/2D/Light2D-Shape.shader")]
         Shader m_ShapeLightShader = null;
@@ -167,10 +169,8 @@ namespace UnityEngine.Experimental.Rendering.Universal
                 EditorPrefs.SetString(suggestedNamesKey, suggestedNamesPrefs);
             }
 
-#if UNITY_EDITOR
             ResourceReloader.ReloadAllNullIn(this, UniversalRenderPipelineAsset.packagePath);
             ResourceReloader.ReloadAllNullIn(m_PostProcessData, UniversalRenderPipelineAsset.packagePath);
-#endif
         }
 
         internal override Material GetDefaultMaterial(DefaultMaterialType materialType)
