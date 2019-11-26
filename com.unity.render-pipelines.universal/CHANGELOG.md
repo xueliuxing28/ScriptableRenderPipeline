@@ -55,6 +55,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fixed an issue when using the 2D Renderer where some types of renderers would not be assigned the correct material.
 - Fixed inconsistent lighting between the forward renderer and the deferred renderer, that was caused by a missing normalize operation on vertex normals on some speedtree shader variants.
 - Fixed issue where XR Multiview failed to render when using URP Shader Graph Shaders
+- Fixed an issue where viewport aspect ratio was wrong when using the Stretch Fill option of the Pixel Perfect Camera. [case 1188695](https://issuetracker.unity3d.com/issues/pixel-perfect-camera-component-does-not-maintain-the-aspect-ratio-when-the-stretch-fill-is-enabled)
 
 ## [7.1.1] - 2019-09-05
 ### Upgrade Guide
