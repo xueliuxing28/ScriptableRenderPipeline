@@ -100,8 +100,8 @@ namespace UnityEngine.Experimental.Rendering.Universal
 #if UNITY_EDITOR
             if (!Application.isPlaying)
             {
-                ResourceReloader.ReloadAllNullIn(this, UniversalRenderPipelineAsset.packagePath);
-                ResourceReloader.ReloadAllNullIn(m_PostProcessData, UniversalRenderPipelineAsset.packagePath);
+                ResourceReloader.TryReloadAllNullIn(this, UniversalRenderPipelineAsset.packagePath);
+                ResourceReloader.TryReloadAllNullIn(m_PostProcessData, UniversalRenderPipelineAsset.packagePath);
             }
 #endif
             return new Renderer2D(this);
@@ -169,8 +169,8 @@ namespace UnityEngine.Experimental.Rendering.Universal
                 EditorPrefs.SetString(suggestedNamesKey, suggestedNamesPrefs);
             }
 
-            ResourceReloader.ReloadAllNullIn(this, UniversalRenderPipelineAsset.packagePath);
-            ResourceReloader.ReloadAllNullIn(m_PostProcessData, UniversalRenderPipelineAsset.packagePath);
+            ResourceReloader.TryReloadAllNullIn(this, UniversalRenderPipelineAsset.packagePath);
+            ResourceReloader.TryReloadAllNullIn(m_PostProcessData, UniversalRenderPipelineAsset.packagePath);
         }
 
         internal override Material GetDefaultMaterial(DefaultMaterialType materialType)
