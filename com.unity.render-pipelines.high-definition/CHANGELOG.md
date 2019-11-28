@@ -261,6 +261,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Change how method for specular occlusions is decided on inspector shader (Lit, LitTesselation, LayeredLit, LayeredLitTessellation)
 - Unlocked SSS, SSR, Motion Vectors and Distortion frame settings for reflections probes.
 - Changed the ownership of temporary ray tracing buffers to reduce the memory footprint.
+- Shader use for Runtime Debug Display are now correctly stripper when doing a release build
 
 ## [7.1.1] - 2019-09-05
 
