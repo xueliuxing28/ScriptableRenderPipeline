@@ -3,6 +3,8 @@ editors:
     cmd: -u 2019.3/staging
   - version: fast-2019.3
     cmd: -u 2019.3/staging --fast
+  - version: CUSTOM-REVISION
+    cmd: -u %CUSTOM_REVISION%
 projects:
   - name: Universal
     folder: UniversalGraphicsTest
@@ -39,7 +41,7 @@ all_project_ci_{{ editor.version }}:
     image: cds-ops/ubuntu-18.04-agent:latest
     flavor: b1.small
   commands:
-  - dir
+    - dir
   dependencies:
   {% for project in projects %}
     - path: .yamato/upm-ci-{{ project.name | downcase }}.yml#All_{{ project.name }}_{{ editor.version }}
@@ -54,7 +56,7 @@ all_project_ci_nightly:
     image: cds-ops/ubuntu-18.04-agent:latest
     flavor: b1.small
   commands:
-  - dir
+    - dir
   dependencies:
   {% for project in projects %}
     - path: .yamato/upm-ci-{{ project.name | downcase }}.yml#All_{{ project.name }}_2019.3
@@ -70,15 +72,18 @@ all_project_ci_nightly:
   artifacts:
     logs:
       paths:
-        - "**/test-results/**"
-        
+        - "**/test-results/**"       
 
 {% for testplatform in testplatforms %} 
 {% for editor in editors %}     
 smoke_test_{{ testplatform.name }}_{{ editor.version }}:
   name: SRP Smoke Test - {{ testplatform.name }}_{{ editor.version }}
   agent:
+    {% if testplatform.name == "editmode" %}
+    type: Unity::VM
+    {% else %}
     type: Unity::VM::GPU
+    {% endif %}
     image: sdet/gamecode_win10:stable
     flavor: b1.large
   commands:
@@ -106,7 +111,7 @@ all_smoke_tests:
     image: cds-ops/ubuntu-18.04-agent:latest
     flavor: b1.small
   commands:
-  - dir
+    - dir
   dependencies:
   {% for testplatform in testplatforms %} 
   {% for editor in editors %}
@@ -117,3 +122,27 @@ all_smoke_tests:
     logs:
       paths:
         - "**/test-results/**"
+
+trunk_verification:
+  name: z_(do not use) Trunk verification 
+  dependencies:
+    {% for project in projects %}  
+    {% for testplatform in testplatforms %}
+    {% if project.name == "HDRP_Standalone" %}
+    # skip
+    {% else %}
+    {% if testplatform.name == "Standalone" %}
+    # skip
+    {% else %}
+
+    {% if testplatform.name == "editmode" and project.name == "VFX_LWRP" %}
+    #skip
+    {% else %}
+    
+    - path: .yamato/upm-ci-{{ project.name | downcase }}.yml#{{ project.name }}_Windows64_DX11_{{ testplatform.name }}_CUSTOM-REVISION
+      rerun: always
+    {% endif %}
+    {% endif %}
+    {% endif %}
+    {% endfor %}
+    {% endfor %}
