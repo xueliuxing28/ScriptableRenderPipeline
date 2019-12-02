@@ -132,7 +132,10 @@ namespace UnityEngine.Rendering.Universal
             }
 
             // We only apply post-processing at the end of the stack, i.e, when we are rendering a camera that resolves rendering to camera target.
-            bool postProcessEnabled = cameraData.postProcessEnabled && renderingData.resolveFinalTarget;
+            bool applyPostProcessing = cameraData.postProcessEnabled && renderingData.resolveFinalTarget;
+
+            // We generate color LUT in the base camera only. This allows us to not break render pass execution for overlay cameras.
+            bool generateColorGradingLUT = cameraData.postProcessEnabled && cameraData.renderType == CameraRenderType.Base;
             bool isSceneViewCamera = cameraData.isSceneViewCamera;
             bool requiresDepthTexture = cameraData.requiresDepthTexture;
             bool isStereoEnabled = cameraData.isStereoEnabled;
@@ -149,7 +152,7 @@ namespace UnityEngine.Rendering.Universal
 
             // The copying of depth should normally happen after rendering skybox.
             // But if we only require it for post processing or the scene camera then we do it after rendering transparent objects
-            m_CopyDepthPass.renderPassEvent = (!requiresDepthTexture && (postProcessEnabled || isSceneViewCamera)) ? RenderPassEvent.AfterRenderingTransparents : RenderPassEvent.AfterRenderingSkybox;
+            m_CopyDepthPass.renderPassEvent = (!requiresDepthTexture && (applyPostProcessing || isSceneViewCamera)) ? RenderPassEvent.AfterRenderingTransparents : RenderPassEvent.AfterRenderingSkybox;
 
             // TODO: There's an issue in multiview and depth copy pass. Atm forcing a depth prepass on XR until we have a proper fix.
             if (isStereoEnabled && requiresDepthTexture)
@@ -208,7 +211,7 @@ namespace UnityEngine.Rendering.Universal
                 EnqueuePass(m_DepthPrepass);
             }
 
-            if (postProcessEnabled)
+            if (generateColorGradingLUT)
             {
                 m_ColorGradingLutPass.Setup(m_ColorGradingLut);
                 EnqueuePass(m_ColorGradingLutPass);
@@ -248,7 +251,7 @@ namespace UnityEngine.Rendering.Universal
             bool hasCaptureActions = renderingData.cameraData.captureActions != null && resolveFinalTarget;
             bool afterRenderExists = hasCaptureActions || hasAfterRendering;
 
-            bool requiresFinalPostProcessPass = postProcessEnabled &&
+            bool requiresFinalPostProcessPass = applyPostProcessing &&
                                      renderingData.cameraData.antialiasing == AntialiasingMode.FastApproximateAntialiasing;
 
             // if we have additional filters
@@ -257,7 +260,7 @@ namespace UnityEngine.Rendering.Universal
             {
                 bool willRenderFinalPass = (m_ActiveCameraColorAttachment != RenderTargetHandle.CameraTarget);
                 // perform post with src / dest the same
-                if (postProcessEnabled)
+                if (applyPostProcessing)
                 {
                     m_PostProcessPass.Setup(cameraTargetDescriptor, m_ActiveCameraColorAttachment, m_AfterPostProcessColor, m_ActiveCameraDepthAttachment, m_ColorGradingLut, requiresFinalPostProcessPass, !willRenderFinalPass);
                     EnqueuePass(m_PostProcessPass);
@@ -286,7 +289,7 @@ namespace UnityEngine.Rendering.Universal
             }
             else
             {
-                if (postProcessEnabled)
+                if (applyPostProcessing)
                 {
                     if (requiresFinalPostProcessPass)
                     {

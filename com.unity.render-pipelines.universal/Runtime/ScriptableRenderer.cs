@@ -167,7 +167,7 @@ namespace UnityEngine.Rendering.Universal
         }
 
         /// <summary>
-        /// Called upon finishing camera rendering. You can release any resources created on setup here.
+        /// Called upon finishing rendering the camera stack. You can release any resources created by the renderer here.
         /// </summary>
         /// <param name="cmd"></param>
         public virtual void FinishRendering(CommandBuffer cmd)
@@ -538,8 +538,12 @@ namespace UnityEngine.Rendering.Universal
             for (int i = 0; i < m_ActiveRenderPassQueue.Count; ++i)
                 m_ActiveRenderPassQueue[i].FrameCleanup(cmd);
 
+            // Happens when rendering the last camera in the camera stack.
             if (resolveFinalTarget)
             {
+                for (int i = 0; i < m_ActiveRenderPassQueue.Count; ++i)
+                    m_ActiveRenderPassQueue[i].OnFinishCameraStackRendering(cmd);
+
                 m_CameraColorTarget = BuiltinRenderTextureType.CameraTarget;
                 m_CameraDepthTarget = BuiltinRenderTextureType.CameraTarget;
                 FinishRendering(cmd);
