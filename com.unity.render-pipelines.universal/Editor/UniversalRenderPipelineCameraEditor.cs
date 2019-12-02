@@ -54,6 +54,8 @@ namespace UnityEditor.Rendering.Universal
 
             public static readonly GUIContent targetTextureLabel = EditorGUIUtility.TrTextContent("Texture", "The texture to render this camera into.");
 
+            public static readonly GUIContent cameraStackNotSupportedMessage = EditorGUIUtility.TrTextContent("Camera Stacking not supported.", "The renderer used by this camera doesn't support camera stacking.");
+
             public readonly string hdrDisabledWarning = "HDR rendering is disabled in the Universal Render Pipeline asset.";
             public readonly string mssaDisabledWarning = "Anti-aliasing is disabled in the Universal Render Pipeline asset.";
 
@@ -499,6 +501,13 @@ namespace UnityEditor.Rendering.Universal
         void DrawStackSettings()
         {
             m_StackSettingsFoldout.value = EditorGUILayout.BeginFoldoutHeaderGroup(m_StackSettingsFoldout.value, Styles.stackSettingsText);
+            ScriptableRenderer.RenderingFeatures supportedRenderingFeatures = m_AdditionalCameraData?.scriptableRenderer.supportedRenderingFeatures;
+            if (supportedRenderingFeatures != null && supportedRenderingFeatures.cameraStacking == false)
+            {
+                EditorGUILayout.HelpBox("The renderer used by this camera doesn't support camera stacking. Only Base cameras will render.", MessageType.Info);
+                return;
+            }
+
             if (m_StackSettingsFoldout.value)
             {
                 m_LayerList.DoLayoutList();

@@ -21,6 +21,21 @@ namespace UnityEngine.Rendering.Universal
     /// </summary>
     [MovedFrom("UnityEngine.Rendering.LWRP")] public abstract class ScriptableRenderer
     {
+        /// <summary>
+        /// Configures the supported features for this renderer. When creating custom renderers
+        /// for Universal Render Pipeline you can choose to opt-in or out for specific features.
+        /// </summary>
+        public class RenderingFeatures
+        {
+            /// <summary>
+            /// This setting controls if the camera editor should display the camera stack category.
+            /// Renderers that don't support camera stacking will only render camera of type CameraRenderType.Base
+            /// <see cref="CameraRenderType"/>
+            /// <seealso cref="UniversalAdditionalCameraData.cameraStack"/>
+            /// </summary>
+            public bool cameraStacking { get; set; } = false;
+        }
+
         void SetShaderTimeValues(float time, float deltaTime, float smoothDeltaTime, CommandBuffer cmd = null)
         {
             // We make these parameters to mirror those described in `https://docs.unity3d.com/Manual/SL-UnityShaderVariables.html
@@ -72,6 +87,12 @@ namespace UnityEngine.Rendering.Universal
         {
             get => m_ActiveRenderPassQueue;
         }
+
+        /// <summary>
+        /// Supported rendering features by this renderer.
+        /// <see cref="SupportedRenderingFeatures"/>
+        /// </summary>
+        public RenderingFeatures supportedRenderingFeatures { get; set; } = new RenderingFeatures();
 
         static class RenderPassBlock
         {

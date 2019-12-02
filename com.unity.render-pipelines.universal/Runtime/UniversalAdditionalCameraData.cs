@@ -229,7 +229,18 @@ namespace UnityEngine.Rendering.Universal
             get
             {
                 if (renderType != CameraRenderType.Base)
+                {
+                    var camera = gameObject.GetComponent<Camera>();
+                    Debug.LogWarning(string.Format("{0}: This camera is of {1} type. Only Base cameras can have a camera stack.", camera.name, renderType));
                     return null;
+                }
+
+                if (scriptableRenderer.supportedRenderingFeatures.cameraStacking == false)
+                {
+                    var camera = gameObject.GetComponent<Camera>();
+                    Debug.LogWarning(string.Format("{0}: This camera has a ScriptableRenderer that doesn't support camera stacking. Camera stack is null.", camera.name));
+                    return null;
+                }
 
                 return m_Cameras;
             }
