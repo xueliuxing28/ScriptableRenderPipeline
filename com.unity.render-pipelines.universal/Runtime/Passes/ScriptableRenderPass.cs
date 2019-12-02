@@ -133,7 +133,7 @@ namespace UnityEngine.Rendering.Universal
         /// This method be called for all cameras in a camera stack.
         /// </summary>
         /// <param name="cmd">Use this CommandBuffer to cleanup any generated data</param>
-        public virtual void FrameCleanup()
+        public virtual void FrameCleanup(CommandBuffer cmd)
         {}
 
         /// <summary>
