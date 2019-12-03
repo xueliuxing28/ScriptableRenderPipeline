@@ -258,7 +258,8 @@ namespace UnityEngine.Rendering.Universal
                 return;
 
             List<Camera> cameraStack = baseCameraAdditionalData.cameraStack;
-            UniversalAdditionalCameraData[] cameraStackData = null;
+            // TODO: we need a solution to create a temp array for reference types to prevent GC Alloc.
+            //UniversalAdditionalCameraData[] cameraStackData = null;
 
             // We need to know the last active camera in the stack to be able to resolve
             // rendering to screen when rendering it. The last camera in the stack is not
@@ -267,26 +268,33 @@ namespace UnityEngine.Rendering.Universal
             int lastActiveOverlayCameraIndex = -1;
             if (cameraStack != null && baseCamera.cameraType == CameraType.Game)
             {
-                cameraStackData = new UniversalAdditionalCameraData[cameraStack.Count];
+                var baseCameraRendererType = baseCameraAdditionalData?.scriptableRenderer.GetType();
+                //cameraStackData = new UniversalAdditionalCameraData[cameraStack.Count];
+
                 for (int i = 0; i < cameraStack.Count; ++i)
                 {
                     Camera currCamera = cameraStack[i];
-                    cameraStackData[i] = null;
+                    //cameraStackData[i] = null;
                     if (currCamera != null && currCamera.isActiveAndEnabled)
                     {
                         var data = currCamera.GetUniversalAdditionalCameraData();
-                        if (data.renderType == CameraRenderType.Overlay)
+                        if (data.renderType != CameraRenderType.Overlay)
                         {
-                            lastActiveOverlayCameraIndex = i;
-                            cameraStackData[i] = data;
+                            Debug.LogWarning(string.Format("Stack can only contain Overlay cameras. {0} will skip rendering.", currCamera.name));
+                        }
+                        else if (data?.scriptableRenderer.GetType() != baseCameraRendererType)
+                        {
+                            Debug.LogWarning(string.Format("Only cameras with the same renderer type as the base camera can be stacked. {0} will skip rendering", currCamera.name));
                         }
                         else
                         {
-                            Debug.LogWarning(string.Format("Stack can only contain Overlay cameras. {0} will skip rendering.", currCamera.name));
+                            lastActiveOverlayCameraIndex = i;
+                            //cameraStackData[i] = data;
                         }
                     }
                 }
             }
+            
 
             bool isStackedRendering = lastActiveOverlayCameraIndex != -1;
             InitializeCameraData(baseCamera, baseCameraAdditionalData, out var baseCameraData);
@@ -298,7 +306,8 @@ namespace UnityEngine.Rendering.Universal
             for (int i = 0; i < cameraStack.Count; ++i)
             {
                 var currCamera = cameraStack[i];
-                var currCameraData = cameraStackData[i];
+                var currCameraData = currCamera.GetUniversalAdditionalCameraData();
+                //var currCameraData = cameraStackData[i];
 
                 // Camera is overlay and enabled
                 if (currCameraData != null)
@@ -714,9 +723,5 @@ namespace UnityEngine.Rendering.Universal
             Matrix4x4 invViewProjMatrix = Matrix4x4.Inverse(viewProjMatrix);
             Shader.SetGlobalMatrix(PerCameraBuffer._InvCameraViewProj, invViewProjMatrix);
         }
-
-
-
-
     }
 }
