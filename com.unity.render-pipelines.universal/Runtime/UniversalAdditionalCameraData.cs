@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine.Scripting.APIUpdating;
 using UnityEngine.Serialization;
+using System.ComponentModel;
 
 namespace UnityEngine.Rendering.LWRP
 {
@@ -66,8 +67,12 @@ namespace UnityEngine.Rendering.Universal
     /// </summary>
     public enum CameraOutput
     {
-        Camera,
+        Screen,
         Texture,
+
+        [Obsolete("Use CameraOutput.Screen instead.", false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        Camera = Screen,
     }
 
     /// <summary>
@@ -131,7 +136,7 @@ namespace UnityEngine.Rendering.Universal
         CameraOverrideOption m_RequiresOpaqueTextureOption = CameraOverrideOption.UsePipelineSettings;
 
         [SerializeField] CameraRenderType m_CameraType = CameraRenderType.Base;
-        [SerializeField] CameraOutput m_CameraOutput = CameraOutput.Camera;
+        [SerializeField] CameraOutput m_CameraOutput = CameraOutput.Screen;
 		[SerializeField] List<Camera> m_Cameras = new List<Camera>();
 		[SerializeField] int m_RendererIndex = -1;
 

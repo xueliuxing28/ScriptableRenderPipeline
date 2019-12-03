@@ -121,8 +121,17 @@ namespace UnityEditor.Rendering.Universal
 
             // Camera Output
             public static List<GUIContent> m_CameraOutputTargets = null;
-            public static readonly string[] cameraOutputTargets = Enum.GetNames(typeof(CameraOutput));
-            public static int[] additionalDataCameraOutputOptions = Enum.GetValues(typeof(CameraOutput)) as int[];
+
+            // Returns all enum names filtering CameraOutput.Camera (replaced by CameraOutput.Screen)
+            public static readonly string[] cameraOutputTargets = Enum.GetNames(typeof(CameraOutput)).ToList()
+                .Where(x => !x.Equals("Camera"))
+                .ToArray();
+
+            // Returns all enum int values filtering CameraOutput.Camera (replaced by CameraOutput.Screen)
+            public static int[] additionalDataCameraOutputOptions = Enum.GetNames(typeof(CameraOutput)).ToList()
+                .Where(x => !x.Equals("Camera"))
+                .Select(x => (int)Enum.Parse(typeof(CameraOutput), x))
+                .ToArray();
         };
 
         ReorderableList m_LayerList;
@@ -611,7 +620,7 @@ namespace UnityEditor.Rendering.Universal
                 if (EditorGUI.EndChangeCheck())
                 {
                     m_AdditionalCameraDataCameraOutputProp.intValue = selCameraOutput;
-                    if (selCameraOutput == (int)CameraOutput.Camera)
+                    if (selCameraOutput == (int)CameraOutput.Screen)
                     {
                         settings.targetTexture.objectReferenceValue = null;
                     }
@@ -619,7 +628,7 @@ namespace UnityEditor.Rendering.Universal
                 }
 
                 CameraOutput selectedOutput = (CameraOutput)m_AdditionalCameraDataCameraOutputProp.intValue;
-                if (selectedOutput == CameraOutput.Camera)
+                if (selectedOutput == CameraOutput.Screen)
                 {
                     // If output is Camera we do default
                     DrawHDR();
