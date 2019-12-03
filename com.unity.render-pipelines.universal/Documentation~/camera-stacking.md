@@ -3,7 +3,7 @@ In the Universal Render Pipeline (URP), you use Camera Stacking to layer the out
 
 ![Camera Stacking in URP](Images/camera-stacking-example.png)
 
-A Camera Stack consists of a [Base Camera](camera-types-and-render-mode.md#base-camera) and one or more [Overlay Cameras](camera-types-and-render-mode.md#overlay-camera). A Camera Stack overrides the output of the Base Camera with the combined output of all the Cameras in the Camera Stack. As such, anything that you can do with the output of a Base Camera, you can do with the output of a Camera Stack. For example, you can render a Camera Stack to a given render target, apply post-process effects, and so on.
+A Camera Stack consists of a [Base Camera](camera-types-and-render-type.md#base-camera) and one or more [Overlay Cameras](camera-types-and-render-type.md#overlay-camera). A Camera Stack overrides the output of the Base Camera with the combined output of all the Cameras in the Camera Stack. As such, anything that you can do with the output of a Base Camera, you can do with the output of a Camera Stack. For example, you can render a Camera Stack to a given render target, apply post-process effects, and so on.
 
 You cannot apply post-processing to individual Overlay Cameras within a Camera Stack. You can apply post-processing to the Base Camera of a Camera Stack, which applies the effect to the combined output of the Camera Stack.
 
