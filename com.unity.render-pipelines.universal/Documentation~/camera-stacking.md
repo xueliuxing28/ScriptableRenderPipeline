@@ -14,9 +14,9 @@ Unity does not perform any optimizations within a Camera Stack to prevent overdr
 
 ![Adding a Camera to a Camera Stack](Images/camera-stack-add-camera.png)
 
-1. Create a Camera in your Scene. Its **Render Mode** defaults to **Base**, making it a Base Camera.
+1. Create a Camera in your Scene. Its **Render Type** defaults to **Base**, making it a Base Camera.
 2. Create another Camera in your Scene, and select it. 
-3. In the Camera Inspector, change the Camera’s  **Render Mode** to **Overlay**.
+3. In the Camera Inspector, change the Camera’s  **Render Type** to **Overlay**.
 4. Select the Base Camera again. In the Camera Inspector, scroll to the Stack section, click the **plus (+)** button, and click the name of the Overlay Camera.
 
 The Overlay Camera is now part of the Base Camera's Camera Stack. Unity renders the Overlay Camera's output on top of the Base Camera's output.
@@ -61,7 +61,7 @@ You can reorder a Camera Stack in a script by directly manipulating the `cameraS
 To add an Overlay Camera to multiple Camera Stacks:
 
 1. Create a Camera Stack that contains at least one Overlay Camera. For instructions, see [Adding a Camera to a Camera Stack](#adding-a-camera-to-a-camera-stack).
-2. Create a Camera in your Scene. Its **Render Mode** defaults to **Base**, making it a Base Camera.
+2. Create a Camera in your Scene. Its **Render Type** defaults to **Base**, making it a Base Camera.
 3. Select the new Base Camera. 
 4. In the Camera Inspector, scroll to the Stack section, click the *plus (+)* button, and click the name of the Overlay Camera that you want to use in both Camera Stacks.
 

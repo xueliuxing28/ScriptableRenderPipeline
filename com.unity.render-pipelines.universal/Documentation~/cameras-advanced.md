@@ -5,7 +5,7 @@ If your Universal Render Pipeline (URP) Scene contains multiple Cameras, Unity p
 
 Once per frame, Unity performs the following operations:
 
-1. Unity gets the list of all active [Base Cameras](camera-types-and-render-mode.md#base-camera) in the Scene.
+1. Unity gets the list of all active [Base Cameras](camera-types-and-render-type.md#base-camera) in the Scene.
 2. Unity organises the active Base Cameras into the following groups:
     * Cameras that render their view to Render Textures
     * Cameras that render their view to the screen
@@ -13,14 +13,14 @@ Once per frame, Unity performs the following operations:
 4. For each Base Camera that renders to a Render Texture, Unity performs the following steps:
     1. Cull the Base Camera
     2. Render the Base Camera to the Render Texture
-    3. For each [Overlay Camera](camera-types-and-render-mode.md#overlay-camera) that is part of the Base Camera's [Camera Stack](camera-stacking.md), in the order defined in the Camera Stack:
+    3. For each [Overlay Camera](camera-types-and-render-type.md#overlay-camera) that is part of the Base Camera's [Camera Stack](camera-stacking.md), in the order defined in the Camera Stack:
         1. Cull the Overlay Camera
         2. Render the Overlay Camera to the Render Texture
 5. Unity sorts the Base Cameras that render to Render Textures into priority order, so that Cameras with a lower numerical priority are drawn before Base Cameras with a higher numerical priority.
 6. For each Base Camera that renders to a Render Texture, Unity performs the following steps:
     1. Cull the Base Camera
     2. Render the Base Camera to the Render Texture
-    3. For each [Overlay Camera](camera-types-and-render-mode.md#overlay-camera) that is part of the Base Camera's [Camera Stack](camera-stacking.md), in the order defined in the Camera Stack:
+    3. For each [Overlay Camera](camera-types-and-render-type.md#overlay-camera) that is part of the Base Camera's [Camera Stack](camera-stacking.md), in the order defined in the Camera Stack:
         1. Cull the Overlay Camera
         2. Render the Overlay Camera to the Render Texture
 
