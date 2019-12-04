@@ -107,11 +107,8 @@ namespace UnityEngine.Experimental.Rendering.Universal
 
                 if (m_CameraSettings.overrideCamera && m_CameraSettings.restoreCamera)
                 {
-                    Matrix4x4 projectionMatrix = Matrix4x4.Perspective(camera.fieldOfView, cameraAspect,
-                        camera.nearClipPlane, camera.farClipPlane);
-
                     cmd.Clear();
-                    cmd.SetViewProjectionMatrices(camera.worldToCameraMatrix, projectionMatrix);
+                    cmd.SetViewProjectionMatrices(camera.worldToCameraMatrix, camera.projectionMatrix);
                 }
             }
             context.ExecuteCommandBuffer(cmd);

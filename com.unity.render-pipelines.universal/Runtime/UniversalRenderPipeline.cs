@@ -366,17 +366,7 @@ namespace UnityEngine.Rendering.Universal
             ///////////////////////////////////////////////////////////////////
             // Environment and Post-processing settings                       /
             ///////////////////////////////////////////////////////////////////
-            if (baseAdditionalCameraData != null)
-            {
-                cameraData.volumeLayerMask = baseAdditionalCameraData.volumeLayerMask;
-                cameraData.volumeTrigger = baseAdditionalCameraData.volumeTrigger == null ? baseCamera.transform : baseAdditionalCameraData.volumeTrigger;
-                cameraData.postProcessEnabled = baseAdditionalCameraData.renderPostProcessing;
-                cameraData.isStopNaNEnabled = cameraData.postProcessEnabled && baseAdditionalCameraData.stopNaN && SystemInfo.graphicsShaderLevel >= 35;
-                cameraData.isDitheringEnabled = cameraData.postProcessEnabled && baseAdditionalCameraData.dithering;
-                cameraData.antialiasing = cameraData.postProcessEnabled ? baseAdditionalCameraData.antialiasing : AntialiasingMode.None;
-                cameraData.antialiasingQuality = baseAdditionalCameraData.antialiasingQuality;
-            }
-            else if (baseCamera.cameraType == CameraType.SceneView)
+            if (baseCamera.cameraType == CameraType.SceneView)
             {
                 cameraData.volumeLayerMask = 1; // "Default"
                 cameraData.volumeTrigger = null;
@@ -385,6 +375,16 @@ namespace UnityEngine.Rendering.Universal
                 cameraData.isDitheringEnabled = false;
                 cameraData.antialiasing = AntialiasingMode.None;
                 cameraData.antialiasingQuality = AntialiasingQuality.High;
+            }
+            else if (baseAdditionalCameraData != null)
+            {
+                cameraData.volumeLayerMask = baseAdditionalCameraData.volumeLayerMask;
+                cameraData.volumeTrigger = baseAdditionalCameraData.volumeTrigger == null ? baseCamera.transform : baseAdditionalCameraData.volumeTrigger;
+                cameraData.postProcessEnabled = baseAdditionalCameraData.renderPostProcessing;
+                cameraData.isStopNaNEnabled = cameraData.postProcessEnabled && baseAdditionalCameraData.stopNaN && SystemInfo.graphicsShaderLevel >= 35;
+                cameraData.isDitheringEnabled = cameraData.postProcessEnabled && baseAdditionalCameraData.dithering;
+                cameraData.antialiasing = cameraData.postProcessEnabled ? baseAdditionalCameraData.antialiasing : AntialiasingMode.None;
+                cameraData.antialiasingQuality = baseAdditionalCameraData.antialiasingQuality;
             }
             else
             {
@@ -457,7 +457,15 @@ namespace UnityEngine.Rendering.Universal
             cameraData.maxShadowDistance = (anyShadowsEnabled && cameraData.maxShadowDistance >= camera.nearClipPlane) ?
                 cameraData.maxShadowDistance : 0.0f;
 
-            if (additionalCameraData != null)
+            if (camera.cameraType == CameraType.SceneView)
+            {
+                cameraData.renderType = CameraRenderType.Base;
+                cameraData.clearDepth = true;
+                cameraData.requiresDepthTexture = settings.supportsCameraDepthTexture;
+                cameraData.requiresOpaqueTexture = settings.supportsCameraOpaqueTexture;
+                cameraData.renderer = asset.scriptableRenderer;
+            }
+            else if (additionalCameraData != null)
             {
                 cameraData.renderType = additionalCameraData.renderType;
                 cameraData.clearDepth = (additionalCameraData.renderType != CameraRenderType.Base) ? additionalCameraData.clearDepth : true;
@@ -465,14 +473,6 @@ namespace UnityEngine.Rendering.Universal
                 cameraData.requiresDepthTexture = additionalCameraData.requiresDepthTexture;
                 cameraData.requiresOpaqueTexture = additionalCameraData.requiresColorTexture;
                 cameraData.renderer = additionalCameraData.scriptableRenderer;
-            }
-            else if(camera.cameraType == CameraType.SceneView)
-            {
-                cameraData.renderType = CameraRenderType.Base;
-                cameraData.clearDepth = true;
-                cameraData.requiresDepthTexture = settings.supportsCameraDepthTexture;
-                cameraData.requiresOpaqueTexture = settings.supportsCameraOpaqueTexture;
-                cameraData.renderer = asset.scriptableRenderer;
             }
             else
             {
