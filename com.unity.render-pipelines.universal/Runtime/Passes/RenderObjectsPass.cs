@@ -78,7 +78,8 @@ namespace UnityEngine.Experimental.Rendering.Universal
             drawingSettings.overrideMaterial = overrideMaterial;
             drawingSettings.overrideMaterialPassIndex = overrideMaterialPassIndex;
 
-            Camera camera = renderingData.cameraData.camera;
+            ref CameraData cameraData = ref renderingData.cameraData;
+            Camera camera = cameraData.camera;
 
             // In case of camera stacking we need to take the viewport rect from base camera
             Rect pixelRect = renderingData.cameraData.pixelRect;
@@ -108,7 +109,7 @@ namespace UnityEngine.Experimental.Rendering.Universal
                 if (m_CameraSettings.overrideCamera && m_CameraSettings.restoreCamera)
                 {
                     cmd.Clear();
-                    cmd.SetViewProjectionMatrices(camera.worldToCameraMatrix, camera.projectionMatrix);
+                    cmd.SetViewProjectionMatrices(cameraData.viewMatrix, cameraData.projectionMatrix);
                 }
             }
             context.ExecuteCommandBuffer(cmd);

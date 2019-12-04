@@ -412,6 +412,7 @@ namespace UnityEngine.Rendering.Universal
             cameraData.pixelRect = baseCamera.pixelRect;
             cameraData.pixelWidth = baseCamera.pixelWidth;
             cameraData.pixelHeight = baseCamera.pixelHeight;
+            cameraData.aspectRatio = (float)cameraData.pixelWidth / (float)cameraData.pixelHeight;
             cameraData.isDefaultViewport = (!(Math.Abs(cameraRect.x) > 0.0f || Math.Abs(cameraRect.y) > 0.0f ||
                 Math.Abs(cameraRect.width) < 1.0f || Math.Abs(cameraRect.height) < 1.0f));
 
@@ -456,6 +457,12 @@ namespace UnityEngine.Rendering.Universal
             cameraData.maxShadowDistance = Mathf.Min(settings.shadowDistance, camera.farClipPlane);
             cameraData.maxShadowDistance = (anyShadowsEnabled && cameraData.maxShadowDistance >= camera.nearClipPlane) ?
                 cameraData.maxShadowDistance : 0.0f;
+
+            cameraData.viewMatrix = camera.worldToCameraMatrix;
+
+            // Overlay cameras inherit viewport from base. In this case, we need to guarantee that the aspect ratio is the same in the projection
+            // matrix to not cause squishing when rendering objects in overlay cameras.
+            cameraData.projectionMatrix = Matrix4x4.Perspective(camera.fieldOfView, cameraData.aspectRatio, camera.nearClipPlane, camera.farClipPlane);
 
             if (camera.cameraType == CameraType.SceneView)
             {

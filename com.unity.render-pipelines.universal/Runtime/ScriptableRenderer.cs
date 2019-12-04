@@ -209,11 +209,12 @@ namespace UnityEngine.Rendering.Universal
         /// <param name="renderingData">Current render state information.</param>
         public void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
         {
-            Camera camera = renderingData.cameraData.camera;
+            ref CameraData cameraData = ref renderingData.cameraData;
+            Camera camera = cameraData.camera;
             CommandBuffer cmd = CommandBufferPool.Get(k_SetCameraRenderStateTag);
 
             // Initialize Camera Render State
-            SetCameraRenderState(cmd, ref renderingData.cameraData);
+            SetCameraRenderState(cmd, ref cameraData);
             context.ExecuteCommandBuffer(cmd);
             cmd.Clear();
             
@@ -262,10 +263,22 @@ namespace UnityEngine.Rendering.Universal
             bool stereoEnabled = renderingData.cameraData.isStereoEnabled;
             context.SetupCameraProperties(camera, stereoEnabled);
 
+            // If overlay camera, we have to reset projection related matrices due to inheriting viewport from base
+            // camera. This changes the aspect ratio, which requires to recompute projection.
+            // TODO: We need to expose all work done in SetupCameraProperties above to c# land. This not only
+            // avoids resetting values but also guarantee values are correct for all systems.
+            // Known Issue: billboard will not work with camera stacking when using viewport with aspect ratio different from default aspect.
+            if (cameraData.renderType == CameraRenderType.Overlay)
+            {
+                cmd.SetViewProjectionMatrices(cameraData.viewMatrix, cameraData.projectionMatrix);
+            }
+
             // Override time values from when `SetupCameraProperties` were called.
             // They might be a frame behind.
             // We can remove this after removing `SetupCameraProperties` as the values should be per frame, and not per camera.
-            SetShaderTimeValues(time, deltaTime, smoothDeltaTime);
+            SetShaderTimeValues(time, deltaTime, smoothDeltaTime, cmd);
+            context.ExecuteCommandBuffer(cmd);
+            cmd.Clear();
 
             if (stereoEnabled)
                 BeginXRRendering(context, camera);

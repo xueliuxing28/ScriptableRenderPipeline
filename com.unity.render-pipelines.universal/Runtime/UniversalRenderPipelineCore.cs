@@ -45,9 +45,14 @@ namespace UnityEngine.Rendering.Universal
         public CameraRenderType renderType;
         public RenderTexture targetTexture;
         public RenderTextureDescriptor cameraTargetDescriptor;
-        public Rect pixelRect;
-        public int pixelWidth;
-        public int pixelHeight;
+        // Internal camera data as we are not yet sure how to expose View in stereo context.
+        // We might change this API soon.
+        internal Matrix4x4 viewMatrix;
+        internal Matrix4x4 projectionMatrix;
+        internal Rect pixelRect;
+        internal int pixelWidth;
+        internal int pixelHeight;
+        internal float aspectRatio;
         public float renderScale;
         public bool clearDepth;
         public bool isSceneViewCamera;
