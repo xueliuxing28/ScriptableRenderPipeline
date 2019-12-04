@@ -28,8 +28,15 @@
 #define WaveActiveSum CrossLaneAdd
 #define INTRINSIC_WAVE_LOGICAL_OPS
 #define WaveActiveBitAnd CrossLaneAnd
-#define WaveActiveBitOr CrossLaneOr
+#define WaveActiveBitOr PSSLCrossLaneOr
 #define WaveGetID GetWaveID
+
+// Work arround
+[isolate]
+template<typename T> T PSSLCrossLaneOr(T v)
+{
+    return CrossLaneOr(v);
+}
 
 #define INTRINSIC_WAVE_ACTIVE_ALL_ANY
 bool WaveActiveAllTrue(bool expression)
@@ -49,7 +56,13 @@ uint WaveGetLaneIndex()
 
 bool WaveIsFirstLane()
 {
+#ifdef SHADER_STAGE_FRAGMENT
+    // For fragment shaders we have to make sure to return the first non helper lane that is valid.
+    ulong mask = __s_read_exec() & __s_read_initialpixelvalidmask();
+    return __v_cndmask_b32(0, 1, mask & -mask);
+#else
     return MaskBitCnt(__s_read_exec()) == 0;
+#endif
 }
 
 uint WaveGetLaneCount()
