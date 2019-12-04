@@ -114,7 +114,10 @@ namespace UnityEngine.Rendering.Universal
 
         public static string GetName(this CameraRenderType type)
         {
-            return s_CameraTypeNames[(int)type];
+            int typeInt = (int)type;
+            if (typeInt < 0 || typeInt >= s_CameraTypeNames.Length)
+                typeInt = (int)CameraRenderType.Base;
+            return s_CameraTypeNames[typeInt];
         }
     }
 
