@@ -258,8 +258,6 @@ namespace UnityEngine.Rendering.Universal
                 return;
 
             List<Camera> cameraStack = baseCameraAdditionalData.cameraStack;
-            // TODO: we need a solution to create a temp array for reference types to prevent GC Alloc.
-            //UniversalAdditionalCameraData[] cameraStackData = null;
 
             // We need to know the last active camera in the stack to be able to resolve
             // rendering to screen when rendering it. The last camera in the stack is not
@@ -269,12 +267,10 @@ namespace UnityEngine.Rendering.Universal
             if (cameraStack != null && baseCamera.cameraType == CameraType.Game)
             {
                 var baseCameraRendererType = baseCameraAdditionalData?.scriptableRenderer.GetType();
-                //cameraStackData = new UniversalAdditionalCameraData[cameraStack.Count];
 
                 for (int i = 0; i < cameraStack.Count; ++i)
                 {
                     Camera currCamera = cameraStack[i];
-                    //cameraStackData[i] = null;
                     if (currCamera != null && currCamera.isActiveAndEnabled)
                     {
                         var data = currCamera.GetUniversalAdditionalCameraData();
@@ -289,7 +285,6 @@ namespace UnityEngine.Rendering.Universal
                         else
                         {
                             lastActiveOverlayCameraIndex = i;
-                            //cameraStackData[i] = data;
                         }
                     }
                 }
@@ -307,7 +302,6 @@ namespace UnityEngine.Rendering.Universal
             {
                 var currCamera = cameraStack[i];
                 var currCameraData = currCamera.GetUniversalAdditionalCameraData();
-                //var currCameraData = cameraStackData[i];
 
                 // Camera is overlay and enabled
                 if (currCameraData != null)

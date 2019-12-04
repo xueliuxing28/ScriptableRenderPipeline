@@ -483,12 +483,6 @@ namespace UnityEditor.Rendering.Universal
                 DrawCommonSettings();
                 DrawRenderingSettings();
             }
-            //
-            //            // UI Camera
-            //            if (camType == CameraRenderType.ScreenSpaceUI)
-            //            {
-            //                DrawCommonSettings();
-            //            }
 
             EditorGUI.indentLevel--;
 	        settings.ApplyModifiedProperties();
