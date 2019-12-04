@@ -15,34 +15,38 @@ namespace UnityEngine.Experimental.Rendering.Universal
         static readonly ShaderTagId k_LegacyPassName = new ShaderTagId("SRPDefaultUnlit");
         static readonly List<ShaderTagId> k_ShaderTags = new List<ShaderTagId>() { k_LegacyPassName, k_CombinedRenderingPassName, k_CombinedRenderingPassNameOld };
 
-        Texture m_BlackTexture;
-        
         public Render2DLightingPass(Renderer2DData rendererData)
         {
             if (s_SortingLayers == null)
                 s_SortingLayers = SortingLayer.layers;
 
-            m_BlackTexture = rendererData.blackTexture;
             m_Renderer2DData = rendererData;
         }
 
-        public void SetTransparencySortingMode(Camera camera, out TransparencySortMode sortingMode, out Vector3 sortingAxis)
+        public void GetTransparencySortingMode(Camera camera, ref SortingSettings sortingSettings)
         {
-            sortingMode = camera.transparencySortMode;
-            sortingAxis = camera.transparencySortAxis;
+            TransparencySortMode mode = camera.transparencySortMode;
 
-            if (camera.transparencySortMode == TransparencySortMode.Default)
+            if (mode == TransparencySortMode.Default)
             {
-                TransparencySortMode defaultTransparencySortMode = camera.orthographic ? TransparencySortMode.Orthographic : TransparencySortMode.Perspective;
-                camera.transparencySortMode = m_Renderer2DData.transparencySortMode == TransparencySortMode.Default ? defaultTransparencySortMode : m_Renderer2DData.transparencySortMode;
-                camera.transparencySortAxis = m_Renderer2DData.transparencySortAxis;
+                mode = m_Renderer2DData.transparencySortMode;
+                if (mode == TransparencySortMode.Default)
+                    mode = camera.orthographic ? TransparencySortMode.Orthographic : TransparencySortMode.Perspective;
             }
-        }
 
-        public void RestoreTransparencySortingMode(Camera camera, TransparencySortMode sortingMode, Vector3 sortingAxis)
-        {
-            camera.transparencySortMode = sortingMode;
-            camera.transparencySortAxis = sortingAxis;
+            if (mode == TransparencySortMode.Perspective)
+            {
+                sortingSettings.distanceMetric = DistanceMetric.Perspective;
+            }
+            else if (mode == TransparencySortMode.Orthographic)
+            {
+                sortingSettings.distanceMetric = DistanceMetric.Orthographic;
+            }
+            else
+            {
+                sortingSettings.distanceMetric = DistanceMetric.CustomAxis;
+                sortingSettings.customAxis = m_Renderer2DData.transparencySortAxis;
+            }
         }
 
         public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
@@ -68,9 +72,6 @@ namespace UnityEngine.Experimental.Rendering.Universal
             filterSettings.renderingLayerMask = 0xFFFFFFFF;
             filterSettings.sortingLayerRange = SortingLayerRange.all;
 
-            TransparencySortMode savedSortingMode;
-            Vector3 savedSortingAxis;
-            SetTransparencySortingMode(camera, out savedSortingMode, out savedSortingAxis);
 
             bool isSceneLit = Light2D.IsSceneLit(camera);
             if (isSceneLit)
@@ -89,10 +90,13 @@ namespace UnityEngine.Experimental.Rendering.Universal
 
                 context.ExecuteCommandBuffer(cmd);
 
-                Profiler.BeginSample("RenderSpritesWithLighting - Prepare");
                 DrawingSettings combinedDrawSettings = CreateDrawingSettings(k_ShaderTags, ref renderingData, SortingCriteria.CommonTransparent);
                 DrawingSettings normalsDrawSettings = CreateDrawingSettings(k_NormalsRenderingPassName, ref renderingData, SortingCriteria.CommonTransparent);
-                Profiler.EndSample();
+
+                SortingSettings sortSettings = combinedDrawSettings.sortingSettings;
+                GetTransparencySortingMode(camera, ref sortSettings);
+                combinedDrawSettings.sortingSettings = sortSettings;
+                combinedDrawSettings.sortingSettings = sortSettings;
 
                 const int blendStylesCount = 4;
                 bool[] hasBeenInitialized = new bool[blendStylesCount];
@@ -174,10 +178,10 @@ namespace UnityEngine.Experimental.Rendering.Universal
                 DrawingSettings unlitDrawSettings = CreateDrawingSettings(k_ShaderTags, ref renderingData, SortingCriteria.CommonTransparent);
 
                 CoreUtils.SetRenderTarget(cmd, colorAttachment, RenderBufferLoadAction.Load, RenderBufferStoreAction.Store, ClearFlag.None, Color.white);
-                cmd.SetGlobalTexture("_ShapeLightTexture0", m_BlackTexture);
-                cmd.SetGlobalTexture("_ShapeLightTexture1", m_BlackTexture);
-                cmd.SetGlobalTexture("_ShapeLightTexture2", m_BlackTexture);
-                cmd.SetGlobalTexture("_ShapeLightTexture3", m_BlackTexture);
+                cmd.SetGlobalTexture("_ShapeLightTexture0", Texture2D.blackTexture);
+                cmd.SetGlobalTexture("_ShapeLightTexture1", Texture2D.blackTexture);
+                cmd.SetGlobalTexture("_ShapeLightTexture2", Texture2D.blackTexture);
+                cmd.SetGlobalTexture("_ShapeLightTexture3", Texture2D.blackTexture);
                 cmd.SetGlobalFloat("_UseSceneLighting", isLitView ? 1.0f : 0.0f);
                 cmd.EnableShaderKeyword("USE_SHAPE_LIGHT_TYPE_0");
                 context.ExecuteCommandBuffer(cmd);
@@ -189,8 +193,6 @@ namespace UnityEngine.Experimental.Rendering.Universal
 
                 RenderingUtils.RenderObjectsWithError(context, ref renderingData.cullResults, camera, filterSettings, SortingCriteria.None);
             }
-
-            RestoreTransparencySortingMode(camera, savedSortingMode, savedSortingAxis);
         }
     }
 }

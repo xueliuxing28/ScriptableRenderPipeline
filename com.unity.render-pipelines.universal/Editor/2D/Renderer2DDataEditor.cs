@@ -169,7 +169,6 @@ namespace UnityEditor.Experimental.Rendering.Universal
                     }
 
                     EditorGUI.indentLevel--;
-                    EditorGUI.EndDisabledGroup();
                 }
             }
 
@@ -178,12 +177,9 @@ namespace UnityEditor.Experimental.Rendering.Universal
             EditorGUILayout.PropertyField(m_UseDepthStencilBuffer, Styles.useDepthStencilBuffer);
             EditorGUILayout.PropertyField(m_PostProcessData, Styles.postProcessData);
 
-
-            EditorGUI.BeginChangeCheck();
             EditorGUILayout.PropertyField(m_DefaultMaterialType, Styles.defaultMaterialType);
             if(m_DefaultMaterialType.intValue == (int)Renderer2DData.Renderer2DDefaultMaterialType.Custom)
                 EditorGUILayout.PropertyField(m_DefaultCustomMaterial, Styles.defaultCustomMaterial);
-            
 
             m_WasModified |= serializedObject.hasModifiedProperties;
             serializedObject.ApplyModifiedProperties();

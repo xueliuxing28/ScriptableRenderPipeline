@@ -292,7 +292,7 @@ namespace UnityEngine.Experimental.Rendering.Universal
                 List<Light2D> lightList = Light2DManager.lights[layer];
                 for (int lightIndex = 0; lightIndex < lightList.Count; lightIndex++)
                 {
-                    if (lightList[lightIndex].IsLightVisible(camera))
+                    if (lightList[lightIndex].lightType == LightType.Global || lightList[lightIndex].IsLightVisible(camera))
                         return true;
                 }
             }

@@ -75,9 +75,6 @@ namespace UnityEngine.Experimental.Rendering.Universal
         [SerializeField, Reload("Runtime/Data/PostProcessData.asset")]
         PostProcessData m_PostProcessData = null;
 
-        [SerializeField, Reload("Textures/2D/Black1x1.jpg")]
-        Texture m_BlackTexture = null;
-
         public float hdrEmulationScale => m_HDREmulationScale;
         public Light2DBlendStyle[] lightBlendStyles => m_LightBlendStyles;
         internal bool useDepthStencilBuffer => m_UseDepthStencilBuffer;
@@ -92,8 +89,6 @@ namespace UnityEngine.Experimental.Rendering.Universal
         internal PostProcessData postProcessData => m_PostProcessData;
         internal TransparencySortMode transparencySortMode => m_TransparencySortMode;
         internal Vector3 transparencySortAxis => m_TransparencySortAxis;
-        internal Texture blackTexture => m_BlackTexture;
-
 
         protected override ScriptableRenderer Create()
         {
