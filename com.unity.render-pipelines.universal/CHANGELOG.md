@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added default implementations of OnPreprocessMaterialDescription for FBX, Obj, Sketchup and 3DS file formats.
 - Added the option to toggle shadow receiving on transparent objects.
 - Added XR multipass rendering. Multipass rendering is a requirement on many VR platforms and allows graceful fallback when single-pass rendering isn't available.
+- Added support for Camera Stacking. This introduces a new property on the camera called `Render Type`. A base type can contain a camera stack and be initialized with either the Skybox or Solid Color. An Overlay type is always initialized with the contents of the previous camera that rendered in the stack.
+
 
 ### Changed
 - Moved the icon that indicates the type of a Light 2D from the Inspector header to the Light Type field.
