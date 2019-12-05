@@ -184,7 +184,7 @@ namespace UnityEngine.Rendering.Universal
         public static void RenderSingleCamera(ScriptableRenderContext context, Camera camera)
         {
             UniversalAdditionalCameraData additionalCameraData = null;
-            if (camera.cameraType == CameraType.Game || camera.cameraType == CameraType.VR)
+            if (IsGameCamera(camera))
                 camera.gameObject.TryGetComponent(out additionalCameraData);
 
             if (additionalCameraData.renderType != CameraRenderType.Base)
@@ -262,31 +262,40 @@ namespace UnityEngine.Rendering.Universal
             // We need to know the last active camera in the stack to be able to resolve
             // rendering to screen when rendering it. The last camera in the stack is not
             // necessarily the last active one as it users might disable it.
-            // TODO: Add support to VR cameras to be stacked as well.
             int lastActiveOverlayCameraIndex = -1;
-            if (cameraStack != null && baseCamera.cameraType == CameraType.Game)
+            if (cameraStack != null && IsGameCamera(baseCamera) )
             {
-                var baseCameraRendererType = baseCameraAdditionalData?.scriptableRenderer.GetType();
-
-                for (int i = 0; i < cameraStack.Count; ++i)
+                // TODO: Add support to camera stack in VR multi pass mode
+                if (!IsMultiPassStereoEnabled(baseCamera))
                 {
-                    Camera currCamera = cameraStack[i];
-                    if (currCamera != null && currCamera.isActiveAndEnabled)
+                    var baseCameraRendererType = baseCameraAdditionalData?.scriptableRenderer.GetType();
+
+                    for (int i = 0; i < cameraStack.Count; ++i)
                     {
-                        var data = currCamera.GetUniversalAdditionalCameraData();
-                        if (data.renderType != CameraRenderType.Overlay)
+                        Camera currCamera = cameraStack[i];
+
+                        if (currCamera != null && currCamera.isActiveAndEnabled)
                         {
-                            Debug.LogWarning(string.Format("Stack can only contain Overlay cameras. {0} will skip rendering.", currCamera.name));
-                        }
-                        else if (data?.scriptableRenderer.GetType() != baseCameraRendererType)
-                        {
-                            Debug.LogWarning(string.Format("Only cameras with the same renderer type as the base camera can be stacked. {0} will skip rendering", currCamera.name));
-                        }
-                        else
-                        {
-                            lastActiveOverlayCameraIndex = i;
+                            var data = currCamera.GetUniversalAdditionalCameraData();
+
+                            if (data.renderType != CameraRenderType.Overlay)
+                            {
+                                Debug.LogWarning(string.Format("Stack can only contain Overlay cameras. {0} will skip rendering.", currCamera.name));
+                            }
+                            else if (data?.scriptableRenderer.GetType() != baseCameraRendererType)
+                            {
+                                Debug.LogWarning(string.Format("Only cameras with the same renderer type as the base camera can be stacked. {0} will skip rendering", currCamera.name));
+                            }
+                            else
+                            {
+                                lastActiveOverlayCameraIndex = i;
+                            }
                         }
                     }
+                }
+                else
+                {
+                    Debug.LogWarning("Multi pass stereo mode doesn't support Camera Stacking. Overlay cameras will skip rendering.");
                 }
             }
             
@@ -357,13 +366,15 @@ namespace UnityEngine.Rendering.Universal
             cameraData.isStereoEnabled = IsStereoEnabled(baseCamera);
             cameraData.isSceneViewCamera = baseCamera.cameraType == CameraType.SceneView;
 
-            cameraData.isXRMultipass = false;
-            cameraData.numberOfXRPasses = 1;
-
-            if (cameraData.isStereoEnabled && !cameraData.isSceneViewCamera && XR.XRSettings.stereoRenderingMode == XR.XRSettings.StereoRenderingMode.MultiPass)
+            if (IsMultiPassStereoEnabled(baseCamera))
             {
                 cameraData.numberOfXRPasses = 2;
                 cameraData.isXRMultipass = true;
+            }
+            else
+            {
+                cameraData.numberOfXRPasses = 1;
+                cameraData.isXRMultipass = false;
             }
 
             ///////////////////////////////////////////////////////////////////

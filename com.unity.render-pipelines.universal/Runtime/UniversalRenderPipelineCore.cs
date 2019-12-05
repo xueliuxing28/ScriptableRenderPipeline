@@ -161,13 +161,48 @@ namespace UnityEngine.Rendering.Universal
     {
         static List<Vector4> m_ShadowBiasData = new List<Vector4>();
 
+        /// <summary>
+        /// Checks if a camera is a game camera.
+        /// </summary>
+        /// <param name="camera">Camera to check state from.</param>
+        /// <returns>true if given camera is a game camera, false otherwise.</returns>
+        public static bool IsGameCamera(Camera camera)
+        {
+            if (camera == null)
+                throw new ArgumentNullException("camera");
+
+            return camera.cameraType == CameraType.Game || camera.cameraType == CameraType.VR;
+        }
+
+        /// <summary>
+        /// Checks if a camera is rendering in stereo mode.
+        /// </summary>
+        /// <param name="camera">Camera to check state from.</param>
+        /// <returns>Returns true if the given camera is rendering in stereo mode, false otherwise.</returns>
         public static bool IsStereoEnabled(Camera camera)
         {
             if (camera == null)
                 throw new ArgumentNullException("camera");
 
-            bool isGameCamera = camera.cameraType == CameraType.Game || camera.cameraType == CameraType.VR;
+            bool isGameCamera = IsGameCamera(camera);
             return XRGraphics.enabled && isGameCamera && (camera.stereoTargetEye == StereoTargetEyeMask.Both);
+        }
+
+        /// <summary>
+        /// Checks if a camera is rendering in MultiPass stereo mode.
+        /// </summary>
+        /// <param name="camera">Camera to check state from.</param>
+        /// <returns>Returns true if the given camera is rendering in multi pass stereo mode, false otherwise.</returns>
+        static bool IsMultiPassStereoEnabled(Camera camera)
+        {
+            if (camera == null)
+                throw new ArgumentNullException("camera");
+
+#if ENABLE_VR
+            return IsStereoEnabled(camera) && XR.XRSettings.stereoRenderingMode == XR.XRSettings.StereoRenderingMode.MultiPass;
+#else
+            return false;
+#endif
         }
 
         void SortCameras(Camera[] cameras)
