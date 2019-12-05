@@ -393,6 +393,7 @@ namespace UnityEngine.Rendering.Universal
 
             m_FirstTimeCameraColorTargetIsBound = true;
             m_FirstTimeCameraDepthTargetIsBound = true;
+            //m_FirstTimeStereoTargetIsBound = true;
             m_InsideStereoRenderBlock = false;
             m_ActiveRenderPassQueue.Clear();
         }
@@ -580,7 +581,7 @@ namespace UnityEngine.Rendering.Universal
             context.ExecuteCommandBuffer(cmd);
             CommandBufferPool.Release(cmd);
 
-            if (firstTimeStereo && cameraData.isStereoEnabled && m_FirstTimeStereoTargetIsBound)
+            if (firstTimeStereo && cameraData.isStereoEnabled && (m_FirstTimeStereoTargetIsBound || (cameraData.isXRMultipass && m_XRRenderTargetNeedsClear)))
             {
                 m_FirstTimeStereoTargetIsBound = false;
 
