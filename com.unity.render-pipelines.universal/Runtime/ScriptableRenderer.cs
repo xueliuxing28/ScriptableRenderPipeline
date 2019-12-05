@@ -390,7 +390,6 @@ namespace UnityEngine.Rendering.Universal
 
             m_FirstTimeCameraColorTargetIsBound = true;
             m_FirstTimeCameraDepthTargetIsBound = true;
-            m_FirstTimeStereoTargetIsBound = true;
             m_InsideStereoRenderBlock = false;
             m_ActiveRenderPassQueue.Clear();
         }
