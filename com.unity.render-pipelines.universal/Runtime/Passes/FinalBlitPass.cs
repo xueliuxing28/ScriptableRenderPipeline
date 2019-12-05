@@ -54,7 +54,7 @@ namespace UnityEngine.Rendering.Universal.Internal
             // Note: We need to get the cameraData.targetTexture as this will get the targetTexture of the camera stack.
             // Overlay cameras need to output to the target described in the base camera while doing camera stack.
             ref CameraData cameraData = ref renderingData.cameraData;
-            RenderTargetIdentifier cameraTarget = new RenderTargetIdentifier(cameraData.targetTexture);
+            RenderTargetIdentifier cameraTarget = (cameraData.targetTexture != null) ? new RenderTargetIdentifier(cameraData.targetTexture) : BuiltinRenderTextureType.CameraTarget;
 
             // Use default blit for XR as we are not sure the UniversalRP blit handles stereo.
             // The blit will be reworked for stereo along the XRSDK work.

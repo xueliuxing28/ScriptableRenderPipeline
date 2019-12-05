@@ -309,7 +309,7 @@ namespace UnityEngine.Rendering.Universal
             ExecuteBlock(RenderPassBlock.AfterRendering, blockRanges, context, ref renderingData, eyeIndex);
 
             if (stereoEnabled)
-                EndXRRendering(context, camera, renderingData, eyeIndex);
+                EndXRRendering(context, renderingData, eyeIndex);
             }
 
             DrawGizmos(context, camera, GizmoSubset.PostImageEffects);
@@ -477,10 +477,11 @@ namespace UnityEngine.Rendering.Universal
             m_XRRenderTargetNeedsClear = true;
         }
 
-        void EndXRRendering(ScriptableRenderContext context, Camera camera, RenderingData renderingData, int eyeIndex)
+        void EndXRRendering(ScriptableRenderContext context, in RenderingData renderingData, int eyeIndex)
         {
+            Camera camera = renderingData.cameraData.camera;
             context.StopMultiEye(camera);
-            bool isLastPass = eyeIndex == renderingData.cameraData.numberOfXRPasses - 1;
+            bool isLastPass = renderingData.resolveFinalTarget && (eyeIndex == renderingData.cameraData.numberOfXRPasses - 1);
             context.StereoEndRender(camera, eyeIndex, isLastPass);
             m_InsideStereoRenderBlock = false;
         }
