@@ -60,6 +60,8 @@ namespace UnityEngine.Rendering.Universal
             get => m_ClearColor;
         }
 
+        internal int eyeIndex { get; set; }
+
         internal bool overrideCameraTarget { get; set; }
         internal bool isBlitRenderPass { get; set; }
 
@@ -77,6 +79,7 @@ namespace UnityEngine.Rendering.Universal
             m_ClearColor = Color.black;
             overrideCameraTarget = false;
             isBlitRenderPass = false;
+            eyeIndex = 0;
         }
 
         /// <summary>
