@@ -436,9 +436,9 @@ namespace UnityEngine.Rendering.Universal
                 bool needCustomCameraDepthClear = false;
 
                 int cameraColorTargetIndex = RenderingUtils.IndexOf(renderPass.colorAttachments, m_CameraColorTarget);
-                if (cameraColorTargetIndex != -1 && m_FirstTimeCameraColorTargetIsBound)
+                if (cameraColorTargetIndex != -1 && (m_FirstTimeCameraColorTargetIsBound || (cameraData.isXRMultipass && m_XRRenderTargetNeedsClear) ))
                 {
-                    m_FirstTimeCameraColorTargetIsBound = false;
+                    m_FirstTimeCameraColorTargetIsBound = false; // register that we did clear the camera target the first time it was bound
                     firstTimeStereo = true;
 
                     // Overlay cameras composite on top of previous ones. They don't clear.
@@ -450,6 +450,8 @@ namespace UnityEngine.Rendering.Universal
                     // But there is still a chance we don't need to issue individual clear() on each render-targets if they all have the same clear parameters.
                     needCustomCameraColorClear = (cameraClearFlag & ClearFlag.Color) != (renderPass.clearFlag & ClearFlag.Color)
                                                 || CoreUtils.ConvertSRGBToActiveColorSpace(camera.backgroundColor) != renderPass.clearColor;
+
+                    m_XRRenderTargetNeedsClear = false; // register that the XR camera multi-pass target does not need clear any more (until next call to BeginXRRendering)
                 }
 
                 // Note: if we have to give up the assumption that no depthTarget can be included in the MRT colorAttachments, we might need something like this:
@@ -459,12 +461,15 @@ namespace UnityEngine.Rendering.Universal
                 // }
 
                 if (renderPass.depthAttachment == m_CameraDepthTarget && m_FirstTimeCameraDepthTargetIsBound)
+                // note: should be split m_XRRenderTargetNeedsClear into m_XRColorTargetNeedsClear and m_XRDepthTargetNeedsClear and use m_XRDepthTargetNeedsClear here?
                 {
                     m_FirstTimeCameraDepthTargetIsBound = false;
-                    firstTimeStereo = true;
+                    //firstTimeStereo = true; // <- we do not call this here as the first render pass might be a shadow pass (non-stereo)
                     needCustomCameraDepthClear = (cameraClearFlag & ClearFlag.Depth) != (renderPass.clearFlag & ClearFlag.Depth);
-                }
 
+                    //m_XRRenderTargetNeedsClear = false; // note: is it possible that XR camera multi-pass target gets clear first when bound as depth target?
+                                                          //       in this case we might need need to register that it does not need clear any more (until next call to BeginXRRendering)
+                }
 
 
                 // Perform all clear operations needed. ----------------
