@@ -75,7 +75,6 @@ void Frag(  PackedVaryingsToPS packedInput,
         GetSurfaceData(input, V, posInput, surfaceData);
 #endif
 
-
 // Perform HTile optimization only on platform that support it
 #if ((SHADERPASS == SHADERPASS_DBUFFER_PROJECTOR) || (SHADERPASS == SHADERPASS_DBUFFER_MESH)) && defined(PLATFORM_SUPPORTS_BUFFER_ATOMICS_IN_PIXEL_SHADER)
     uint2 htileCoord = input.positionSS.xy / 8;
