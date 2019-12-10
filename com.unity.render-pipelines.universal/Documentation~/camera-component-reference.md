@@ -125,8 +125,9 @@ For more information on configuring and using Camera Stacks, see [Camera Stackin
 <a name="overlay-camera"></a>
 ## Overlay Camera reference
 
-TODO SCREENSHOT - Overlay Camera Inspector
 ![Overlay Camera Inspector](Images/camera-inspector-overlay.png)
+
+__Important note:__ In this version of URP, Overlay Cameras and Camera Stacking are supported only when using the Forward Renderer.
 
 When you use [Camera Stacking](camera-stacking.md), the [Base Camera](camera-types-and-render-mode.md#base-camera) of a Camera Stack determines most of the properties of the Camera Stack. Because [Overlay Cameras](camera-types-and-render-mode.md#overlay-camera) can only be used as part of a Camera Stack, you can configure only a limited number of settings on an Overlay Camera.
 
