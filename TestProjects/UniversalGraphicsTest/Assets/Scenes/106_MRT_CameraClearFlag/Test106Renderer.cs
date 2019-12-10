@@ -45,8 +45,11 @@ namespace UnityEngine.Rendering.Universal
         {
             CommandBuffer cmd = CommandBufferPool.Get(m_profilerTag);
 
-            cmd.GetTemporaryRT(m_CameraColor.id, 1280, 720);
-            cmd.GetTemporaryRT(m_CameraDepth.id, 1280, 720, 16);
+            int width = renderingData.cameraData.cameraTargetDescriptor.width;
+            int height = renderingData.cameraData.cameraTargetDescriptor.height;
+
+            cmd.GetTemporaryRT(m_CameraColor.id, width, height);
+            cmd.GetTemporaryRT(m_CameraDepth.id, width, height, 16);
 
             context.ExecuteCommandBuffer(cmd);
             CommandBufferPool.Release(cmd);
@@ -62,17 +65,21 @@ namespace UnityEngine.Rendering.Universal
             // Notice that the camera     clearColor (green)  is applied for output#0 (because output#0 is the camera target)
 
 
-            // 2) Copy results to the camera target - in test 106 we only copy output#1 since output#0 is the camera target itself
+            // 2) Copy results to the camera target
 
-            // layout
-            // x: <-040-><-580-><-040-><-580-><-040->
-            // y: <-200-><-320-><-200->
+            // layout (margin/blit/margin/..)
+            // x: <-0.04-><-0.44-><-0.04-><-0.44-><-0.04->
+            // y: <-0.25-><-0.50-><-0.25->
 
-            //m_Viewport.x = 40;
+            //m_Viewport.x = 0.04f * width;
+            m_Viewport.width = 0.44f * width;
+            m_Viewport.y = 0.25f * height;
+            m_Viewport.height = 0.50f * height;
+
             //m_CopyToViewportPasses[0].Setup(m_ColorToMrtOutputs[0].Identifier(), m_CameraColor, m_Viewport);
             //EnqueuePass(m_CopyToViewportPasses[0]);
 
-            //m_Viewport.x = 660;
+            m_Viewport.x = (0.04f + 0.44f + 0.04f) * width;
             m_CopyToViewportPasses[1].Setup(m_ColorToMrtOutputs[1].Identifier(), m_CameraColor, m_Viewport);
             EnqueuePass(m_CopyToViewportPasses[1]);
 
