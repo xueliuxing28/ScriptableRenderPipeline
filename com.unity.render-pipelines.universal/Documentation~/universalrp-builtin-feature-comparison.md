@@ -13,7 +13,7 @@ This table provides an overview of the current features supported in the Univers
 | Physical Camera                                              | Yes                                                          | Yes                                                          |
 | Dynamic Resolution                                           | Yes                                                          | Yes                                                          |
 | Multi Display                                                | Yes                                                          | Yes                                                          |
-| Stacking                                                     | Yes                                                          | In research                                                  |
+| Stacking                                                     | Yes                                                          | Yes                                                 |
 | Flare Layer                                                  | Yes                                                          | Not supported                                                |
 | Depth Texture                                                | Yes                                                          | Yes                                                          |
 | Depth + Normals Texture                                      | Yes                                                          | Not supported                                                |
@@ -156,7 +156,7 @@ This table provides an overview of the current features supported in the Univers
 | 2D Point Lights with Shades                                  | Not supported                                                | In research                                                  |
 | ***UI (Canvas Renderer)***                                   |                                                              |                                                              |
 | Screen Space - Overlay                                       | Yes                                                          | Yes                                                          |
-| Screen Space - Camera                                        | Yes                                                          | In research                                                  |
+| Screen Space - Camera                                        | Yes                                                          | Yes                                                 |
 | World Space                                                  | Yes                                                          | Yes                                                          |
 | Text Mesh Pro                                                | Yes                                                          | Yes                                                          |
 | ***VR***                                                     |                                                              |                                                              |
