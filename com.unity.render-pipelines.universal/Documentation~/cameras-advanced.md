@@ -34,23 +34,21 @@ If your URP Scene contains multiple Cameras, Unity performs their culling and re
 Once per frame, Unity performs the following operations:
 
 1. Unity gets the list of all active [Base Cameras](camera-types-and-render-type.md#base-camera) in the Scene.
-2. Unity organises the active Base Cameras into the following groups:
-    * Cameras that render their view to Render Textures
-    * Cameras that render their view to the screen
-3. Unity sorts the Base Cameras that render to Render Textures into priority order, so that Cameras with a lower numerical priority are drawn before Base Cameras with a higher numerical priority.
+2. Unity organises the active Base Cameras into 2 groups: Cameras that render their view to Render Textures, and Cameras that render their view to the screen.
+3. Unity sorts the Base Cameras that render to Render Textures into priority order, so that Cameras with a higher priority value are drawn last.
 4. For each Base Camera that renders to a Render Texture, Unity performs the following steps:
     1. Cull the Base Camera
     2. Render the Base Camera to the Render Texture
     3. For each [Overlay Camera](camera-types-and-render-type.md#overlay-camera) that is part of the Base Camera's [Camera Stack](camera-stacking.md), in the order defined in the Camera Stack:
         1. Cull the Overlay Camera
         2. Render the Overlay Camera to the Render Texture
-5. Unity sorts the Base Cameras that render to Render Textures into priority order, so that Cameras with a lower numerical priority are drawn before Base Cameras with a higher numerical priority.
-6. For each Base Camera that renders to a Render Texture, Unity performs the following steps:
+5. Unity sorts the Base Cameras that render to the screen into priority order, so that Cameras with a higher priority value are drawn last.
+6. For each Base Camera that renders to the screen, Unity performs the following steps:
     1. Cull the Base Camera
-    2. Render the Base Camera to the Render Texture
+    2. Render the Base Camera to the screen
     3. For each Overlay Camera that is part of the Base Camera's Camera Stack, in the order defined in the Camera Stack:
         1. Cull the Overlay Camera
-        2. Render the Overlay Camera to the Render Texture
+        2. Render the Overlay Camera to the screen
 
 Unity can render an Overlay Camera’s view multiple times during a frame - either because the Overlay Camera appears in more than one Camera Stack, or because the Overlay Camera appears in the same Camera Stack more than once. When this happens, Unity does not reuse any element of the culling or rendering operation. The operations are repeated in full, in the order detailed above.
 
