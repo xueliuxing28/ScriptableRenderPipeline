@@ -1,7 +1,35 @@
-# Camera rendering order and overdraw
+# Camera clearing, rendering order and overdraw
+
+## Clearing
+
+In the Universal Render Pipeline (URP), Camera clearing behavior depends on the Camera's [Render Type](camera-types-and-render-type.md).
+
+### Base Camera
+
+#### Color buffer
+
+At the start of its render loop, a [Base Camera](camera-types-and-render-type.md#base-camera) can clear its color buffer to a Skybox, clear its color buffer to a solid color, or use an uninitialized color buffer. You can choose this behavior using the __Background Type__ property in the [Base Camera Inspector](camera-component-reference.md#base-camera).
+
+Note that the contents of the uninitialized color buffer vary by platform. On some platforms, the unitialized color buffer will contain data from the previous frame. On other platforms, the unitialized color buffer will contain unintialized memory. You should choose to use an unitialized color buffer only if your Camera draws to every pixel in the color buffer, and you do not wish to incur the cost of an unnecessary clear operation.
+
+#### Depth buffer
+
+A Base Camera always clears its depth buffer at the start of each render loop.
+
+## Overlay Camera
+
+#### Color buffer
+
+At the start of its render loop, an [Overlay Camera](camera-types-and-render-type.md#overlay-camera) receives a color buffer containing color data from the previous Cameras in the Camera stack. It does not clear the contents of the color buffer.
+
+#### Depth buffer
+
+At the start of its render loop, an Overlay Camera receives a depth buffer containing depth data from the previous Cameras in the Camera Stack. You can choose this behavior using the __Clear Depth__ property in the [Overlay Camera Inspector](camera-component-reference.md#overlay-camera).
+
+When __Clear Depth__ is set to true, the Overlay Camera clears the depth buffer and draws its view to the color buffer on top of any existing color data. When __Clear Depth__ is set to false, the Overlay Camera tests against the depth buffer before drawing its view to the color buffer.
 
 ## Camera culling and rendering order
-If your Universal Render Pipeline (URP) Scene contains multiple Cameras, Unity performs their culling and rendering operations in a predictable order.
+If your URP Scene contains multiple Cameras, Unity performs their culling and rendering operations in a predictable order.
 
 Once per frame, Unity performs the following operations:
 
@@ -20,7 +48,7 @@ Once per frame, Unity performs the following operations:
 6. For each Base Camera that renders to a Render Texture, Unity performs the following steps:
     1. Cull the Base Camera
     2. Render the Base Camera to the Render Texture
-    3. For each [Overlay Camera](camera-types-and-render-type.md#overlay-camera) that is part of the Base Camera's [Camera Stack](camera-stacking.md), in the order defined in the Camera Stack:
+    3. For each Overlay Camera that is part of the Base Camera's Camera Stack, in the order defined in the Camera Stack:
         1. Cull the Overlay Camera
         2. Render the Overlay Camera to the Render Texture
 
