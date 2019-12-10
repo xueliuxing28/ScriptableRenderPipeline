@@ -78,11 +78,11 @@ The Camera Inspector has the following sections when the Camera has its **Render
 
 | __Property__               | __Description__                                              |
 | -------------------------- | ------------------------------------------------------------ |
-|__Background Type__ |Controls how to initialize the Camera's background.|
-|&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;_Skybox_|Skybox initializes camera with Skybox, defaulting to a background color if no skybox is found.|
-|&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;_Solid Color_|Solid Color initializes background with the background color.|
-|&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;_Uninitialized_|Uninitialized has undefined values for the camera background. Use this only if you are rendering all pixels in the Camera's view.|
-|__Background__ |The Camera clears the screen to this colour before rendering.<br/>This property only appears when you select **Solid Color** from the **Background Type** drop-down.|
+|__Background Type__ |Controls how to initialize the color buffer at the start of this Camera's render loop. For more information, see [the documentation on clearing](cameras-advanced.md#clearing).|
+|&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;_Skybox_|Initializes the color buffer by clearing to a Skybox. Defaults to a background color if no Skybox is found.|
+|&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;_Solid Color_|Initializes the color buffer by clearing to a given color.|
+|&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;_Uninitialized_|Does not initialize the color buffer. Choose this option only if your Camera or Camera Stack will draw to every pixel in the color buffer.|
+|__Background__ |The Camera clears its color buffer to this colour before rendering.<br/>This property only appears when you select **Solid Color** from the **Background Type** drop-down.|
 |__Volume Mask__| Use the drop-down to set the Layer Mask that defines which Volumes affect this Camera.|
 |__Volume Trigger__| Assign a Transform that the [Volume](Volumes.md) system uses to handle the position of this Camera. For example, if your application uses a third person view of a character, set this property to the character's Transform. The Camera then uses the post-processing and Scene settings for Volumes that the character enters. If you do not assign a Transform, the Camera uses its own Transform instead.|
 
@@ -117,13 +117,12 @@ This is because the Render Texture determines these properties. To change them, 
 <a name="base-stack"></a>
 ## Stack
 
-When the Base Camera is part of a Camera Stack, you use the Base Camera's Inspector to define and order the Stack.
+When the Base Camera is part of a Camera Stack, you use the Base Camera's Inspector to define and order the Stack. For more information on configuring and using Camera Stacks, see [Camera Stacking](camera-stacking.md).
 
-For more information on configuring and using Camera Stacks, see [Camera Stacking](camera-stacking.md).
-
+__Important note:__ In this version of URP, Overlay Cameras and Camera Stacking are supported only when using the Forward Renderer.
 
 <a name="overlay-camera"></a>
-## Overlay Camera reference
+## Overlay Camera component reference
 
 ![Overlay Camera Inspector](Images/camera-inspector-overlay.png)
 
@@ -173,7 +172,7 @@ The Camera Inspector has the following sections when the Camera has its Render M
 | __Property__               | __Description__                                              |
 | -------------------------- | ------------------------------------------------------------ |
 |__Renderer__ |Controls which renderer this Camera uses. |
-|__Clear Depth__ | If enabled, depth from the previous Camera will be cleared. |
+|__Clear Depth__ | If enabled, the depth buffer from the previous Camera will be cleared at the start of this Camera's render loop. For more information, see [the documentation on clearing](cameras-advanced.md#clearing). |
 |__Opaque Texture__ | Controls whether the Camera creates a CameraOpaqueTexture, which is a copy of the rendered view. |
 |&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;_On_ |The Camera creates a CameraOpaqueTexture.|
 |&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;_Off_ |The Camera does not create a CameraOpaqueTexture. |
