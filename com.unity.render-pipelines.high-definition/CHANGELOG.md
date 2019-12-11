@@ -4,11 +4,7 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
-## [8.x.x] - 2019-xx-yy
-### Changed
-- Updated macros to be compatible with the new shader preprocessor.
-
-## [8.0.0] - 2019-11-18
+## [Unreleased]
 
 ### Added
 - Ray tracing support for VR single-pass
@@ -261,6 +257,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Changed the way Sky Intensity (on Sky volume components) is handled. It's now a combo box where users can choose between Exposure, Multiplier or Lux (for HDRI sky only) instead of both multiplier and exposure being applied all the time. Added a new menu item to convert old profiles.
 - Change how method for specular occlusions is decided on inspector shader (Lit, LitTesselation, LayeredLit, LayeredLitTessellation)
 - Unlocked SSS, SSR, Motion Vectors and Distortion frame settings for reflections probes.
+- Updated macros to be compatible with the new shader preprocessor.
 
 ## [7.1.1] - 2019-09-05
 
