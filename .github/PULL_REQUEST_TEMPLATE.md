@@ -1,3 +1,12 @@
+**DONT FORGET TO ADD A CHANGELOG**
+
+### Checklist for PR maker
+- [ ] Have you added a backport label (if needed)? For example, the `need-backport-2019.3` label. After you backport the PR, the label changes to `backported-2019.3`.
+- [ ] Have you updated the changelog? Each package has a `CHANGELOG.md` file.
+- [ ] Have you updated or added the documentation for your PR? When you add a new feature, change a property name, or change the behavior of a feature, it's best practice to include related documentation changes in the same PR.
+- [ ] Have you added a graphic test for your PR (if needed)? When you add a new feature, or discover a bug that tests don't cover, please add a graphic test.
+
+---
 ### Purpose of this PR
 Why is this PR needed, what hard problem is it solving/fixing?
 

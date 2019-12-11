@@ -35,28 +35,22 @@ testplatforms:
 {% for editor in editors %}
 all_project_ci_{{ editor.version }}:
   name: _ABV for SRP repository - {{ editor.version }}
-  agent:
-    name: whatever
-    type: Unity::VM
-    image: cds-ops/ubuntu-18.04-agent:latest
-    flavor: b1.small
-  commands:
-    - dir
   dependencies:
   {% for project in projects %}
     - path: .yamato/upm-ci-{{ project.name | downcase }}.yml#All_{{ project.name }}_{{ editor.version }}
       rerun: always
   {% endfor %}
+  {% if editor.version == "fast-2019.3" %}
+  triggers:
+    pull_requests:
+      - targets:
+          only:
+            - "release/2019.3"
+  {% endif %}
 {% endfor %}
 
 all_project_ci_nightly:
-  name: Nightly ABV against 2019.3/staging
-  agent:
-    type: Unity::VM
-    image: cds-ops/ubuntu-18.04-agent:latest
-    flavor: b1.small
-  commands:
-    - dir
+  name: _Nightly ABV against 2019.3/staging
   dependencies:
   {% for project in projects %}
     - path: .yamato/upm-ci-{{ project.name | downcase }}.yml#All_{{ project.name }}_2019.3
@@ -68,11 +62,7 @@ all_project_ci_nightly:
   triggers:
     recurring:
       - branch: release/2019.3
-        frequency: daily
-  artifacts:
-    logs:
-      paths:
-        - "**/test-results/**"       
+        frequency: daily   
 
 {% for testplatform in testplatforms %} 
 {% for editor in editors %}     
@@ -106,22 +96,12 @@ smoke_test_{{ testplatform.name }}_{{ editor.version }}:
 
 all_smoke_tests:
   name: All Smoke Tests
-  agent:
-    type: Unity::VM
-    image: cds-ops/ubuntu-18.04-agent:latest
-    flavor: b1.small
-  commands:
-    - dir
   dependencies:
   {% for testplatform in testplatforms %} 
   {% for editor in editors %}
   - .yamato/upm-ci-abv.yml#smoke_test_{{ testplatform.name }}_{{ editor.version }}
   {% endfor %}
   {% endfor %}
-  artifacts:
-    logs:
-      paths:
-        - "**/test-results/**"
 
 trunk_verification:
   name: z_(do not use) Trunk verification 

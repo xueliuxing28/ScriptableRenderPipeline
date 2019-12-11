@@ -21,7 +21,7 @@ platforms:
     flavor: m1.mac
   - name: Linux
     type: Unity::VM::GPU
-    image: cds-ops/ubuntu-18.04-base:latest
+    image: cds-ops/ubuntu-18.04-base:stable
     flavor: b1.large
 testplatforms:
   - name: Standalone
@@ -339,12 +339,6 @@ Build_{{ project.name }}_OSX_OpenGLCore_Player_{{ editor.version }}:
 
 All_{{ project.name }}_{{ editor.version }}:
   name: All {{ project.name }} CI - {{ editor.version }}
-  agent:
-    type: Unity::VM
-    image: cds-ops/ubuntu-18.04-agent:latest
-    flavor: b1.small
-  commands:
-    - dir
   dependencies:
   {% for platform in platforms %}
   {% for testplatform in testplatforms %}
@@ -376,6 +370,16 @@ All_{{ project.name }}_{{ editor.version }}:
     
   {% endfor %}
   {% endfor %}
+  # {% if editor.version == "fast-trunk" %}
+  # triggers:
+    # changes:
+      # only:
+        # - "com.unity.visualeffectgraph/**/*"
+        # - "com.unity.testing.visualeffectgraph/**/*"
+        # - "TestProjects/VisualEffectGraph*/**/*"
+      # except:
+        # - "**/*.md"
+  # {% endif %}
 
 {% endfor %}
 {% endfor %}
