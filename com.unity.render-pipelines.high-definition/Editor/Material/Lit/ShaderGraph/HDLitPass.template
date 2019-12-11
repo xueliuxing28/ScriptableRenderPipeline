@@ -56,10 +56,9 @@ Pass
     $TransparentWritesMotionVec:         #define _WRITE_TRANSPARENT_MOTION_VECTOR 1
     $DepthOffset:                        #define _DEPTHOFFSET_ON 1
     $BlendMode.PreserveSpecular:        #define _BLENDMODE_PRESERVE_SPECULAR_LIGHTING 1
-
-	$NormalDropOffTS:					#define _NORMAL_DROPOFF_SPACE	0
-	$NormalDropOffOS:					#define _NORMAL_DROPOFF_SPACE	1
-	$NormalDropOffWS:					#define _NORMAL_DROPOFF_SPACE	2
+    $features.NormalDropOffTS:			#define _NORMAL_DROPOFF_SPACE	0
+    $features.NormalDropOffOS:			#define _NORMAL_DROPOFF_SPACE	1
+    $features.NormalDropOffWS:			#define _NORMAL_DROPOFF_SPACE	2
 
     //-------------------------------------------------------------------------------------
     // End Variant Definitions
