@@ -3,15 +3,27 @@ SurfaceDescriptionInputs BuildSurfaceDescriptionInputs(Varyings input)
     SurfaceDescriptionInputs output;
     ZERO_INITIALIZE(SurfaceDescriptionInputs, output);
 
-    $SurfaceDescriptionInputs.WorldSpaceNormal:          output.WorldSpaceNormal =            input.normalWS;
+	// must use interpolated tangent, bitangent and normal before they are normalized in the pixel shader.
+	float3 unnormalizedNormalWS = input.normalWS;
+    const float renormFactor = 1.0 / length(unnormalizedNormalWS);
+
+	// use bitangent on the fly like in hdrp
+	float3 bitang = cross(input.normalWS.xyz, input.tangentWS.xyz);			// IMPORTANT! for double sided materials the normal must not be negated until AFTER this point.
+	bitang *= (dot(bitang, input.bitangentWS.xyz)<0.0 ? (-1.0) : 1.0);		// we don't have the sign bit anymore (wasn't delivered by the vertex shader).
+
+    $SurfaceDescriptionInputs.WorldSpaceNormal:          output.WorldSpaceNormal =            renormFactor*input.normalWS;		// we want a unit length Normal Vector node in shader graph
     $SurfaceDescriptionInputs.ObjectSpaceNormal:         output.ObjectSpaceNormal =           mul(output.WorldSpaceNormal, (float3x3) UNITY_MATRIX_M);           // transposed multiplication by inverse matrix to handle normal scale
     $SurfaceDescriptionInputs.ViewSpaceNormal:           output.ViewSpaceNormal =             mul(output.WorldSpaceNormal, (float3x3) UNITY_MATRIX_I_V);         // transposed multiplication by inverse matrix to handle normal scale
     $SurfaceDescriptionInputs.TangentSpaceNormal:        output.TangentSpaceNormal =          float3(0.0f, 0.0f, 1.0f);
-    $SurfaceDescriptionInputs.WorldSpaceTangent:         output.WorldSpaceTangent =           input.tangentWS.xyz;
+
+	// to preserve mikktspace compliance we use same scale renormFactor as was used on the normal.
+	// This is explained in section 2.2 in "surface gradient based bump mapping framework"
+    $SurfaceDescriptionInputs.WorldSpaceTangent:         output.WorldSpaceTangent =           renormFactor*input.tangentWS.xyz;
+	$SurfaceDescriptionInputs.WorldSpaceBiTangent:       output.WorldSpaceBiTangent =         renormFactor*bitang;
+
     $SurfaceDescriptionInputs.ObjectSpaceTangent:        output.ObjectSpaceTangent =          TransformWorldToObjectDir(output.WorldSpaceTangent);
     $SurfaceDescriptionInputs.ViewSpaceTangent:          output.ViewSpaceTangent =            TransformWorldToViewDir(output.WorldSpaceTangent);
     $SurfaceDescriptionInputs.TangentSpaceTangent:       output.TangentSpaceTangent =         float3(1.0f, 0.0f, 0.0f);
-    $SurfaceDescriptionInputs.WorldSpaceBiTangent:       output.WorldSpaceBiTangent =         input.bitangentWS;
     $SurfaceDescriptionInputs.ObjectSpaceBiTangent:      output.ObjectSpaceBiTangent =        TransformWorldToObjectDir(output.WorldSpaceBiTangent);
     $SurfaceDescriptionInputs.ViewSpaceBiTangent:        output.ViewSpaceBiTangent =          TransformWorldToViewDir(output.WorldSpaceBiTangent);
     $SurfaceDescriptionInputs.TangentSpaceBiTangent:     output.TangentSpaceBiTangent =       float3(0.0f, 1.0f, 0.0f);
