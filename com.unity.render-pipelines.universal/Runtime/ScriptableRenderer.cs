@@ -433,6 +433,9 @@ namespace UnityEngine.Rendering.Universal
             m_FirstTimeCameraDepthTargetIsBound = true;
             
             m_ActiveRenderPassQueue.Clear();
+
+            m_CameraColorTarget = BuiltinRenderTextureType.CameraTarget;
+            m_CameraDepthTarget = BuiltinRenderTextureType.CameraTarget;
         }
 
         void ExecuteBlock(int blockIndex, NativeArray<int> blockRanges,
@@ -584,11 +587,6 @@ namespace UnityEngine.Rendering.Universal
                 if (passColorAttachment == m_CameraColorTarget && (m_FirstTimeCameraColorTargetIsBound || (cameraData.isXRMultipass && m_XRRenderTargetNeedsClear) ))
                 {
                     m_FirstTimeCameraColorTargetIsBound = false; // register that we did clear the camera target the first time it was bound
-
-                    // Overlay cameras composite on top of previous ones. They don't clear.
-                    // MTT: Commented due to not implemented yet
-                    //                if (renderingData.cameraData.renderType == CameraRenderType.Overlay)
-                    //                    clearFlag = ClearFlag.None;
 
                     finalClearFlag |= (cameraClearFlag & ClearFlag.Color);
                     finalClearColor = CoreUtils.ConvertSRGBToActiveColorSpace(camera.backgroundColor);
@@ -774,11 +772,8 @@ namespace UnityEngine.Rendering.Universal
                 for (int i = 0; i < m_ActiveRenderPassQueue.Count; ++i)
                     m_ActiveRenderPassQueue[i].OnFinishCameraStackRendering(cmd);
 
-                m_CameraColorTarget = BuiltinRenderTextureType.CameraTarget;
-                m_CameraDepthTarget = BuiltinRenderTextureType.CameraTarget;
                 FinishRendering(cmd);
             }
-            Clear();
 
             context.ExecuteCommandBuffer(cmd);
             CommandBufferPool.Release(cmd);
