@@ -2,8 +2,15 @@
 {
     inputData.positionWS = input.positionWS;
 #ifdef _NORMALMAP
-    inputData.normalWS = TransformTangentToWorld(normal,
-        half3x3(input.tangentWS.xyz, input.bitangentWS.xyz, input.normalWS.xyz));
+
+#if _NORMAL_DROPOFF_SPACE==0
+    inputData.normalWS = TransformTangentToWorld(normal, half3x3(input.tangentWS.xyz, input.bitangentWS.xyz, input.normalWS.xyz));
+#elif _NORMAL_DROPOFF_SPACE==1
+	inputData.normalWS = TransformObjectToWorldNormal(normal);
+#elif _NORMAL_DROPOFF_SPACE==2
+	inputData.normalWS = normal;
+#endif
+    
 #else
     inputData.normalWS = input.normalWS;
 #endif
