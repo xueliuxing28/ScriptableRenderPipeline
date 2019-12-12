@@ -476,7 +476,9 @@ namespace UnityEngine.Rendering.Universal
 
             // Overlay cameras inherit viewport from base. In this case, we need to guarantee that the aspect ratio is the same in the projection
             // matrix to not cause squishing when rendering objects in overlay cameras.
-            cameraData.projectionMatrix = Matrix4x4.Perspective(camera.fieldOfView, cameraData.aspectRatio, camera.nearClipPlane, camera.farClipPlane);
+            cameraData.projectionMatrix = (!camera.orthographic) ?
+                Matrix4x4.Perspective(camera.fieldOfView, cameraData.aspectRatio, camera.nearClipPlane, camera.farClipPlane) :
+                camera.projectionMatrix;
 
             if (camera.cameraType == CameraType.SceneView)
             {
