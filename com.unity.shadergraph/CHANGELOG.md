@@ -25,7 +25,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - The Main Preview for Sprite Lit and Sprite Unlit master nodes now displays the correct color. [1184656](https://issuetracker.unity3d.com/issues/shadergraph-preview-for-lit-and-unlit-master-node-wrong-color-when-color-is-set-directly-on-master-node)
 - Shader Graph shaders in `Always Include Shaders` no longer crash builds. [1191757](https://issuetracker.unity3d.com/issues/lwrp-build-crashes-when-built-with-shadergraph-file-added-to-always-include-shaders-list)
 - The `Transform` node now correctly transforms Absolute World to Object.
-- Fixed a bug where Blackboard can be dragged into the Graph when Blackboard is disabled
+- Fixed a bug where you could drag the Blackboard into a graph even when you disabled the Blackboard.
 
 ### Fixed
 - Sticky Notes can now be grouped properly.
