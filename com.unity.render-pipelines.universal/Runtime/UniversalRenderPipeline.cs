@@ -176,7 +176,13 @@ namespace UnityEngine.Rendering.Universal
 
             SortCameras(cameras);
             for (int i = 0; i < cameras.Length; ++i)
-                RenderCameraStack(renderContext, cameras[i], cameras[i].GetUniversalAdditionalCameraData());
+            {
+                var camera = cameras[i];
+                if (IsGameCamera(camera))
+                    RenderCameraStack(renderContext, camera);
+                else
+                    RenderSingleCamera(renderContext, camera);
+            }
 
             EndFrameRendering(renderContext, cameras);
         }
@@ -187,7 +193,7 @@ namespace UnityEngine.Rendering.Universal
             if (IsGameCamera(camera))
                 camera.gameObject.TryGetComponent(out additionalCameraData);
 
-            if (additionalCameraData.renderType != CameraRenderType.Base)
+            if (additionalCameraData != null && additionalCameraData.renderType != CameraRenderType.Base)
             {
                 Debug.LogWarning("Only Base cameras can be rendered with standalone RenderSingleCamera. Camera will be skipped.");
                 return;
@@ -249,21 +255,21 @@ namespace UnityEngine.Rendering.Universal
             EndCameraRendering(context, camera);
         }
 
-        static void RenderCameraStack(ScriptableRenderContext context, Camera baseCamera, UniversalAdditionalCameraData baseCameraAdditionalData)
+        static void RenderCameraStack(ScriptableRenderContext context, Camera baseCamera)
         {
-            Debug.Assert(baseCameraAdditionalData != null);
+            baseCamera.TryGetComponent<UniversalAdditionalCameraData>(out var baseCameraAdditionalData);
 
             // Overlay cameras will be rendered stacked while rendering base cameras
-            if (baseCameraAdditionalData.renderType == CameraRenderType.Overlay)
+            if (baseCameraAdditionalData != null && baseCameraAdditionalData.renderType == CameraRenderType.Overlay)
                 return;
 
-            List<Camera> cameraStack = baseCameraAdditionalData.cameraStack;
+            List<Camera> cameraStack = baseCameraAdditionalData?.cameraStack;
 
             // We need to know the last active camera in the stack to be able to resolve
             // rendering to screen when rendering it. The last camera in the stack is not
             // necessarily the last active one as it users might disable it.
             int lastActiveOverlayCameraIndex = -1;
-            if (cameraStack != null && IsGameCamera(baseCamera) )
+            if (cameraStack != null)
             {
                 // TODO: Add support to camera stack in VR multi pass mode
                 if (!IsMultiPassStereoEnabled(baseCamera))
@@ -276,9 +282,9 @@ namespace UnityEngine.Rendering.Universal
 
                         if (currCamera != null && currCamera.isActiveAndEnabled)
                         {
-                            var data = currCamera.GetUniversalAdditionalCameraData();
+                            currCamera.TryGetComponent<UniversalAdditionalCameraData>(out var data);
 
-                            if (data.renderType != CameraRenderType.Overlay)
+                            if (data == null || data.renderType != CameraRenderType.Overlay)
                             {
                                 Debug.LogWarning(string.Format("Stack can only contain Overlay cameras. {0} will skip rendering.", currCamera.name));
                             }
