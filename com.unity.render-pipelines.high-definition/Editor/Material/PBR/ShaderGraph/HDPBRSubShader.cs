@@ -508,6 +508,22 @@ namespace UnityEditor.Rendering.HighDefinition
             {
                 baseActiveFields.Add("AlphaTest");
             }
+            
+            switch(masterNode.normalDropOffSpace)
+            {
+                case NormalDropOffSpace.Tangent:
+                    baseActiveFields.AddAll("features.NormalDropOffTS");
+                    break;
+                case NormalDropOffSpace.Object:
+                    baseActiveFields.AddAll("features.NormalDropOffOS");
+                    break;
+                case NormalDropOffSpace.World:
+                    baseActiveFields.AddAll("features.NormalDropOffWS");
+                    break;
+                default:
+                    UnityEngine.Debug.LogError("Unknown normal drop off space: " + masterNode.normalDropOffSpace);
+                    break;
+            }
 
             if (masterNode.surfaceType != UnityEditor.ShaderGraph.SurfaceType.Opaque)
             {

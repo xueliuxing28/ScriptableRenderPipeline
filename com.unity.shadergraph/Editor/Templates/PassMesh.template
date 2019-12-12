@@ -38,6 +38,9 @@ Pass
     $SpecularSetup:                     #define _SPECULAR_SETUP
     $BlendMode.Add:                     #define _BLENDMODE_ADD 1
     $BlendMode.Premultiply:             #define _ALPHAPREMULTIPLY_ON 1
+    $features.NormalDropOffTS:			#define _NORMAL_DROPOFF_SPACE	0
+    $features.NormalDropOffOS:			#define _NORMAL_DROPOFF_SPACE	1
+    $features.NormalDropOffWS:			#define _NORMAL_DROPOFF_SPACE	2
     $Attributes.normalOS:               #define ATTRIBUTES_NEED_NORMAL
     $Attributes.tangentOS:              #define ATTRIBUTES_NEED_TANGENT
     $Attributes.uv0:                    #define ATTRIBUTES_NEED_TEXCOORD0
