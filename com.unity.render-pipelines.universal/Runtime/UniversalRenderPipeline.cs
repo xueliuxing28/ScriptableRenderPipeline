@@ -316,8 +316,11 @@ namespace UnityEngine.Rendering.Universal
             for (int i = 0; i < cameraStack.Count; ++i)
             {
                 var currCamera = cameraStack[i];
-                var currCameraData = currCamera.GetUniversalAdditionalCameraData();
 
+                if (!currCamera.isActiveAndEnabled)
+                    continue;
+
+                currCamera.TryGetComponent<UniversalAdditionalCameraData>(out var currCameraData);
                 // Camera is overlay and enabled
                 if (currCameraData != null)
                 {
