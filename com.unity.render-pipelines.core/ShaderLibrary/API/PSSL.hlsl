@@ -57,7 +57,12 @@ uint WaveGetLaneIndex()
 bool WaveIsFirstLane()
 {
 #ifdef SHADER_STAGE_FRAGMENT
-    // For fragment shaders we have to make sure to return the first non helper lane that is valid.
+    // For fragment shaders we have to make sure to return the first non helper lane that is valid as helper lanes are
+    // described as inactive according to the HLSL docs here: https://github.com/Microsoft/DirectXShaderCompiler/wiki/Wave-Intrinsics
+    // the MSDN docs appear to be out of date on the Wave functions: https://github.com/Microsoft/DirectXShaderCompiler/issues/699
+    // where they describe WaveIsFirstLane as including helper lanes. Inspecting the GCN disassembly from DX12 a DX12 shader with the OpenGPU
+    // RGA tool shows that on DX12 WaveIsFirstLane() does indeed appear to exclude helper lanes picking the lowest non-helper lane.
+
     ulong mask = __s_read_exec() & __s_read_initialpixelvalidmask();
     return __v_cndmask_b32(0, 1, mask & -mask);
 #else
