@@ -8,8 +8,7 @@ SurfaceDescriptionInputs BuildSurfaceDescriptionInputs(Varyings input)
     $SurfaceDescriptionInputs.WorldSpaceNormal: const float renormFactor = 1.0 / length(unnormalizedNormalWS);
 
 	$SurfaceDescriptionInputs.WorldSpaceBiTangent: // use bitangent on the fly like in hdrp
-	$SurfaceDescriptionInputs.WorldSpaceBiTangent: float3 bitang = cross(input.normalWS.xyz, input.tangentWS.xyz);			// IMPORTANT! for double sided materials the normal must not be negated until AFTER this point.
-	$SurfaceDescriptionInputs.WorldSpaceBiTangent: bitang *= (dot(bitang, input.bitangentWS.xyz)<0.0 ? (-1.0) : 1.0);		// we don't have the sign bit anymore (wasn't delivered by the vertex shader).
+	$SurfaceDescriptionInputs.WorldSpaceBiTangent: float3 bitang = (input.tangentWS.w<0.0 ? -1.0 : 1.0) * cross(input.normalWS.xyz, input.tangentWS.xyz);			// IMPORTANT! for double sided materials the normal must not be negated until AFTER this point.
 
     $SurfaceDescriptionInputs.WorldSpaceNormal:          output.WorldSpaceNormal =            renormFactor*input.normalWS;		// we want a unit length Normal Vector node in shader graph
     $SurfaceDescriptionInputs.ObjectSpaceNormal:         output.ObjectSpaceNormal =           mul(output.WorldSpaceNormal, (float3x3) UNITY_MATRIX_M);           // transposed multiplication by inverse matrix to handle normal scale
