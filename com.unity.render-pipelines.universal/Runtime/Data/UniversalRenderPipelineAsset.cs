@@ -160,7 +160,9 @@ namespace UnityEngine.Rendering.Universal
         [SerializeField] PipelineDebugLevel m_DebugLevel = PipelineDebugLevel.Disabled;
 
         // Post-processing settings
+#pragma warning disable 414 // 'field' is assigned but never used
         [SerializeField] PostProcessingFeatureSet m_PostProcessingFeatureSet = PostProcessingFeatureSet.Builtin;
+#pragma warning restore 414
         [SerializeField] ColorGradingMode m_ColorGradingMode = ColorGradingMode.LowDynamicRange;
         [SerializeField] int m_ColorGradingLutSize = 32;
 
