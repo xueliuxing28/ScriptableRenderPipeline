@@ -98,6 +98,12 @@ namespace UnityEngine.Rendering.Universal
         HighDynamicRange
     }
 
+    public enum PostProcessingFeatureSet
+    {
+        Builtin,
+        PostProcessingV2
+    }
+
     public class UniversalRenderPipelineAsset : RenderPipelineAsset, ISerializationCallbackReceiver
     {
         Shader m_DefaultShader;
@@ -154,6 +160,7 @@ namespace UnityEngine.Rendering.Universal
         [SerializeField] PipelineDebugLevel m_DebugLevel = PipelineDebugLevel.Disabled;
 
         // Post-processing settings
+        [SerializeField] PostProcessingFeatureSet m_PostProcessingFeatureSet = PostProcessingFeatureSet.Builtin;
         [SerializeField] ColorGradingMode m_ColorGradingMode = ColorGradingMode.LowDynamicRange;
         [SerializeField] int m_ColorGradingLutSize = 32;
 
@@ -581,6 +588,26 @@ namespace UnityEngine.Rendering.Universal
         {
             get { return m_UseSRPBatcher; }
             set { m_UseSRPBatcher = value; }
+        }
+
+        public PostProcessingFeatureSet postProcessingFeatureSet
+        {
+            get
+            {
+#if POST_PROCESSING_STACK_2_0_0_OR_NEWER
+                return m_PostProcessingFeatureSet;
+#else
+                return PostProcessingFeatureSet.Builtin;
+#endif
+            }
+            set
+            {
+#if POST_PROCESSING_STACK_2_0_0_OR_NEWER
+                m_PostProcessingFeatureSet = value;
+#else
+                m_PostProcessingFeatureSet = PostProcessingFeatureSet.Builtin;
+#endif
+            }
         }
 
         public ColorGradingMode colorGradingMode

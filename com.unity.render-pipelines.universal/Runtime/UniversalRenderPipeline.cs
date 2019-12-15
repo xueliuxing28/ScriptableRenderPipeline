@@ -336,6 +336,17 @@ namespace UnityEngine.Rendering.Universal
                 cameraData.antialiasingQuality = AntialiasingQuality.High;
             }
 
+            // PPv2 compatibility
+#if POST_PROCESSING_STACK_2_0_0_OR_NEWER
+#pragma warning disable 0618 // Obsolete
+            if (settings.postProcessingFeatureSet == PostProcessingFeatureSet.PostProcessingV2)
+            {
+                camera.TryGetComponent(out cameraData.postProcessLayer);
+                cameraData.postProcessEnabled &= cameraData.postProcessLayer != null && cameraData.postProcessLayer.isActiveAndEnabled;
+            }
+#pragma warning restore 0618
+#endif
+
             // Disables post if GLes2
             cameraData.postProcessEnabled &= SystemInfo.graphicsDeviceType != GraphicsDeviceType.OpenGLES2;
 

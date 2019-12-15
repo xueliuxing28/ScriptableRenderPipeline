@@ -836,7 +836,7 @@ namespace UnityEditor.Rendering.Universal
 
             hasChanged |= DrawToggle(m_AdditionalCameraDataRenderPostProcessing, ref selectedRenderPostProcessing, Styles.renderPostProcessing);
 
-            if (selectedRenderPostProcessing)
+            if (selectedRenderPostProcessing && UniversalRenderPipeline.asset?.postProcessingFeatureSet != PostProcessingFeatureSet.PostProcessingV2)
             {
                 EditorGUI.indentLevel++;
                 hasChanged |= DrawIntPopup(m_AdditionalCameraDataAntialiasing, ref selectedAntialiasing, Styles.antialiasing, Styles.antialiasingOptions, Styles.antialiasingValues);
