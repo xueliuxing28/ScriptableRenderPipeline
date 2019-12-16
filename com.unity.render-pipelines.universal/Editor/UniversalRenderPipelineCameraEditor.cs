@@ -28,11 +28,9 @@ namespace UnityEditor.Rendering.Universal
             public static GUIContent outputSettingsText = EditorGUIUtility.TrTextContent("Output", "These settings control how the camera output is formatted.");
             public static GUIContent renderingSettingsText = EditorGUIUtility.TrTextContent("Rendering", "These settings control for the specific rendering features for this camera.");
             public static GUIContent stackSettingsText = EditorGUIUtility.TrTextContent("Stack", "The list of overlay cameras assigned to this camera.");
-            public static GUIContent volumeSettingsText = EditorGUIUtility.TrTextContent("Environment", "These settings control the Environment.");
 
             public static GUIContent backgroundType = EditorGUIUtility.TrTextContent("Background Type", "Controls how to initialize the Camera's background.\n\nSkybox initializes camera with Skybox, defaulting to a background color if no skybox is found.\n\nSolid Color initializes background with the background color.\n\nUninitialized has undefined values for the camera background. Use this only if you are rendering all pixels in the Camera's view.");
             public static GUIContent cameraType = EditorGUIUtility.TrTextContent("Render Type", "Controls which type of camera this is.");
-            public static GUIContent cameraOutput = EditorGUIUtility.TrTextContent("Output Target", "Controls where we are rendering the output to.");
             public static GUIContent renderingShadows = EditorGUIUtility.TrTextContent("Render Shadows", "Makes this camera render shadows.");
             public static GUIContent requireDepthTexture = EditorGUIUtility.TrTextContent("Depth Texture", "On makes this camera create a _CameraDepthTexture, which is a copy of the rendered depth values.\nOff makes the camera not create a depth texture.\nUse Pipeline Settings applies settings from the Render Pipeline Asset.");
             public static GUIContent requireOpaqueTexture = EditorGUIUtility.TrTextContent("Opaque Texture", "On makes this camera create a _CameraOpaqueTexture, which is a copy of the rendered view.\nOff makes the camera not create an opaque texture.\nUse Pipeline Settings applies settings from the Render Pipeline Asset.");
@@ -52,12 +50,12 @@ namespace UnityEditor.Rendering.Universal
             public static GUIContent stopNaN = EditorGUIUtility.TrTextContent("Stop NaN", "Automatically replaces NaN/Inf in shaders by a black pixel to avoid breaking some effects. This will affect performances and should only be used if you experience NaN issues that you can't fix. Has no effect on GLES2 platforms.");
             public static GUIContent dithering = EditorGUIUtility.TrTextContent("Dithering", "Applies 8-bit dithering to the final render to reduce color banding.");
 
-            public static readonly GUIContent targetTextureLabel = EditorGUIUtility.TrTextContent("Texture", "The texture to render this camera into.");
+            public static readonly GUIContent targetTextureLabel = EditorGUIUtility.TrTextContent("Output Texture", "The texture to render this camera into, if none then this camera renders to screen.");
 
             public static readonly GUIContent cameraStackNotSupportedMessage = EditorGUIUtility.TrTextContent("Camera Stacking not supported.", "The renderer used by this camera doesn't support camera stacking.");
 
-            public readonly string hdrDisabledWarning = "HDR rendering is disabled in the Universal Render Pipeline asset.";
-            public readonly string mssaDisabledWarning = "Anti-aliasing is disabled in the Universal Render Pipeline asset.";
+            public static readonly string hdrDisabledWarning = "HDR rendering is disabled in the Universal Render Pipeline asset.";
+            public static readonly string mssaDisabledWarning = "Anti-aliasing is disabled in the Universal Render Pipeline asset.";
 
             public static readonly string missingRendererWarning = "The currently selected Renderer is missing form the Universal Render Pipeline asset.";
             public static readonly string noRendererError = "There are no valid Renderers available on the Universal Render Pipeline asset.";
@@ -118,20 +116,7 @@ namespace UnityEditor.Rendering.Universal
                 new GUIContent("High")
             };
             public static int[] antialiasingQualityValues = { 0, 1, 2 };
-
-            // Camera Output
-            public static List<GUIContent> m_CameraOutputTargets = null;
-
-            // Returns all enum names filtering CameraOutput.Camera (replaced by CameraOutput.Screen)
-            public static readonly string[] cameraOutputTargets = Enum.GetNames(typeof(CameraOutput)).ToList()
-                .Where(x => !x.Equals("Camera"))
-                .ToArray();
-
-            // Returns all enum int values filtering CameraOutput.Camera (replaced by CameraOutput.Screen)
-            public static int[] additionalDataCameraOutputOptions = Enum.GetNames(typeof(CameraOutput)).ToList()
-                .Where(x => !x.Equals("Camera"))
-                .Select(x => (int)Enum.Parse(typeof(CameraOutput), x))
-                .ToArray();
+            
         };
 
         ReorderableList m_LayerList;
@@ -213,19 +198,7 @@ namespace UnityEditor.Rendering.Universal
                 }
             }
         }
-
-        void UpdateCameraOutputIntPopupData()
-        {
-            if (Styles.m_CameraOutputTargets == null)
-            {
-                Styles.m_CameraOutputTargets = new List<GUIContent>();
-                foreach (string outputTarget in Styles.cameraOutputTargets)
-                {
-                    Styles.m_CameraOutputTargets.Add(new GUIContent(outputTarget));
-                }
-            }
-        }
-
+        
         public new void OnEnable()
         {
             m_UniversalRenderPipeline = GraphicsSettings.renderPipelineAsset as UniversalRenderPipelineAsset;
@@ -250,7 +223,6 @@ namespace UnityEditor.Rendering.Universal
 
             UpdateAnimationValues(true);
             UpdateCameraTypeIntPopupData();
-            UpdateCameraOutputIntPopupData();
 
             UpdateCameras();
         }
@@ -604,10 +576,9 @@ namespace UnityEditor.Rendering.Universal
             m_OutputSettingsFoldout.value = EditorGUILayout.BeginFoldoutHeaderGroup(m_OutputSettingsFoldout.value, Styles.outputSettingsText);
             if (m_OutputSettingsFoldout.value)
             {
-                EditorGUI.indentLevel++;
                 DrawTargetTexture();
 
-                if (camera.targetTexture == null)
+                EditorGUI.BeginDisabledGroup(camera.targetTexture != null);
                 {
                     DrawHDR();
                     DrawMSAA();
@@ -615,14 +586,13 @@ namespace UnityEditor.Rendering.Universal
                     settings.DrawDynamicResolution();
                     settings.DrawMultiDisplay();
                 }
-
+                EditorGUI.EndDisabledGroup();
                 // Third option comes later.
 
                 EditorGUILayout.Space();
                 EditorGUILayout.Space();
 
                 DrawVRSettings();
-                EditorGUI.indentLevel--;
             }
             EditorGUILayout.EndFoldoutHeaderGroup();
         }
