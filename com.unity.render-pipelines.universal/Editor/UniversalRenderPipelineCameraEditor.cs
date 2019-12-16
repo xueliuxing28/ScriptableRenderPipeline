@@ -578,7 +578,7 @@ namespace UnityEditor.Rendering.Universal
             {
                 DrawTargetTexture();
 
-                EditorGUI.BeginDisabledGroup(camera.targetTexture != null);
+                if(camera.targetTexture == null)
                 {
                     DrawHDR();
                     DrawMSAA();
@@ -586,7 +586,6 @@ namespace UnityEditor.Rendering.Universal
                     settings.DrawDynamicResolution();
                     settings.DrawMultiDisplay();
                 }
-                EditorGUI.EndDisabledGroup();
                 // Third option comes later.
 
                 EditorGUILayout.Space();
