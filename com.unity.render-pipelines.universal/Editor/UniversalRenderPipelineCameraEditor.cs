@@ -380,7 +380,7 @@ namespace UnityEditor.Rendering.Universal
             if (!validCameras.Any())
             {
                 names = new GUIContent[1];
-                names[0] = new GUIContent("No Overlay Cameras exists");
+                names[0] = new GUIContent("No Overlay Cameras exist.");
             }
             EditorUtility.DisplayCustomMenu(rect, names, -1, AddCameraToCameraListMenuSelected, null);
         }
