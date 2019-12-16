@@ -55,11 +55,11 @@ namespace UnityEditor.Rendering.Universal
             public static GUIContent supportsSoftShadows = EditorGUIUtility.TrTextContent("Soft Shadows", "If enabled pipeline will perform shadow filtering. Otherwise all lights that cast shadows will fallback to perform a single shadow sample.");
 
             // Post-processing
-            public static GUIContent postProcessingFeatureSet = EditorGUIUtility.TrTextContent("Feature Set", "Sets the feature set to use for the render pipeline. Builtin should always be preferred over the other compatibility mode.");
+            public static GUIContent postProcessingFeatureSet = EditorGUIUtility.TrTextContent("Feature Set", "Sets the feature set to use for the render pipeline. Integrated should always be preferred over the other compatibility mode.");
             public static GUIContent colorGradingMode = EditorGUIUtility.TrTextContent("Grading Mode", "Defines how color grading will be applied. Operators will react differently depending on the mode.");
             public static GUIContent colorGradingLutSize = EditorGUIUtility.TrTextContent("LUT size", "Sets the size of the internal and external color grading lookup textures (LUTs).");
             public static string postProcessingFeatureSetWarning = "Post-processing V2 support for the Universal Render Pipeline will be deprecated in a near future. We recommend only using this mode for compatibility purpose.";
-            public static string postProcessingFeatureSetError = "The Post-processing V2 package isn't installed, the feature set will fallback on Builtin.";
+            public static string postProcessingFeatureSetError = "The Post-processing V2 package isn't installed, the feature set will fallback on Integrated.";
             public static string colorGradingModeWarning = "HDR rendering is required to use the high dynamic range color grading mode. The low dynamic range will be used instead.";
             public static string colorGradingModeSpecInfo = "The high dynamic range color grading mode works best on platforms that support floating point textures.";
             public static string colorGradingLutSizeWarning = "The minimal recommended LUT size for the high dynamic range color grading mode is 32. Using lower values will potentially result in color banding and posterization effects.";

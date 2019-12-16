@@ -86,7 +86,7 @@ namespace UnityEngine.Experimental.Rendering.Universal
             bool requireFinalBlitPass = useOffscreenColorTexture;
             var finalBlitSourceHandle = m_ColorTargetHandle;
 
-            if (postProcessEnabled && postProcessFeatureSet == PostProcessingFeatureSet.Builtin)
+            if (postProcessEnabled && postProcessFeatureSet == PostProcessingFeatureSet.Integrated)
             {
                 m_ColorGradingLutPass.Setup(m_ColorGradingLutHandle);
                 EnqueuePass(m_ColorGradingLutPass);

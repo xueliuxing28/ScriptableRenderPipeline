@@ -100,7 +100,7 @@ namespace UnityEngine.Rendering.Universal
 
     public enum PostProcessingFeatureSet
     {
-        Builtin,
+        Integrated,
         PostProcessingV2
     }
 
@@ -161,7 +161,7 @@ namespace UnityEngine.Rendering.Universal
 
         // Post-processing settings
 #pragma warning disable 414 // 'field' is assigned but never used
-        [SerializeField] PostProcessingFeatureSet m_PostProcessingFeatureSet = PostProcessingFeatureSet.Builtin;
+        [SerializeField] PostProcessingFeatureSet m_PostProcessingFeatureSet = PostProcessingFeatureSet.Integrated;
 #pragma warning restore 414
         [SerializeField] ColorGradingMode m_ColorGradingMode = ColorGradingMode.LowDynamicRange;
         [SerializeField] int m_ColorGradingLutSize = 32;

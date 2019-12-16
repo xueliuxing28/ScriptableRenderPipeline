@@ -196,7 +196,7 @@ namespace UnityEngine.Rendering.Universal
                 EnqueuePass(m_ScreenSpaceShadowResolvePass);
             }
 
-            if (postProcessEnabled && postProcessFeatureSet == PostProcessingFeatureSet.Builtin)
+            if (postProcessEnabled && postProcessFeatureSet == PostProcessingFeatureSet.Integrated)
             {
                 m_ColorGradingLutPass.Setup(m_ColorGradingLut);
                 EnqueuePass(m_ColorGradingLutPass);
@@ -243,6 +243,7 @@ namespace UnityEngine.Rendering.Universal
             bool requiresFinalPostProcessPass = postProcessEnabled &&
                                      renderingData.cameraData.antialiasing == AntialiasingMode.FastApproximateAntialiasing;
 
+#region Post-processing v2 support
 #if POST_PROCESSING_STACK_2_0_0_OR_NEWER
             // To keep things clean we'll separate the logic from builtin PP and PPv2 - expect some copy/pasting
             if (postProcessFeatureSet == PostProcessingFeatureSet.PostProcessingV2)
@@ -287,6 +288,7 @@ namespace UnityEngine.Rendering.Universal
             }
             else
 #endif
+#endregion
             {
                 // if we have additional filters
                 // we need to stay in a RT
