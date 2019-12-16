@@ -172,7 +172,6 @@ namespace UnityEditor.Rendering.Universal
         SerializedProperty m_AdditionalCameraDataRenderOpaqueProp;
         SerializedProperty m_AdditionalCameraDataRendererProp;
         SerializedProperty m_AdditionalCameraDataCameraTypeProp;
-        SerializedProperty m_AdditionalCameraDataCameraOutputProp;
 		SerializedProperty m_AdditionalCameraDataCameras;
         SerializedProperty m_AdditionalCameraDataVolumeLayerMask;
         SerializedProperty m_AdditionalCameraDataVolumeTrigger;
@@ -416,7 +415,6 @@ namespace UnityEditor.Rendering.Universal
             m_AdditionalCameraDataDithering = m_AdditionalCameraDataSO.FindProperty("m_Dithering");
             m_AdditionalCameraClearDepth = m_AdditionalCameraDataSO.FindProperty("m_ClearDepth");
             m_AdditionalCameraDataCameraTypeProp = m_AdditionalCameraDataSO.FindProperty("m_CameraType");
-            m_AdditionalCameraDataCameraOutputProp = m_AdditionalCameraDataSO.FindProperty("m_CameraOutput");
 
             m_AdditionalCameraDataCameras = m_AdditionalCameraDataSO.FindProperty("m_Cameras");
         }
@@ -606,41 +604,16 @@ namespace UnityEditor.Rendering.Universal
             m_OutputSettingsFoldout.value = EditorGUILayout.BeginFoldoutHeaderGroup(m_OutputSettingsFoldout.value, Styles.outputSettingsText);
             if (m_OutputSettingsFoldout.value)
             {
-                // If there is an output texture we convert it to output target texture camera and only check this if
-                // target camera isn't already out-puting to texture
-                if (camera.targetTexture != null && m_AdditionalCameraDataCameraOutputProp.intValue != (int)CameraOutput.Texture)
-                {
-                    m_AdditionalCameraDataCameraOutputProp.intValue = (int)CameraOutput.Texture;
-                }
+                EditorGUI.indentLevel++;
+                DrawTargetTexture();
 
-                int selectedCameraOutput = m_AdditionalCameraDataCameraOutputProp.intValue;
-
-                EditorGUI.BeginChangeCheck();
-                int selCameraOutput = EditorGUILayout.IntPopup(Styles.cameraOutput, selectedCameraOutput, Styles.m_CameraOutputTargets.ToArray(), Styles.additionalDataCameraOutputOptions);
-                if (EditorGUI.EndChangeCheck())
+                if (camera.targetTexture == null)
                 {
-                    m_AdditionalCameraDataCameraOutputProp.intValue = selCameraOutput;
-                    if (selCameraOutput == (int)CameraOutput.Screen)
-                    {
-                        settings.targetTexture.objectReferenceValue = null;
-                    }
-                    m_AdditionalCameraDataSO.ApplyModifiedProperties();
-                }
-
-                CameraOutput selectedOutput = (CameraOutput)m_AdditionalCameraDataCameraOutputProp.intValue;
-                if (selectedOutput == CameraOutput.Screen)
-                {
-                    // If output is Camera we do default
                     DrawHDR();
                     DrawMSAA();
                     settings.DrawNormalizedViewPort();
                     settings.DrawDynamicResolution();
                     settings.DrawMultiDisplay();
-                }
-                else if (selectedOutput == CameraOutput.Texture)
-                {
-                    // Else we have Texture and show DrawTargetTexture()
-                    DrawTargetTexture();
                 }
 
                 // Third option comes later.
@@ -649,6 +622,7 @@ namespace UnityEditor.Rendering.Universal
                 EditorGUILayout.Space();
 
                 DrawVRSettings();
+                EditorGUI.indentLevel--;
             }
             EditorGUILayout.EndFoldoutHeaderGroup();
         }
@@ -725,7 +699,6 @@ namespace UnityEditor.Rendering.Universal
 
         void DrawTargetTexture()
         {
-            EditorGUI.indentLevel++;
             EditorGUILayout.PropertyField(settings.targetTexture, Styles.targetTextureLabel);
 
             if (!settings.targetTexture.hasMultipleDifferentValues && m_UniversalRenderPipeline != null)
@@ -742,8 +715,6 @@ namespace UnityEditor.Rendering.Universal
                         MessageType.Warning, true);
                 }
             }
-
-            EditorGUI.indentLevel--;
         }
 
         void DrawVolumes()
