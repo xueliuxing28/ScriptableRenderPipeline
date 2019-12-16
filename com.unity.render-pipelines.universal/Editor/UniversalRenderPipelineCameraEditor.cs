@@ -474,7 +474,6 @@ namespace UnityEditor.Rendering.Universal
                 DrawEnvironmentSettings();
                 DrawOutputSettings();
                 DrawStackSettings();
-                DrawVRSettings();
             }
 
             // Overlay Camera
@@ -648,6 +647,8 @@ namespace UnityEditor.Rendering.Universal
 
                 EditorGUILayout.Space();
                 EditorGUILayout.Space();
+
+                DrawVRSettings();
             }
             EditorGUILayout.EndFoldoutHeaderGroup();
         }
