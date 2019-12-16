@@ -26,7 +26,7 @@ namespace UnityEngine.Rendering.Universal
         public PerObjectData perObjectData;
         [Obsolete("killAlphaInFinalBlit is deprecated in the Universal Render Pipeline since it is no longer needed on any supported platform.")]
         public bool killAlphaInFinalBlit;
-        public bool resolveFinalTarget;
+        internal bool resolveFinalTarget;
     }
 
     [MovedFrom("UnityEngine.Rendering.LWRP")] public struct LightData
