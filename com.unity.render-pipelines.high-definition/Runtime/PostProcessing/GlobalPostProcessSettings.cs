@@ -56,7 +56,8 @@ namespace UnityEngine.Rendering.HighDefinition
             bufferFormat = PostProcessBufferFormat.RGB111110Float
         };
 
-        public bool enableAlpha => bufferFormat != PostProcessBufferFormat.RGB111110Float;
+        // Returns true if the post-processing passes support an alpha channel
+        public bool supportsAlpha => bufferFormat != PostProcessBufferFormat.RGB111110Float;
 
         // Note: A lut size of 16^3 is barely usable (noticeable color banding in highly contrasted
         // areas and harsh tonemappers like ACES'). 32 should be the minimum, the lut being encoded

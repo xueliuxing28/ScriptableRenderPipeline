@@ -1,6 +1,7 @@
-#ifndef UNITY_PP_DEFINES_
-#define UNITY_PP_DEFINES_
+#ifndef UNITY_PP_DEFINES_INCLUDED
+#define UNITY_PP_DEFINES_INCLUDED
 
+#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Filtering.hlsl"
 
 #if !defined(ENABLE_ALPHA)
@@ -14,7 +15,7 @@
 
     CTYPE SAMPLE_CTYPE_LOD(TEXTURE2D_X_PARAM(tex, smp), float2 coords, float lod)
     {
-        return SAMPLE_TEXTURE2D_X_LOD(TEXTURE2D_X_ARGS(tex, smp), coords, lod).xyz;
+        return SAMPLE_TEXTURE2D_X_LOD(tex, smp, coords, lod).xyz;
     }
 
     CTYPE SAMPLE_CTYPE_BICUBIC(TEXTURE2D_X_PARAM(tex, smp), float2 coords, float4 texSize, float2 maxCoord, uint unused)
@@ -34,7 +35,7 @@
 
     CTYPE SAMPLE_CTYPE_LOD(TEXTURE2D_X_PARAM(tex, smp), float2 coords, float lod)
     {
-        return SAMPLE_TEXTURE2D_X_LOD(TEXTURE2D_X_ARGS(tex, smp), coords, lod);
+        return SAMPLE_TEXTURE2D_X_LOD(tex, smp, coords, lod);
     }
 
     CTYPE SAMPLE_CTYPE_BICUBIC(TEXTURE2D_X_PARAM(tex, smp), float2 coords, float4 texSize, float2 maxCoord, uint slice)
@@ -44,4 +45,4 @@
     #define FETCH_COLOR Fetch4
 #endif //ENABLE_ALPHA
 
-#endif //UNITY_PP_DEFINES_
+#endif //UNITY_PP_DEFINES_INCLUDED

@@ -104,8 +104,10 @@ namespace UnityEngine.Rendering.HighDefinition
         RTHandle m_TempTexture1024; // RGHalf
         RTHandle m_TempTexture32;   // RGHalf
 
-        // If true, the post processing passes will process or pass-through the alpha of the input texture.
-        // Passes like the Uber shader and the final pass do a simple pass-through copy, while passes like DoF, TAA apply post-processing on the alpha itself
+        // HDRP has the following behavior regarding alpha:
+        // - If post processing is disabled, the alpha channel of the rendering passes (if any) will be passed to the frame buffer by the final pass
+        // - If post processing is enabled, then post processing passes will either copy (exposure, color grading, etc) or process (DoF, TAA, etc) the alpha channel, if one exists.
+        // If the user explicitly requests a color buffer without alpha (for performance reasons), then alpha will not be processed or copied.
         readonly bool m_EnableAlpha;
 
         readonly TargetPool m_Pool;
@@ -224,8 +226,11 @@ namespace UnityEngine.Rendering.HighDefinition
             );
    
             m_ColorFormat = (GraphicsFormat)hdAsset.currentPlatformRenderPipelineSettings.postProcessSettings.bufferFormat;
-            m_EnableAlpha = hdAsset.currentPlatformRenderPipelineSettings.postProcessSettings.enableAlpha;
-
+            m_EnableAlpha = hdAsset.currentPlatformRenderPipelineSettings.supportsAlpha;
+            if(m_PostProcessEnabled)
+            {
+                m_EnableAlpha &= hdAsset.currentPlatformRenderPipelineSettings.postProcessSettings.supportsAlpha;
+            }
             ResetHistory();
         }
 
