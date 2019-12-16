@@ -272,7 +272,8 @@ namespace UnityEngine.Rendering.Universal
             if (cameraStack != null)
             {
                 // TODO: Add support to camera stack in VR multi pass mode
-                if (!IsMultiPassStereoEnabled(baseCamera))
+                // TODO: Add support to camera stack in VR multi view mode
+                if (!IsStereoEnabled(baseCamera))
                 {
                     var baseCameraRendererType = baseCameraAdditionalData?.scriptableRenderer.GetType();
 
@@ -301,7 +302,7 @@ namespace UnityEngine.Rendering.Universal
                 }
                 else
                 {
-                    Debug.LogWarning("Multi pass stereo mode doesn't support Camera Stacking. Overlay cameras will skip rendering.");
+                    Debug.LogWarning("Stereo Rendering doesn't support Camera Stacking. Overlay cameras will skip rendering.");
                 }
             }
             
