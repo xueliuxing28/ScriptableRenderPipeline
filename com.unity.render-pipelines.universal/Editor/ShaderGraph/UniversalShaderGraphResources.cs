@@ -234,6 +234,7 @@ namespace UnityEditor.Rendering.Universal
                 new Dependency("SurfaceDescriptionInputs.ViewSpaceNormal",           "SurfaceDescriptionInputs.WorldSpaceNormal"),
 
                 new Dependency("SurfaceDescriptionInputs.WorldSpaceTangent",         "Varyings.tangentWS"),
+                new Dependency("SurfaceDescriptionInputs.WorldSpaceTangent",         "SurfaceDescriptionInputs.WorldSpaceNormal"),
                 new Dependency("SurfaceDescriptionInputs.ObjectSpaceTangent",        "SurfaceDescriptionInputs.WorldSpaceTangent"),
                 new Dependency("SurfaceDescriptionInputs.ViewSpaceTangent",          "SurfaceDescriptionInputs.WorldSpaceTangent"),
 
