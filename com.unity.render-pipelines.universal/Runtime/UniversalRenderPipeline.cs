@@ -302,7 +302,7 @@ namespace UnityEngine.Rendering.Universal
                 }
                 else
                 {
-                    Debug.LogWarning("Stereo Rendering doesn't support Camera Stacking. Overlay cameras will skip rendering.");
+                    Debug.LogWarning("Camera Stacking is not supported in VR. Only Base cameras will render.");
                 }
             }
             
