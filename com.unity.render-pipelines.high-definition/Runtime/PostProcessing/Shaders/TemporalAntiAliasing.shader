@@ -5,7 +5,7 @@ Shader "Hidden/HDRP/TemporalAntialiasing"
         #pragma target 4.5
         #pragma multi_compile_local _ ORTHOGRAPHIC
         #pragma multi_compile_local _ REDUCED_HISTORY_CONTRIB
-        #pragma multi_compile_local _ HAS_ALPHA
+        #pragma multi_compile_local _ ENABLE_ALPHA
         #pragma only_renderers d3d11 ps4 xboxone vulkan metal switch
 
         #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
@@ -109,7 +109,7 @@ Shader "Hidden/HDRP/TemporalAntialiasing"
             float weight = 1.0 - diff;
             float feedback = lerp(FEEDBACK_MIN, FEEDBACK_MAX, weight * weight);
 
-    #if defined(HAS_ALPHA)
+    #if defined(ENABLE_ALPHA)
             // Compute the antialiased alpha value
             color.w = lerp(color.w, history.w, feedback);
             // TAA should not overwrite pixels with zero alpha. This allows camera stacking with mixed TAA settings (bottom camera with TAA OFF and top camera with TAA ON).

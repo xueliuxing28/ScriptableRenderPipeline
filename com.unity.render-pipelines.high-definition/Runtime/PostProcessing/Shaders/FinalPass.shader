@@ -9,7 +9,7 @@ Shader "Hidden/HDRP/FinalPass"
         #pragma multi_compile_local _ FXAA
         #pragma multi_compile_local _ GRAIN
         #pragma multi_compile_local _ DITHER
-        #pragma multi_compile_local _ HAS_ALPHA
+        #pragma multi_compile_local _ ENABLE_ALPHA
         #pragma multi_compile_local _ APPLY_AFTER_POST
 
         #pragma multi_compile_local _ BILINEAR CATMULL_ROM_4 LANCZOS
@@ -26,7 +26,6 @@ Shader "Hidden/HDRP/FinalPass"
         TEXTURE2D(_GrainTexture);
         TEXTURE2D_X(_AfterPostProcessTexture);
         TEXTURE2D_ARRAY(_BlueNoiseTexture);
-        TEXTURE2D_X(_AlphaTexture);
 
         SAMPLER(sampler_LinearClamp);
         SAMPLER(sampler_LinearRepeat);
@@ -93,10 +92,6 @@ Shader "Hidden/HDRP/FinalPass"
             CTYPE outColor = LOAD_CTYPE(_InputTexture, positionSS);
             #endif
 
-            #if !defined(HAS_ALPHA)
-            float outAlpha = LOAD_TEXTURE2D_X(_AlphaTexture, positionSS).x;
-            #endif
-
             #if FXAA
             RunFXAA(_InputTexture, sampler_LinearClamp, outColor, positionSS, positionNDC);
             #endif
@@ -146,8 +141,8 @@ Shader "Hidden/HDRP/FinalPass"
             outColor.xyz = afterPostColor.a * outColor.xyz + afterPostColor.xyz;
             #endif
 
-        #if !defined(HAS_ALPHA)
-            return float4(outColor, outAlpha);
+        #if !defined(ENABLE_ALPHA)
+            return float4(outColor, 1.0);
         #else
             return outColor;
         #endif

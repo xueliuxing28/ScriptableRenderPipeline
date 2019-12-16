@@ -3,7 +3,7 @@
 
 #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Filtering.hlsl"
 
-#if !defined(HAS_ALPHA)
+#if !defined(ENABLE_ALPHA)
     #define CTYPE float3
 
     //Note: we use functions instead of defines for type safaty. The compiler should inline everything.
@@ -42,6 +42,6 @@
         return SampleTexture2DBicubic(TEXTURE2D_X_ARGS(tex, smp), coords, texSize, maxCoord, slice);
     }
     #define FETCH_COLOR Fetch4
-#endif //HAS_ALPHA
+#endif //ENABLE_ALPHA
 
 #endif //UNITY_PP_DEFINES_

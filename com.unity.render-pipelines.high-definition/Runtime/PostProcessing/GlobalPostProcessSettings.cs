@@ -53,8 +53,7 @@ namespace UnityEngine.Rendering.HighDefinition
         {
             lutSize = 32,
             lutFormat = GradingLutFormat.ARGBHalf,
-            bufferFormat = PostProcessBufferFormat.RGB111110Float,
-            useAlpha = false
+            bufferFormat = PostProcessBufferFormat.RGB111110Float
         };
 
         // Note: A lut size of 16^3 is barely usable (noticeable color banding in highly contrasted
@@ -91,8 +90,9 @@ namespace UnityEngine.Rendering.HighDefinition
         [FormerlySerializedAs("m_LutFormat")]
         public GradingLutFormat lutFormat;
 
+        /// <summary>
+        /// The texture format to be used for the post-processing passes.
+        /// </summary>
         public PostProcessBufferFormat bufferFormat;
-
-        public bool useAlpha;
     }
 }

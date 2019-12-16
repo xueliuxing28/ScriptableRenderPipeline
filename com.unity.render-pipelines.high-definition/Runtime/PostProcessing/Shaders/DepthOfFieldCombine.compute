@@ -19,19 +19,19 @@
 #pragma kernel KMainPreCombineFar       MAIN2=KMainPreCombineFar
 
 // Alpha mask variants:
-#pragma kernel KMainNearFarLowQAlpha         MAIN=KMainNearFarLowQAlpha           LOW_QUALITY NEAR FAR HAS_ALPHA
-#pragma kernel KMainNearLowQAlpha            MAIN=KMainNearLowQAlpha              LOW_QUALITY NEAR HAS_ALPHA
-#pragma kernel KMainFarLowQAlpha             MAIN=KMainFarLowQAlpha               LOW_QUALITY FAR HAS_ALPHA
+#pragma kernel KMainNearFarLowQAlpha         MAIN=KMainNearFarLowQAlpha           LOW_QUALITY NEAR FAR ENABLE_ALPHA
+#pragma kernel KMainNearLowQAlpha            MAIN=KMainNearLowQAlpha              LOW_QUALITY NEAR ENABLE_ALPHA
+#pragma kernel KMainFarLowQAlpha             MAIN=KMainFarLowQAlpha               LOW_QUALITY FAR ENABLE_ALPHA
 
-#pragma kernel KMainNearFarHighQAlpha        MAIN=KMainNearFarHighQAlpha          HIGH_QUALITY NEAR FAR HAS_ALPHA
-#pragma kernel KMainNearHighQAlpha           MAIN=KMainNearHighQAlpha             HIGH_QUALITY NEAR HAS_ALPHA
-#pragma kernel KMainFarHighQAlpha            MAIN=KMainFarHighQAlpha              HIGH_QUALITY FAR HAS_ALPHA
+#pragma kernel KMainNearFarHighQAlpha        MAIN=KMainNearFarHighQAlpha          HIGH_QUALITY NEAR FAR ENABLE_ALPHA
+#pragma kernel KMainNearHighQAlpha           MAIN=KMainNearHighQAlpha             HIGH_QUALITY NEAR ENABLE_ALPHA
+#pragma kernel KMainFarHighQAlpha            MAIN=KMainFarHighQAlpha              HIGH_QUALITY FAR ENABLE_ALPHA
 
-#pragma kernel KMainNearFarFullResAlpha      MAIN=KMainNearFarFullResAlpha        FULL_RES NEAR FAR HAS_ALPHA
-#pragma kernel KMainNearFullResAlpha         MAIN=KMainNearFullResAlpha           FULL_RES NEAR HAS_ALPHA
-#pragma kernel KMainFarFullResAlpha          MAIN=KMainFarFullResAlpha            FULL_RES FAR HAS_ALPHA
+#pragma kernel KMainNearFarFullResAlpha      MAIN=KMainNearFarFullResAlpha        FULL_RES NEAR FAR ENABLE_ALPHA
+#pragma kernel KMainNearFullResAlpha         MAIN=KMainNearFullResAlpha           FULL_RES NEAR ENABLE_ALPHA
+#pragma kernel KMainFarFullResAlpha          MAIN=KMainFarFullResAlpha            FULL_RES FAR ENABLE_ALPHA
 
-#pragma kernel KMainPreCombineFarAlpha       MAIN2=KMainPreCombineFarAlpha        HAS_ALPHA
+#pragma kernel KMainPreCombineFarAlpha       MAIN2=KMainPreCombineFarAlpha        ENABLE_ALPHA
 
 #include "Packages/com.unity.render-pipelines.high-definition/Runtime/PostProcessing/Shaders/PostProcessDefines.hlsl"
 
@@ -115,9 +115,8 @@ void MAIN(uint3 dispatchThreadId : SV_DispatchThreadID)
     }
     #endif
 
-#ifdef HAS_ALPHA
+#ifdef ENABLE_ALPHA
     // Preserve the original value of the pixels with zero alpha
-    // outColor.xyz = lerp(originalColor.xyz, outColor.xyz, originalColor.w);
     outColor = lerp(originalColor, outColor, outColor.a);
 #endif
     _OutputTexture[COORD_TEXTURE2D_X(posInputs.positionSS)] = outColor;
@@ -146,8 +145,5 @@ void MAIN2 (uint3 dispatchThreadId : SV_DispatchThreadID)
     }
 
     CTYPE finalColor = baseColor * dstAlpha + dstColor;
-#ifdef HAS_ALPHA
-//    finalColor.w = baseColor.w * dstAlpha;
-#endif
     _OutputTexture[COORD_TEXTURE2D_X(dispatchThreadId.xy)] = finalColor;
 }

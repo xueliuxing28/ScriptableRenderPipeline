@@ -10,6 +10,6 @@ namespace UnityEngine.Rendering.HighDefinition
         ChromaticAberration       = 1 << 0,
         Vignette                  = 1 << 1,
         LensDistortion            = 1 << 2,
-        HasAlpha                  = 1 << 3
+        EnableAlpha               = 1 << 3
     }
 }

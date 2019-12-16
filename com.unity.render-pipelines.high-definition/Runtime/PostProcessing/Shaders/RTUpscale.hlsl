@@ -26,7 +26,7 @@ CTYPE CatmullRomFourSamples(TEXTURE2D_X(_InputTexture), float2 UV)
     float2 TexSize = _ScreenSize.xy * rcp(_RTHandleScale.xy);
     float4 bicubicWnd = float4(TexSize, 1.0 / (TexSize));
 
-#ifndef HAS_ALPHA
+#ifndef ENABLE_ALPHA
     return SampleTexture2DBicubic(  TEXTURE2D_X_ARGS(_InputTexture, s_linear_clamp_sampler),
                                     UV * _RTHandleScale.xy,
                                     bicubicWnd,
@@ -106,7 +106,7 @@ CTYPE Lanczos(TEXTURE2D_X(_InputTexture), float2 inUV)
     // Correct UV to account for bilinear adjustment
     UV0 += (weight3 / weight23) * TexelSize;
 
-#ifndef HAS_ALPHA
+#ifndef ENABLE_ALPHA
     float4 accumulation = 0;
     // Corners are dropped (similarly to what Jimenez suggested for Bicubic)
     accumulation += float4(Bilinear(_InputTexture, float2(UV_2.x, UV0.y)), 1) * weight0.x * weight23.y;
