@@ -947,13 +947,13 @@ namespace UnityEditor.Rendering.HighDefinition
             switch(masterNode.normalDropOffSpace)
             {
                 case NormalDropOffSpace.Tangent:
-                    baseActiveFields.AddAll("features.NormalDropOffTS");
+                    baseActiveFields.AddAll("NormalDropOffTS");
                     break;
                 case NormalDropOffSpace.Object:
-                    baseActiveFields.AddAll("features.NormalDropOffOS");
+                    baseActiveFields.AddAll("NormalDropOffOS");
                     break;
                 case NormalDropOffSpace.World:
-                    baseActiveFields.AddAll("features.NormalDropOffWS");
+                    baseActiveFields.AddAll("NormalDropOffWS");
                     break;
                 default:
                     UnityEngine.Debug.LogError("Unknown normal drop off space: " + masterNode.normalDropOffSpace);
