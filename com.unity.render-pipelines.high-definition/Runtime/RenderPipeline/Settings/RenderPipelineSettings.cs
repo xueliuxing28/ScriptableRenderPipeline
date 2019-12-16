@@ -132,8 +132,6 @@ namespace UnityEngine.Rendering.HighDefinition
         public MSAASamples msaaSampleCount;
         public bool supportMSAA => msaaSampleCount != MSAASamples.None;
 
-        public bool keepAlpha => colorBufferFormat == ColorBufferFormat.R16G16B16A16;
-
         public bool supportMotionVectors;
         public bool supportRuntimeDebugDisplay;
         public bool supportDitheringCrossFade;

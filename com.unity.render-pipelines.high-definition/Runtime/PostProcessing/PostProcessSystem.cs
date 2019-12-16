@@ -126,11 +126,6 @@ namespace UnityEngine.Rendering.HighDefinition
 
         HDRenderPipeline m_HDInstance;
 
-        static bool IsFormatWithAlphaChannel(GraphicsFormat format)
-        {
-            return format != GraphicsFormat.B10G11R11_UFloatPack32;
-        }
-
         public PostProcessSystem(HDRenderPipelineAsset hdAsset, RenderPipelineResources defaultResources)
         {
             m_Resources = defaultResources;
@@ -229,7 +224,7 @@ namespace UnityEngine.Rendering.HighDefinition
             );
    
             m_ColorFormat = (GraphicsFormat)hdAsset.currentPlatformRenderPipelineSettings.postProcessSettings.bufferFormat;
-            m_EnableAlpha = IsFormatWithAlphaChannel(m_ColorFormat);
+            m_EnableAlpha = hdAsset.currentPlatformRenderPipelineSettings.postProcessSettings.enableAlpha;
 
             ResetHistory();
         }

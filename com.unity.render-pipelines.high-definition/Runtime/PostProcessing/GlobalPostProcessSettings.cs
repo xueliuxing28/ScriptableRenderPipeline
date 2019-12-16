@@ -56,6 +56,8 @@ namespace UnityEngine.Rendering.HighDefinition
             bufferFormat = PostProcessBufferFormat.RGB111110Float
         };
 
+        public bool enableAlpha => bufferFormat != PostProcessBufferFormat.RGB111110Float;
+
         // Note: A lut size of 16^3 is barely usable (noticeable color banding in highly contrasted
         // areas and harsh tonemappers like ACES'). 32 should be the minimum, the lut being encoded
         // in log. Lower sizes would work better with an additional 1D shaper lut but for now we'll
