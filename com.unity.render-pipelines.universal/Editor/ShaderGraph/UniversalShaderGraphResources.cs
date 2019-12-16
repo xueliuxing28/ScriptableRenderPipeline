@@ -237,7 +237,8 @@ namespace UnityEditor.Rendering.Universal
                 new Dependency("SurfaceDescriptionInputs.ObjectSpaceTangent",        "SurfaceDescriptionInputs.WorldSpaceTangent"),
                 new Dependency("SurfaceDescriptionInputs.ViewSpaceTangent",          "SurfaceDescriptionInputs.WorldSpaceTangent"),
 
-                new Dependency("SurfaceDescriptionInputs.WorldSpaceBiTangent",       "Varyings.bitangentWS"),
+                new Dependency("SurfaceDescriptionInputs.WorldSpaceBiTangent",       "SurfaceDescriptionInputs.WorldSpaceNormal"),
+                new Dependency("SurfaceDescriptionInputs.WorldSpaceBiTangent",       "SurfaceDescriptionInputs.WorldSpaceTangent"),
                 new Dependency("SurfaceDescriptionInputs.ObjectSpaceBiTangent",      "SurfaceDescriptionInputs.WorldSpaceBiTangent"),
                 new Dependency("SurfaceDescriptionInputs.ViewSpaceBiTangent",        "SurfaceDescriptionInputs.WorldSpaceBiTangent"),
 
