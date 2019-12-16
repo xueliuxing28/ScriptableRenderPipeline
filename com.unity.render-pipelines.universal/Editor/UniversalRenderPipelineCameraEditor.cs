@@ -512,9 +512,9 @@ namespace UnityEditor.Rendering.Universal
                 return;
             }
 
-            if (XRGraphics.enabled)
+            if (XRGraphics.tryEnable)
             {
-                EditorGUILayout.HelpBox("Camera Stacking is not supported in stereo rendering. Only Base cameras will render.", MessageType.Warning);
+                EditorGUILayout.HelpBox("Virtual Reality is enabled in Player Settings. Camera Stacking is not supported in VR. Only Base cameras will render.", MessageType.Warning);
                 return;
             }
 
