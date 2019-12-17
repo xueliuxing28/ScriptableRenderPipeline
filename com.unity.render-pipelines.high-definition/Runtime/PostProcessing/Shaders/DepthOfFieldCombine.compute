@@ -104,7 +104,7 @@ void MAIN(uint3 dispatchThreadId : SV_DispatchThreadID)
         CTYPE nearColor = LOAD_CTYPE(_InputNearTexture, posInputs.positionSS);
         float alpha = LOAD_TEXTURE2D_X(_InputNearAlphaTexture, posInputs.positionSS).x;
         #elif HIGH_QUALITY
-        CTYPE nearColor = SAMPLE_CTYPE_BICUBIC(TEXTURE2D_X_ARGS(_InputNearAlphaTexture, sampler_LinearClamp), uv, bicubicWnd, maxCoord, unity_StereoEyeIndex);
+        CTYPE nearColor = SAMPLE_CTYPE_BICUBIC(TEXTURE2D_X_ARGS(_InputNearTexture, sampler_LinearClamp), uv, bicubicWnd, maxCoord, unity_StereoEyeIndex);
         float alpha = SampleTexture2DBicubic(TEXTURE2D_X_ARGS(_InputNearAlphaTexture, sampler_LinearClamp), uv, bicubicWnd, maxCoord, unity_StereoEyeIndex).x;
         #else
         CTYPE nearColor = SAMPLE_CTYPE_LOD(_InputNearTexture, sampler_LinearClamp, uv, 0.0);
