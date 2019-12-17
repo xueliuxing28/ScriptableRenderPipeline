@@ -161,7 +161,7 @@ namespace UnityEditor.ShaderGraph
                 if (conversion.to == CoordinateSpace.World)
                 {
                     requiresTransposeTangentTransform = true;
-                    transformString = string.Format("mul({0}, {1}).xyz", transposeTargetTransformString, inputValue);
+                    transformString = string.Format(conversionType == ConversionType.Direction ? "normalize(mul({0}, {1}).xyz)" : "mul({0}, {1}).xyz", transposeTargetTransformString, inputValue);
                 }
                 else if (conversion.to == CoordinateSpace.Object)
                 {
