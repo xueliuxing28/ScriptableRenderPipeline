@@ -1775,6 +1775,7 @@ namespace UnityEngine.Rendering.HighDefinition
             {
                 lightData.previousTransform = lightData.transform.localToWorldMatrix;
                 lightData.previousScreenSpaceShadowIndex = lightData.screenSpaceShadowIndex;
+                lightData.previousScreenSpaceShadowSlot = lightData.screenSpaceShadowSlot;
             }
         }
 
