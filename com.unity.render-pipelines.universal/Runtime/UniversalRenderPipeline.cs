@@ -85,7 +85,7 @@ namespace UnityEngine.Rendering.Universal
 
                 // We don't use SSBO in D3D because we can't figure out without adding shader variants if platforms is D3D10.
                 // We don't use SSBO on Nintendo Switch as UBO path is faster.
-                // However here we use same limits as SSBO path. 
+                // However here we use same limits as SSBO path.
                 var deviceType = SystemInfo.graphicsDeviceType;
                 if (deviceType == GraphicsDeviceType.Direct3D11 || deviceType == GraphicsDeviceType.Direct3D12 ||
                     deviceType == GraphicsDeviceType.Switch)
@@ -179,14 +179,31 @@ namespace UnityEngine.Rendering.Universal
             {
                 var camera = cameras[i];
                 if (IsGameCamera(camera))
+                {
                     RenderCameraStack(renderContext, camera);
+                }
                 else
+                {
+                    BeginCameraRendering(renderContext, camera);
+#if VISUAL_EFFECT_GRAPH_0_0_1_OR_NEWER
+                    //It should be called before culling to prepare material. When there isn't any VisualEffect component, this method has no effect.
+                    VFX.VFXManager.PrepareCamera(camera);
+#endif
                     RenderSingleCamera(renderContext, camera);
+                    EndCameraRendering(renderContext, camera);
+                }
             }
 
             EndFrameRendering(renderContext, cameras);
         }
 
+        /// <summary>
+        /// Standalone camera rendering. Use this to render procedural cameras.
+        /// This method doesn't call <c>BeginCameraRendering</c> and <c>EndCameraRendering</c> callbacks.
+        /// </summary>
+        /// <param name="context">Render context used to record commands during execution.</param>
+        /// <param name="camera">Camera to render.</param>
+        /// <seealso cref="ScriptableRenderContext"/>
         public static void RenderSingleCamera(ScriptableRenderContext context, Camera camera)
         {
             UniversalAdditionalCameraData additionalCameraData = null;
@@ -203,6 +220,12 @@ namespace UnityEngine.Rendering.Universal
             RenderSingleCamera(context, cameraData, true);
         }
 
+        /// <summary>
+        /// Renders a single camera. This method will do culling, setup and execution of the renderer.
+        /// </summary>
+        /// <param name="context">Render context used to record commands during execution.</param>
+        /// <param name="cameraData">Camera rendering data. This might contain data inherited from a base camera.</param>
+        /// <param name="requiresBlitToBackbuffer">True if this is the last camera in the stack rendering, false otherwise.</param>
         static void RenderSingleCamera(ScriptableRenderContext context, CameraData cameraData, bool requiresBlitToBackbuffer)
         {
             Camera camera = cameraData.camera;
@@ -212,12 +235,6 @@ namespace UnityEngine.Rendering.Universal
                 Debug.LogWarning(string.Format("Trying to render {0} with an invalid renderer. Camera rendering will be skipped.", camera.name));
                 return;
             }
-
-            BeginCameraRendering(context, camera);
-#if VISUAL_EFFECT_GRAPH_0_0_1_OR_NEWER
-            //It should be called before culling to prepare material. When there isn't any VisualEffect component, this method has no effect.
-            VFX.VFXManager.PrepareCamera(camera);
-#endif
 
             if (!camera.TryGetCullingParameters(IsStereoEnabled(camera), out var cullingParameters))
                 return;
@@ -251,10 +268,14 @@ namespace UnityEngine.Rendering.Universal
             context.ExecuteCommandBuffer(cmd);
             CommandBufferPool.Release(cmd);
             context.Submit();
-
-            EndCameraRendering(context, camera);
         }
 
+        /// <summary>
+        // Renders a camera stack. This method calls RenderSingleCamera for each valid camera in the stack.
+        // The last camera resolves the final target to screen.
+        /// </summary>
+        /// <param name="context">Render context used to record commands during execution.</param>
+        /// <param name="camera">Camera to render.</param>
         static void RenderCameraStack(ScriptableRenderContext context, Camera baseCamera)
         {
             baseCamera.TryGetComponent<UniversalAdditionalCameraData>(out var baseCameraAdditionalData);
@@ -305,11 +326,18 @@ namespace UnityEngine.Rendering.Universal
                     Debug.LogWarning("Camera Stacking is not supported in VR. Only Base cameras will render.");
                 }
             }
-            
+
 
             bool isStackedRendering = lastActiveOverlayCameraIndex != -1;
+
+            BeginCameraRendering(context, baseCamera);
+#if VISUAL_EFFECT_GRAPH_0_0_1_OR_NEWER
+            //It should be called before culling to prepare material. When there isn't any VisualEffect component, this method has no effect.
+            VFX.VFXManager.PrepareCamera(baseCamera);
+#endif
             InitializeCameraData(baseCamera, baseCameraAdditionalData, out var baseCameraData);
             RenderSingleCamera(context, baseCameraData, !isStackedRendering);
+            EndCameraRendering(context, baseCamera);
 
             if (!isStackedRendering)
                 return;
@@ -325,12 +353,18 @@ namespace UnityEngine.Rendering.Universal
                 // Camera is overlay and enabled
                 if (currCameraData != null)
                 {
-                    // Copy base settings from base camera data and initialize initialize remaining specific settings for this camera type. 
+                    // Copy base settings from base camera data and initialize initialize remaining specific settings for this camera type.
                     CameraData overlayCameraData = baseCameraData;
-                    InitializeAdditionalCameraData(currCamera, currCameraData, ref overlayCameraData);
-
                     bool lastCamera = i == lastActiveOverlayCameraIndex;
+
+                    BeginCameraRendering(context, currCamera);
+#if VISUAL_EFFECT_GRAPH_0_0_1_OR_NEWER
+                    //It should be called before culling to prepare material. When there isn't any VisualEffect component, this method has no effect.
+                    VFX.VFXManager.PrepareCamera(currCamera);
+#endif
+                    InitializeAdditionalCameraData(currCamera, currCameraData, ref overlayCameraData);
                     RenderSingleCamera(context, overlayCameraData, lastCamera);
+                    EndCameraRendering(context, currCamera);
                 }
             }
         }
