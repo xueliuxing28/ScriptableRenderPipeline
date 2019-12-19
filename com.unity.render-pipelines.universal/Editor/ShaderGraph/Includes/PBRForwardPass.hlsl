@@ -4,7 +4,8 @@
 #ifdef _NORMALMAP
 
 #if _NORMAL_DROPOFF_SPACE==0
-    float3 bitangent = (input.tangentWS.w<0.0 ? -1.0 : 1.0) * cross(input.normalWS.xyz, input.tangentWS.xyz);
+	// IMPORTANT! If we ever support Flip on double sided materials ensure bitangent and tangent are NOT flipped.
+    float3 bitangent = (input.tangentWS.w>0.0 ? 1.0 : -1.0) * cross(input.normalWS.xyz, input.tangentWS.xyz);
     inputData.normalWS = TransformTangentToWorld(normal, half3x3(input.tangentWS.xyz, bitangent, input.normalWS.xyz));
 #elif _NORMAL_DROPOFF_SPACE==1
 	inputData.normalWS = TransformObjectToWorldNormal(normal);

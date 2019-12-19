@@ -8,9 +8,10 @@ SurfaceDescriptionInputs BuildSurfaceDescriptionInputs(Varyings input)
     $SurfaceDescriptionInputs.WorldSpaceNormal: const float renormFactor = 1.0 / length(unnormalizedNormalWS);
 
 	$SurfaceDescriptionInputs.WorldSpaceBiTangent: // use bitangent on the fly like in hdrp
-	$SurfaceDescriptionInputs.WorldSpaceBiTangent: float3 bitang = (input.tangentWS.w<0.0 ? -1.0 : 1.0) * cross(input.normalWS.xyz, input.tangentWS.xyz);			// IMPORTANT! for double sided materials the normal must not be negated until AFTER this point.
+	$SurfaceDescriptionInputs.WorldSpaceBiTangent: // IMPORTANT! If we ever support Flip on double sided materials ensure bitangent and tangent are NOT flipped.
+	$SurfaceDescriptionInputs.WorldSpaceBiTangent: float3 bitang = (input.tangentWS.w>0.0 ? 1.0 : -1.0) * cross(input.normalWS.xyz, input.tangentWS.xyz);
 
-    $SurfaceDescriptionInputs.WorldSpaceNormal:          output.WorldSpaceNormal =            renormFactor*input.normalWS;		// we want a unit length Normal Vector node in shader graph
+    $SurfaceDescriptionInputs.WorldSpaceNormal:          output.WorldSpaceNormal =            renormFactor*input.normalWS.xyz;		// we want a unit length Normal Vector node in shader graph
     $SurfaceDescriptionInputs.ObjectSpaceNormal:         output.ObjectSpaceNormal =           normalize(mul(output.WorldSpaceNormal, (float3x3) UNITY_MATRIX_M));           // transposed multiplication by inverse matrix to handle normal scale
     $SurfaceDescriptionInputs.ViewSpaceNormal:           output.ViewSpaceNormal =             mul(output.WorldSpaceNormal, (float3x3) UNITY_MATRIX_I_V);         // transposed multiplication by inverse matrix to handle normal scale
     $SurfaceDescriptionInputs.TangentSpaceNormal:        output.TangentSpaceNormal =          float3(0.0f, 0.0f, 1.0f);
