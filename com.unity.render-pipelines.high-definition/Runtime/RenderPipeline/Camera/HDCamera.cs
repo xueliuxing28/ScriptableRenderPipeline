@@ -73,6 +73,9 @@ namespace UnityEngine.Rendering.HighDefinition
         // the lights can be done after the volume update.
         internal float shadowMaxDistance = 500.0f;
 
+        // Currently the frame count is not increase every render, for ray tracing shadow filtering. We need to have a number that increases every render
+        internal uint cameraFrameCount = 0;
+
         // XR multipass and instanced views are supported (see XRSystem)
         XRPass m_XRPass;
         public XRPass xr { get { return m_XRPass; } }
@@ -99,20 +102,20 @@ namespace UnityEngine.Rendering.HighDefinition
         internal struct ShadowHistoryUsage
         {
             public int lightInstanceID;
-            public int frameCount;
+            public uint frameCount;
         }
         internal ShadowHistoryUsage[] shadowHistoryUsage = null;
 
-        internal bool ValidShadowHistory(HDAdditionalLightData lightData, int screenSpaceShadowIndex, int frameCount)
+        internal bool ValidShadowHistory(HDAdditionalLightData lightData, int screenSpaceShadowIndex)
         {
             return shadowHistoryUsage[screenSpaceShadowIndex].lightInstanceID == lightData.GetInstanceID()
-                    && (shadowHistoryUsage[screenSpaceShadowIndex].frameCount >= (frameCount - 1));
+                    && (shadowHistoryUsage[screenSpaceShadowIndex].frameCount == (cameraFrameCount - 1));
         }
 
-        internal void PropagateShadowHistory(HDAdditionalLightData lightData, int screenSpaceShadowIndex, int frameCount)
+        internal void PropagateShadowHistory(HDAdditionalLightData lightData, int screenSpaceShadowIndex)
         {
             shadowHistoryUsage[screenSpaceShadowIndex].lightInstanceID = lightData.GetInstanceID();
-            shadowHistoryUsage[screenSpaceShadowIndex].frameCount = frameCount;
+            shadowHistoryUsage[screenSpaceShadowIndex].frameCount = cameraFrameCount;
         }
 
         // Recorder specific
@@ -397,6 +400,7 @@ namespace UnityEngine.Rendering.HighDefinition
 
             UpdateAllViewConstants();
             isFirstFrame = false;
+            cameraFrameCount++;
 
             hdrp.UpdateVolumetricBufferParams(this, ignoreVolumeStack);
 
@@ -849,6 +853,7 @@ namespace UnityEngine.Rendering.HighDefinition
         public void Reset()
         {
             isFirstFrame = true;
+            cameraFrameCount = 0;
         }
 
         public void Dispose()

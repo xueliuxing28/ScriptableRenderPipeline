@@ -380,7 +380,7 @@ namespace UnityEngine.Rendering.HighDefinition
                             // We need to set the history as invalid if the directional light has rotated
                             float historyValidity = 1.0f;
                             if (m_CurrentSunLightAdditionalLightData.previousTransform.rotation != m_CurrentSunLightAdditionalLightData.transform.localToWorldMatrix.rotation
-                                || !hdCamera.ValidShadowHistory(m_CurrentSunLightAdditionalLightData, dirShadowIndex, m_FrameCount))
+                                || !hdCamera.ValidShadowHistory(m_CurrentSunLightAdditionalLightData, dirShadowIndex))
                                 historyValidity = 0.0f;
 
                             // Apply the temporal denoiser
@@ -392,7 +392,7 @@ namespace UnityEngine.Rendering.HighDefinition
                             simpleDenoiser.DenoiseBufferNoHistory(cmd, hdCamera, intermediateBuffer1, intermediateBuffer0, m_CurrentSunLightAdditionalLightData.filterSizeTraced, singleChannel: !m_CurrentSunLightAdditionalLightData.colorShadow);
 
                             // Now that we have overriden this history, mark is as used by this light
-                            hdCamera.PropagateShadowHistory(m_CurrentSunLightAdditionalLightData, dirShadowIndex, m_FrameCount);
+                            hdCamera.PropagateShadowHistory(m_CurrentSunLightAdditionalLightData, dirShadowIndex);
                         }
 
                         // Write the result texture to the screen space shadow buffer
@@ -662,7 +662,7 @@ namespace UnityEngine.Rendering.HighDefinition
                     WriteToScreenSpaceShadowBuffer(cmd, hdCamera, intermediateBufferRGBA0, areaShadowSlot, ScreenSpaceShadowType.Area);
 
                     // Do not forget to update the identification of shadow history usage
-                    hdCamera.PropagateShadowHistory(additionalLightData, areaShadowSlot, m_FrameCount);
+                    hdCamera.PropagateShadowHistory(additionalLightData, areaShadowSlot);
                 }
                 else
                 {
@@ -766,7 +766,7 @@ namespace UnityEngine.Rendering.HighDefinition
                     // We need to set the history as invalid if the light has moved (rotated or translated), 
                     float historyValidity = 1.0f;
                     if (additionalLightData.previousTransform != additionalLightData.transform.localToWorldMatrix
-                        || !hdCamera.ValidShadowHistory(additionalLightData, lightData.screenSpaceShadowIndex, m_FrameCount))
+                        || !hdCamera.ValidShadowHistory(additionalLightData, lightData.screenSpaceShadowIndex))
                         historyValidity = 0.0f;
 
                     // Apply the temporal denoiser
@@ -778,7 +778,7 @@ namespace UnityEngine.Rendering.HighDefinition
                     simpleDenoiser.DenoiseBufferNoHistory(cmd, hdCamera, intermediateBuffer1, intermediateBuffer0, additionalLightData.filterSizeTraced, singleChannel: true);
 
                 // Now that we have overriden this history, mark is as used by this light
-                hdCamera.PropagateShadowHistory(additionalLightData, lightData.screenSpaceShadowIndex, m_FrameCount);
+                hdCamera.PropagateShadowHistory(additionalLightData, lightData.screenSpaceShadowIndex);
             }
 
                 // Write the result texture to the screen space shadow buffer
