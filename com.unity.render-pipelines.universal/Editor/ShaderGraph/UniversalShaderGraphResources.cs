@@ -70,8 +70,6 @@ namespace UnityEditor.Rendering.Universal
             [Optional]
             Vector3 viewDirectionWS;
             [Optional]
-            Vector3 bitangentWS;
-            [Optional]
             Vector4 screenPosition;
             [Optional][PreprocessorIf("defined(LIGHTMAP_ON)")]
             Vector2 lightmapUV;
@@ -177,8 +175,6 @@ namespace UnityEditor.Rendering.Universal
                 new Dependency("Varyings.positionWS",                 "Attributes.positionOS"),
                 new Dependency("Varyings.normalWS",                   "Attributes.normalOS"),
                 new Dependency("Varyings.tangentWS",                  "Attributes.tangentOS"),
-                new Dependency("Varyings.bitangentWS",                "Attributes.normalOS"),
-                new Dependency("Varyings.bitangentWS",                "Attributes.tangentOS"),
                 new Dependency("Varyings.texCoord0",                  "Attributes.uv0"),
                 new Dependency("Varyings.texCoord1",                  "Attributes.uv1"),
                 new Dependency("Varyings.texCoord2",                  "Attributes.uv2"),

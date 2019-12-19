@@ -59,7 +59,6 @@ namespace UnityEditor.Rendering.Universal
                 "Varyings.positionWS",
                 "Varyings.normalWS",
                 "Varyings.tangentWS", //needed for vertex lighting
-                "Varyings.bitangentWS",
                 "Varyings.viewDirectionWS",
                 "Varyings.lightmapUV",
                 "Varyings.sh",
