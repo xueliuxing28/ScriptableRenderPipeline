@@ -259,6 +259,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fixed CustomPassSampleCameraColor scale issue when called from Before Transparent injection point.
 - Fixed corruption of AO in baked probes.
 - Fixed issue with upgrade of projects that still had Very High as shadow filtering quality.
+- Fixed an issue where shadow resolution would be wrong on the first face of a baked reflection probe.
 
 ### Changed
 - Color buffer pyramid is not allocated anymore if neither refraction nor distortion are enabled
@@ -302,6 +303,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Reduced the constrained distance for temporal reprojection of ray tracing denoising
 - Removed shadow near plane from the Directional Light Shadow UI.
 - Improved the performances of custom pass culling.
+- Now each camera has its own Volume Stack. This allows Volume Parameters to be updated as early as possible and be ready for the whole frame without conflicts between cameras.
 
 ## [7.1.1] - 2019-09-05
 
