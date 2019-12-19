@@ -97,9 +97,7 @@ void MAIN(uint dispatchThreadId : SV_DispatchThreadID)
     );
 
     // Sample coordinates on a normalized square
-    float2 pos = 0.0;
-    if(SampleCount > 1)
-        pos = kernelCoords / (SampleCount - 1.0).xx;
+    float2 pos = kernelCoords / (SampleCount - 1.0).xx;
 
     // Grab the sample (range [-1,1])
     float2 smp = GetSample(pos);
