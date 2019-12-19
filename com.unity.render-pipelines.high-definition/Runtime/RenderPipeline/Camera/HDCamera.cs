@@ -96,7 +96,24 @@ namespace UnityEngine.Rendering.HighDefinition
 
         // This variable is ray tracing specific. It allows us to track for the RayTracingShadow history which light was using which slot.
         // This avoid ghosting and many other problems that may happen due to an unwanted history usge
-        internal int[] shadowHistoryIdentification = null;
+        internal struct ShadowHistoryUsage
+        {
+            public int lightInstanceID;
+            public int frameCount;
+        }
+        internal ShadowHistoryUsage[] shadowHistoryUsage = null;
+
+        internal bool ValidShadowHistory(HDAdditionalLightData lightData, int screenSpaceShadowIndex, int frameCount)
+        {
+            return shadowHistoryUsage[screenSpaceShadowIndex].lightInstanceID == lightData.GetInstanceID()
+                    && (shadowHistoryUsage[screenSpaceShadowIndex].frameCount >= (frameCount - 1));
+        }
+
+        internal void PropagateShadowHistory(HDAdditionalLightData lightData, int screenSpaceShadowIndex, int frameCount)
+        {
+            shadowHistoryUsage[screenSpaceShadowIndex].lightInstanceID = lightData.GetInstanceID();
+            shadowHistoryUsage[screenSpaceShadowIndex].frameCount = frameCount;
+        }
 
         // Recorder specific
         IEnumerator<Action<RenderTargetIdentifier, CommandBuffer>> m_RecorderCaptureActions;
@@ -288,9 +305,9 @@ namespace UnityEngine.Rendering.HighDefinition
             bool ignoreVolumeStack = true; // Unfortunately, it is initialized after this function call
 
             // Make sure that the shadow history identification array is allocated and is at the right size
-            if (shadowHistoryIdentification == null || shadowHistoryIdentification.Length != hdrp.currentPlatformRenderPipelineSettings.hdShadowInitParams.maxScreenSpaceShadowSlots)
+            if (shadowHistoryUsage == null || shadowHistoryUsage.Length != hdrp.currentPlatformRenderPipelineSettings.hdShadowInitParams.maxScreenSpaceShadowSlots)
             {
-                shadowHistoryIdentification = new int[hdrp.currentPlatformRenderPipelineSettings.hdShadowInitParams.maxScreenSpaceShadowSlots];
+                shadowHistoryUsage = new ShadowHistoryUsage[hdrp.currentPlatformRenderPipelineSettings.hdShadowInitParams.maxScreenSpaceShadowSlots];
             }
             
             // store a shortcut on HDAdditionalCameraData (done here and not in the constructor as

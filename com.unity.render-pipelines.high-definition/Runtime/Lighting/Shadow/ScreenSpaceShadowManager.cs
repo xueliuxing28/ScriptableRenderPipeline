@@ -380,7 +380,7 @@ namespace UnityEngine.Rendering.HighDefinition
                             // We need to set the history as invalid if the directional light has rotated
                             float historyValidity = 1.0f;
                             if (m_CurrentSunLightAdditionalLightData.previousTransform.rotation != m_CurrentSunLightAdditionalLightData.transform.localToWorldMatrix.rotation
-                                || m_CurrentSunLightAdditionalLightData.screenSpaceShadowIndex != m_CurrentSunLightAdditionalLightData.previousScreenSpaceShadowIndex)
+                                || !hdCamera.ValidShadowHistory(m_CurrentSunLightAdditionalLightData, dirShadowIndex, m_FrameCount))
                                 historyValidity = 0.0f;
 
                             // Apply the temporal denoiser
@@ -392,7 +392,7 @@ namespace UnityEngine.Rendering.HighDefinition
                             simpleDenoiser.DenoiseBufferNoHistory(cmd, hdCamera, intermediateBuffer1, intermediateBuffer0, m_CurrentSunLightAdditionalLightData.filterSizeTraced, singleChannel: !m_CurrentSunLightAdditionalLightData.colorShadow);
 
                             // Now that we have overriden this history, mark is as used by this light
-                            hdCamera.shadowHistoryIdentification[dirShadowIndex] = m_CurrentSunLightAdditionalLightData.GetInstanceID();
+                            hdCamera.PropagateShadowHistory(m_CurrentSunLightAdditionalLightData, dirShadowIndex, m_FrameCount);
                         }
 
                         // Write the result texture to the screen space shadow buffer
@@ -662,7 +662,7 @@ namespace UnityEngine.Rendering.HighDefinition
                     WriteToScreenSpaceShadowBuffer(cmd, hdCamera, intermediateBufferRGBA0, areaShadowSlot, ScreenSpaceShadowType.Area);
 
                     // Do not forget to update the identification of shadow history usage
-                    hdCamera.shadowHistoryIdentification[additionalLightData.screenSpaceShadowIndex] = additionalLightData.GetInstanceID();
+                    hdCamera.PropagateShadowHistory(additionalLightData, areaShadowSlot, m_FrameCount);
                 }
                 else
                 {
@@ -766,8 +766,7 @@ namespace UnityEngine.Rendering.HighDefinition
                     // We need to set the history as invalid if the light has moved (rotated or translated), 
                     float historyValidity = 1.0f;
                     if (additionalLightData.previousTransform != additionalLightData.transform.localToWorldMatrix
-                    || additionalLightData.screenSpaceShadowSlot != additionalLightData.previousScreenSpaceShadowSlot
-                    || hdCamera.shadowHistoryIdentification[additionalLightData.screenSpaceShadowIndex] != additionalLightData.GetInstanceID())
+                        || !hdCamera.ValidShadowHistory(additionalLightData, lightData.screenSpaceShadowIndex, m_FrameCount))
                         historyValidity = 0.0f;
 
                     // Apply the temporal denoiser
@@ -778,9 +777,9 @@ namespace UnityEngine.Rendering.HighDefinition
                     HDSimpleDenoiser simpleDenoiser = GetSimpleDenoiser();
                     simpleDenoiser.DenoiseBufferNoHistory(cmd, hdCamera, intermediateBuffer1, intermediateBuffer0, additionalLightData.filterSizeTraced, singleChannel: true);
 
-                    // Now that we have overriden this history, mark is as used by this light
-                    hdCamera.shadowHistoryIdentification[additionalLightData.screenSpaceShadowIndex] = additionalLightData.GetInstanceID();
-                }
+                // Now that we have overriden this history, mark is as used by this light
+                hdCamera.PropagateShadowHistory(additionalLightData, lightData.screenSpaceShadowIndex, m_FrameCount);
+            }
 
                 // Write the result texture to the screen space shadow buffer
                 WriteToScreenSpaceShadowBuffer(cmd, hdCamera, intermediateBuffer0, lightData.screenSpaceShadowIndex, ScreenSpaceShadowType.GrayScale);
