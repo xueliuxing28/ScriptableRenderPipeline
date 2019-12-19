@@ -33,7 +33,13 @@
 
 // Work arround
 [isolate]
-template<typename T> T PSSLCrossLaneOr(T v)
+uint PSSLCrossLaneOr(uint v)
+{
+    return CrossLaneOr(v);
+}
+
+[isolate]
+int PSSLCrossLaneOr(int v)
 {
     return CrossLaneOr(v);
 }
