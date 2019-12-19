@@ -812,13 +812,13 @@ namespace UnityEngine.Rendering.HighDefinition
 
         public void Dispose()
         {
+            VolumeManager.instance.DestroyStack(volumeStack);
+
             if (m_HistoryRTSystem != null)
             {
                 m_HistoryRTSystem.Dispose();
                 m_HistoryRTSystem = null;
             }
-
-            volumeStack = VolumeManager.instance.CreateStack();
         }
 
         // BufferedRTHandleSystem API expects an allocator function. We define it here.
