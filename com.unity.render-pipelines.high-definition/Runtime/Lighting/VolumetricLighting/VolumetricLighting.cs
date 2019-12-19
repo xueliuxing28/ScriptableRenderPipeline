@@ -281,9 +281,9 @@ namespace UnityEngine.Rendering.HighDefinition
                                          controller.sliceDistributionUniformity.value);
         }
 
-        internal void ReinitializeVolumetricBufferParams(HDCamera hdCamera, bool ignoreVolumeStack)
+        internal void ReinitializeVolumetricBufferParams(HDCamera hdCamera)
         {
-            bool fog  = Fog.IsVolumetricFogEnabled(hdCamera, ignoreVolumeStack);
+            bool fog  = Fog.IsVolumetricFogEnabled(hdCamera);
             bool init = hdCamera.vBufferParams != null;
 
             if (fog ^ init)
@@ -307,9 +307,9 @@ namespace UnityEngine.Rendering.HighDefinition
 
         // This function relies on being called once per camera per frame.
         // The results are undefined otherwise.
-        internal void UpdateVolumetricBufferParams(HDCamera hdCamera, bool ignoreVolumeStack)
+        internal void UpdateVolumetricBufferParams(HDCamera hdCamera)
         {
-            if (!Fog.IsVolumetricFogEnabled(hdCamera, ignoreVolumeStack))
+            if (!Fog.IsVolumetricFogEnabled(hdCamera))
                 return;
 
             var parameters = ComputeVBufferParameters(hdCamera);

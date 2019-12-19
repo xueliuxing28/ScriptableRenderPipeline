@@ -262,9 +262,9 @@ namespace UnityEngine.Rendering.HighDefinition
             return m_NeedTAAResetHistory;
         }
 
-        internal bool IsVolumetricReprojectionEnabled(bool ignoreVolumeStack = false)
+        internal bool IsVolumetricReprojectionEnabled()
         {
-            bool a = Fog.IsVolumetricFogEnabled(this, ignoreVolumeStack);
+            bool a = Fog.IsVolumetricFogEnabled(this);
             bool b = frameSettings.IsEnabled(FrameSettingsField.ReprojectionForVolumetrics);
             bool c = camera.cameraType == CameraType.Game;
             bool d = Application.isPlaying;
@@ -278,11 +278,11 @@ namespace UnityEngine.Rendering.HighDefinition
         // Otherwise, previous frame view constants will be wrong.
         public void Update(FrameSettings currentFrameSettings, HDRenderPipeline hdrp, MSAASamples msaaSamples, XRPass xrPass)
         {
-            bool ignoreVolumeStack = true; // Unfortunately, it is initialized after this function call
-
             // store a shortcut on HDAdditionalCameraData (done here and not in the constructor as
             // we don't create HDCamera at every frame and user can change the HDAdditionalData later (Like when they create a new scene).
             camera.TryGetComponent<HDAdditionalCameraData>(out m_AdditionalCameraData);
+
+            UpdateVolumeAndPhysicalParameters();
 
             m_XRPass = xrPass;
             m_frameSettings = currentFrameSettings;
@@ -293,11 +293,11 @@ namespace UnityEngine.Rendering.HighDefinition
             {
                 // Have to do this every frame in case the settings have changed.
                 // The condition inside controls whether we perform init/deinit or not.
-                hdrp.ReinitializeVolumetricBufferParams(this, ignoreVolumeStack);
+                hdrp.ReinitializeVolumetricBufferParams(this);
 
                 bool isCurrentColorPyramidRequired = m_frameSettings.IsEnabled(FrameSettingsField.RoughRefraction) || m_frameSettings.IsEnabled(FrameSettingsField.Distortion);
                 bool isHistoryColorPyramidRequired = m_frameSettings.IsEnabled(FrameSettingsField.SSR) || antialiasing == AntialiasingMode.TemporalAntialiasing;
-                bool isVolumetricHistoryRequired   = IsVolumetricReprojectionEnabled(ignoreVolumeStack);
+                bool isVolumetricHistoryRequired   = IsVolumetricReprojectionEnabled();
 
                 int numColorPyramidBuffersRequired = 0;
                 if (isCurrentColorPyramidRequired)
@@ -368,9 +368,7 @@ namespace UnityEngine.Rendering.HighDefinition
             UpdateAllViewConstants();
             isFirstFrame = false;
 
-            hdrp.UpdateVolumetricBufferParams(this, ignoreVolumeStack);
-
-            UpdateVolumeAndPhysicalParameters();
+            hdrp.UpdateVolumetricBufferParams(this);
 
             // Here we use the non scaled resolution for the RTHandleSystem ref size because we assume that at some point we will need full resolution anyway.
             // This is necessary because we assume that after post processes, we have the full size render target for debug rendering
@@ -690,6 +688,11 @@ namespace UnityEngine.Rendering.HighDefinition
             // If no override is provided, use the camera transform.
             if (volumeAnchor == null)
                 volumeAnchor = camera.transform;
+
+            using (new ProfilingSample(null, "Custom Pass Volume Update", CustomSamplerId.VolumeUpdate.GetSampler()))
+            {
+                VolumeManager.instance.Update(volumeStack, volumeAnchor, volumeLayerMask);
+            }
         }
 
         /// <param name="aspect">

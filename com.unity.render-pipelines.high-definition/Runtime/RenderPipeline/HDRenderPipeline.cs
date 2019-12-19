@@ -2546,11 +2546,6 @@ namespace UnityEngine.Rendering.HighDefinition
             // From this point, we should only use frame settings from the camera
             hdCamera.Update(currentFrameSettings, this, m_MSAASamples, xrPass);
 
-            using (new ProfilingSample(null, "Custom Pass Volume Update", CustomSamplerId.VolumeUpdate.GetSampler()))
-            {
-                VolumeManager.instance.Update(hdCamera.volumeStack, hdCamera.volumeAnchor, hdCamera.volumeLayerMask);
-            }
-
             // Custom Render requires a proper HDCamera, so we return after the HDCamera was setup
             if (additionalCameraData != null && additionalCameraData.hasCustomRender)
                 return false;
