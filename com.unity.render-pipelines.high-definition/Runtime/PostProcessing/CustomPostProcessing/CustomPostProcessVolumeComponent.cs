@@ -33,7 +33,9 @@ namespace UnityEngine.Rendering.HighDefinition
         /// </summary>
         public virtual void Cleanup() {}
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Unity calls this method when the object goes out of scope.
+        /// </summary>
         protected override void OnDisable()
         {
             base.OnDisable();
