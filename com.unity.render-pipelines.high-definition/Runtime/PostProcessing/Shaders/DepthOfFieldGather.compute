@@ -92,11 +92,6 @@ void MAIN(uint3 dispatchThreadId : SV_DispatchThreadID)
     float samp0CoC = LOAD_TEXTURE2D_X(_InputCoCTexture, posInputs.positionSS).x;
 #endif
 
-#ifdef ENABLE_ALPHA
-//    float samp0Alpha = LOAD_TEXTURE2D_X(_InputTexture, posInputs.positionSS).w;
-//    samp0CoC *= samp0Alpha;
-#endif
-
     const float kMaxMips = 4.0;
     float2 sampDist = _TexelSize.zw * samp0CoC * Radius;
 
@@ -133,10 +128,6 @@ void MAIN(uint3 dispatchThreadId : SV_DispatchThreadID)
 
         CTYPE sampColor = SAMPLE_CTYPE_LOD(_InputTexture, SamplerTap, sampTap, mip);
         float sampCoC = SAMPLE_TEXTURE2D_X_LOD(_InputCoCTexture, SamplerTap, sampTap, mip).x;
-
-    #ifdef ENABLE_ALPHA
-    //    sampCoC *= sampColor.w;
-    #endif
     
         #if NEAR
         {
