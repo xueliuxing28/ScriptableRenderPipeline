@@ -68,11 +68,6 @@ namespace UnityEngine.Rendering.HighDefinition
 
         float m_AmbientOcclusionResolutionScale = 0.0f; // Factor used to track if history should be reallocated for Ambient Occlusion
 
-        // We need to keep this here as culling is done before volume update. That means that culling for the light will be left with the state used by the last
-        // updated camera which is not necessarily the camera we are culling for. This should be fixed if we end up having scriptable culling, as the culling for
-        // the lights can be done after the volume update.
-        internal float shadowMaxDistance = 500.0f;
-
         // XR multipass and instanced views are supported (see XRSystem)
         XRPass m_XRPass;
         public XRPass xr { get { return m_XRPass; } }
@@ -240,6 +235,8 @@ namespace UnityEngine.Rendering.HighDefinition
         int m_NumColorPyramidBuffersAllocated = 0;
         int m_NumVolumetricBuffersAllocated   = 0;
 
+        public VolumeStack volumeStack { get; private set; }
+
         public HDCamera(Camera cam)
         {
             camera = cam;
@@ -249,6 +246,8 @@ namespace UnityEngine.Rendering.HighDefinition
             frustum.corners = new Vector3[8];
 
             frustumPlaneEquations = new Vector4[6];
+
+            volumeStack = VolumeManager.instance.CreateStack();
 
             Reset();
         }
@@ -818,6 +817,8 @@ namespace UnityEngine.Rendering.HighDefinition
                 m_HistoryRTSystem.Dispose();
                 m_HistoryRTSystem = null;
             }
+
+            volumeStack = VolumeManager.instance.CreateStack();
         }
 
         // BufferedRTHandleSystem API expects an allocator function. We define it here.
@@ -1119,9 +1120,9 @@ namespace UnityEngine.Rendering.HighDefinition
             else
 #endif
             {
-                skyAmbientMode = VolumeManager.instance.stack.GetComponent<VisualEnvironment>().skyAmbientMode.value;
+                skyAmbientMode = volumeStack.GetComponent<VisualEnvironment>().skyAmbientMode.value;
 
-                visualSky.skySettings = SkyManager.GetSkySetting(VolumeManager.instance.stack);
+                visualSky.skySettings = SkyManager.GetSkySetting(volumeStack);
 
                 // Now, see if we have a lighting override
                 // Update needs to happen before testing if the component is active other internal data structure are not properly updated yet.

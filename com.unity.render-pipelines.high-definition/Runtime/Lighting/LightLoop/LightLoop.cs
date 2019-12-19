@@ -868,11 +868,13 @@ namespace UnityEngine.Rendering.HighDefinition
             m_ScreenSpaceShadowsUnion.Clear();
         }
 
-        void LightLoopNewFrame(FrameSettings frameSettings)
+        void LightLoopNewFrame(HDCamera hdCamera)
         {
-            m_ContactShadows = VolumeManager.instance.stack.GetComponent<ContactShadows>();
+            var frameSettings = hdCamera.frameSettings;
+
+            m_ContactShadows = hdCamera.volumeStack.GetComponent<ContactShadows>();
             m_EnableContactShadow = frameSettings.IsEnabled(FrameSettingsField.ContactShadows) && m_ContactShadows.enable.value && m_ContactShadows.length.value > 0;
-            m_indirectLightingController = VolumeManager.instance.stack.GetComponent<IndirectLightingController>();
+            m_indirectLightingController = hdCamera.volumeStack.GetComponent<IndirectLightingController>();
 
             m_ContactShadowIndex = 0;
 
@@ -993,11 +995,8 @@ namespace UnityEngine.Rendering.HighDefinition
             return 0.626657f * (r + 2 * s);
         }
 
-        static Vector3 ComputeAtmosphericOpticalDepth(float r, float cosTheta, bool alwaysAboveHorizon = false)
+        static Vector3 ComputeAtmosphericOpticalDepth(PhysicallyBasedSky skySettings, float r, float cosTheta, bool alwaysAboveHorizon = false)
         {
-            var skySettings = VolumeManager.instance.stack.GetComponent<PhysicallyBasedSky>();
-            Debug.Assert(skySettings != null);
-
             float R = skySettings.GetPlanetaryRadius();
 
             Vector2 H    = new Vector2(skySettings.GetAirScaleHeight(), skySettings.GetAerosolScaleHeight());
@@ -1049,21 +1048,18 @@ namespace UnityEngine.Rendering.HighDefinition
         }
 
         // Computes transmittance along the light path segment.
-        static Vector3 EvaluateAtmosphericAttenuation(Vector3 L, Vector3 X)
+        static Vector3 EvaluateAtmosphericAttenuation(PhysicallyBasedSky skySettings, Vector3 L, Vector3 X)
         {
-            var skySettings = VolumeManager.instance.stack.GetComponent<PhysicallyBasedSky>();
-            Debug.Assert(skySettings != null);
-
             Vector3 C = skySettings.GetPlanetCenterPosition(X); // X = camPosWS
 
-            float r        = Vector3.Distance(X, C);
-            float R        = skySettings.GetPlanetaryRadius();
+            float r = Vector3.Distance(X, C);
+            float R = skySettings.GetPlanetaryRadius();
             float cosHoriz = ComputeCosineOfHorizonAngle(r, R);
             float cosTheta = Vector3.Dot(X - C, L) * Rcp(r);
 
             if (cosTheta > cosHoriz) // Above horizon
             {
-                Vector3 oDepth = ComputeAtmosphericOpticalDepth(r, cosTheta, true);
+                Vector3 oDepth = ComputeAtmosphericOpticalDepth(skySettings, r, cosTheta, true);
                 Vector3 transm;
 
                 transm.x = Mathf.Exp(-oDepth.x);
@@ -1202,8 +1198,10 @@ namespace UnityEngine.Rendering.HighDefinition
 
                 if (ShaderConfig.s_PrecomputedAtmosphericAttenuation != 0)
                 {
+                    var skySettings = hdCamera.volumeStack.GetComponent<PhysicallyBasedSky>();
+
                     // Ignores distance (at infinity).
-                    Vector3 transm = EvaluateAtmosphericAttenuation(-lightData.forward, hdCamera.camera.transform.position);
+                    Vector3 transm = EvaluateAtmosphericAttenuation(skySettings, - lightData.forward, hdCamera.camera.transform.position);
                     lightData.color.x *= transm.x;
                     lightData.color.y *= transm.y;
                     lightData.color.z *= transm.z;
@@ -1895,9 +1893,8 @@ namespace UnityEngine.Rendering.HighDefinition
 
         void LightLoopUpdateCullingParameters(ref ScriptableCullingParameters cullingParams, HDCamera hdCamera)
         {
-            // Note we are using hdCamera.shadowMaxDistance instead of the value coming from the volume stack.
-            // Check comment on hdCamera.shadowMaxDistance for more info.
-            m_ShadowManager.UpdateCullingParameters(ref cullingParams, hdCamera.shadowMaxDistance);
+            var shadowMaxDistance = hdCamera.volumeStack.GetComponent<HDShadowSettings>().maxShadowDistance.value;
+            m_ShadowManager.UpdateCullingParameters(ref cullingParams, shadowMaxDistance);
 
             // In HDRP we don't need per object light/probe info so we disable the native code that handles it.
             cullingParams.cullingOptions |= CullingOptions.DisablePerObjectCulling;
@@ -2038,7 +2035,7 @@ namespace UnityEngine.Rendering.HighDefinition
 
                 int decalDatasCount = Math.Min(DecalSystem.m_DecalDatasCount, m_MaxDecalsOnScreen);
 
-                var hdShadowSettings = VolumeManager.instance.stack.GetComponent<HDShadowSettings>();
+                var hdShadowSettings = hdCamera.volumeStack.GetComponent<HDShadowSettings>();
 
                 Vector3 camPosWS = hdCamera.mainViewConstants.worldSpaceCameraPos;
 
@@ -2100,7 +2097,7 @@ namespace UnityEngine.Rendering.HighDefinition
                         LightCategory lightCategory = LightCategory.Count;
                         GPULightType gpuLightType = GPULightType.Point;
                         LightVolumeType lightVolumeType = LightVolumeType.Count;
-                        HDRenderPipeline.EvaluateGPULightType(lightType, additionalData.spotLightShape, additionalData.areaLightShape, 
+                        HDRenderPipeline.EvaluateGPULightType(lightType, additionalData.spotLightShape, additionalData.areaLightShape,
                                                                 ref lightCategory, ref gpuLightType, ref lightVolumeType);
 
                         // Do NOT process lights beyond the specified limit!
@@ -2130,7 +2127,7 @@ namespace UnityEngine.Rendering.HighDefinition
                         // Reserve shadow map resolutions and check if light needs to render shadows
                         if(additionalData.WillRenderShadowMap())
                         {
-                            additionalData.ReserveShadowMap(camera, m_ShadowManager, m_ShadowInitParameters, light.screenRect);
+                            additionalData.ReserveShadowMap(camera, m_ShadowManager, hdShadowSettings, m_ShadowInitParameters, light.screenRect);
                         }
 
                         if (hasDebugLightFilter
@@ -2150,8 +2147,7 @@ namespace UnityEngine.Rendering.HighDefinition
                     // And if needed rescale the whole atlas
                     m_ShadowManager.LayoutShadowMaps(debugDisplaySettings.data.lightingDebugSettings);
 
-                    var visualEnvironment = VolumeManager.instance.stack.GetComponent<VisualEnvironment>();
-                    Debug.Assert(visualEnvironment != null);
+                    var visualEnvironment = hdCamera.volumeStack.GetComponent<VisualEnvironment>();
 
                     bool isPbrSkyActive = visualEnvironment.skyType.value == (int)SkyType.PhysicallyBased;
 
@@ -2190,7 +2186,7 @@ namespace UnityEngine.Rendering.HighDefinition
                         if (additionalLightData.WillRenderShadowMap())
                         {
                             int shadowRequestCount;
-                            shadowIndex = additionalLightData.UpdateShadowRequest(hdCamera, m_ShadowManager, light, cullResults, lightIndex, debugDisplaySettings.data.lightingDebugSettings, out shadowRequestCount);
+                            shadowIndex = additionalLightData.UpdateShadowRequest(hdCamera, m_ShadowManager, hdShadowSettings, light, cullResults, lightIndex, debugDisplaySettings.data.lightingDebugSettings, out shadowRequestCount);
 
 #if UNITY_EDITOR
                             if ((debugDisplaySettings.data.lightingDebugSettings.shadowDebugUseSelection
@@ -3216,7 +3212,7 @@ namespace UnityEngine.Rendering.HighDefinition
             parameters.rayTracingEnabled = hdCamera.frameSettings.IsEnabled(FrameSettingsField.RayTracing);
             if (hdCamera.frameSettings.IsEnabled(FrameSettingsField.RayTracing))
             {
-                RayTracingSettings raySettings = VolumeManager.instance.stack.GetComponent<RayTracingSettings>();
+                RayTracingSettings raySettings = hdCamera.volumeStack.GetComponent<RayTracingSettings>();
                 parameters.contactShadowsRTS = m_Asset.renderPipelineRayTracingResources.shadowRaytracingRT;
                 parameters.rayTracingBias = raySettings.rayBias.value;
                 parameters.accelerationStructure = RequestAccelerationStructure();

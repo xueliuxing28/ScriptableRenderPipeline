@@ -50,17 +50,17 @@ namespace UnityEngine.Rendering.HighDefinition
 
         public static bool IsFogEnabled(HDCamera hdCamera)
         {
-            return hdCamera.frameSettings.IsEnabled(FrameSettingsField.AtmosphericScattering) && VolumeManager.instance.stack.GetComponent<Fog>().enabled.value;
+            return hdCamera.frameSettings.IsEnabled(FrameSettingsField.AtmosphericScattering) && hdCamera.volumeStack.GetComponent<Fog>().enabled.value;
         }
 
         public static bool IsVolumetricLightingEnabled(HDCamera hdCamera)
         {
-            return hdCamera.frameSettings.IsEnabled(FrameSettingsField.Volumetrics) && VolumeManager.instance.stack.GetComponent<Fog>().enableVolumetricFog.value;
+            return hdCamera.frameSettings.IsEnabled(FrameSettingsField.Volumetrics) && hdCamera.volumeStack.GetComponent<Fog>().enableVolumetricFog.value;
         }
 
         public static bool IsPBRFogEnabled(HDCamera hdCamera)
         {
-            var visualEnv = VolumeManager.instance.stack.GetComponent<VisualEnvironment>();
+            var visualEnv = hdCamera.volumeStack.GetComponent<VisualEnvironment>();
             // For now PBR fog (coming from the PBR sky) is disabled until we improve it
             return false;
             //return (visualEnv.skyType.value == (int)SkyType.PhysicallyBased) && hdCamera.frameSettings.IsEnabled(FrameSettingsField.AtmosphericScattering);
@@ -89,7 +89,7 @@ namespace UnityEngine.Rendering.HighDefinition
         public static void PushFogShaderParameters(HDCamera hdCamera, CommandBuffer cmd)
         {
             // TODO Handle user override
-            var fogSettings = VolumeManager.instance.stack.GetComponent<Fog>();
+            var fogSettings = hdCamera.volumeStack.GetComponent<Fog>();
 
             if (!hdCamera.frameSettings.IsEnabled(FrameSettingsField.AtmosphericScattering) || !fogSettings.enabled.value)
             {

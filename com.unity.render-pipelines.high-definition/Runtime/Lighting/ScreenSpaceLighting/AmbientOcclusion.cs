@@ -183,7 +183,7 @@ namespace UnityEngine.Rendering.HighDefinition
 
         public void Render(CommandBuffer cmd, HDCamera camera, ScriptableRenderContext renderContext, int frameCount)
         {
-            var settings = VolumeManager.instance.stack.GetComponent<AmbientOcclusion>();
+            var settings = camera.volumeStack.GetComponent<AmbientOcclusion>();
 
             if (!IsActive(camera, settings))
             {
@@ -240,7 +240,7 @@ namespace UnityEngine.Rendering.HighDefinition
             var parameters = new RenderAOParameters();
 
             // Grab current settings
-            var settings = VolumeManager.instance.stack.GetComponent<AmbientOcclusion>();
+            var settings = camera.volumeStack.GetComponent<AmbientOcclusion>();
             parameters.fullResolution = settings.fullResolution;
 
             if (parameters.fullResolution)
@@ -503,7 +503,7 @@ namespace UnityEngine.Rendering.HighDefinition
 
         public void Dispatch(CommandBuffer cmd, HDCamera camera, int frameCount)
         {
-            var settings = VolumeManager.instance.stack.GetComponent<AmbientOcclusion>();
+            var settings = camera.volumeStack.GetComponent<AmbientOcclusion>();
             if (IsActive(camera, settings))
             {
                 using (new ProfilingSample(cmd, "GTAO", CustomSamplerId.RenderSSAO.GetSampler()))
@@ -538,7 +538,7 @@ namespace UnityEngine.Rendering.HighDefinition
 
         public void PushGlobalParameters(HDCamera hdCamera, CommandBuffer cmd)
         {
-            var settings = VolumeManager.instance.stack.GetComponent<AmbientOcclusion>();
+            var settings = hdCamera.volumeStack.GetComponent<AmbientOcclusion>();
             if (IsActive(hdCamera, settings))
                 cmd.SetGlobalVector(HDShaderIDs._AmbientOcclusionParam, new Vector4(0f, 0f, 0f, settings.directLightingStrength.value));
             else
@@ -547,7 +547,7 @@ namespace UnityEngine.Rendering.HighDefinition
 
         public void PostDispatchWork(CommandBuffer cmd, HDCamera camera)
         {
-            var settings = VolumeManager.instance.stack.GetComponent<AmbientOcclusion>();
+            var settings = camera.volumeStack.GetComponent<AmbientOcclusion>();
             var aoTexture = IsActive(camera, settings) ? m_AmbientOcclusionTex : TextureXR.GetBlackTexture();
             cmd.SetGlobalTexture(HDShaderIDs._AmbientOcclusionTexture, aoTexture);
             // TODO: All the push debug stuff should be centralized somewhere
