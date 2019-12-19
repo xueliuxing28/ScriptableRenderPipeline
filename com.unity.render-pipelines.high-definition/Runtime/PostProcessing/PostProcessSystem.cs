@@ -256,29 +256,6 @@ namespace UnityEngine.Rendering.HighDefinition
             m_BokehIndirectCmd          = null;
             m_NearBokehTileList         = null;
             m_FarBokehTileList          = null;
-
-            // Cleanup Custom Post Process
-            var currentHDRP = HDRenderPipeline.currentAsset;
-            if (currentHDRP != null)
-            {
-                foreach (var typeString in currentHDRP.beforeTransparentCustomPostProcesses)
-                    CleanupCustomPostProcess(typeString);
-                foreach (var typeString in currentHDRP.beforePostProcessCustomPostProcesses)
-                    CleanupCustomPostProcess(typeString);
-                foreach (var typeString in currentHDRP.afterPostProcessCustomPostProcesses)
-                    CleanupCustomPostProcess(typeString);
-
-                void CleanupCustomPostProcess(string typeString)
-                {
-                    Type t = Type.GetType(typeString);
-
-                    if (t == null)
-                        return;
-
-                    var comp = VolumeManager.instance.stack.GetComponent(t) as CustomPostProcessVolumeComponent;                    comp.CleanupInternal();
-                    comp.CleanupInternal();
-                }
-            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

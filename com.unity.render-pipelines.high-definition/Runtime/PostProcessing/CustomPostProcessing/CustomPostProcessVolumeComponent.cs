@@ -33,6 +33,13 @@ namespace UnityEngine.Rendering.HighDefinition
         /// </summary>
         public virtual void Cleanup() {}
 
+        /// <inheritdoc />
+        protected override void OnDisable()
+        {
+            base.OnDisable();
+            CleanupInternal();
+        }
+
         internal void CleanupInternal()
         {
             if (m_IsInitialized)
