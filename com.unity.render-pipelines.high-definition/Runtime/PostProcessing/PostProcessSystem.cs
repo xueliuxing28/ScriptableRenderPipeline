@@ -1137,7 +1137,7 @@ namespace UnityEngine.Rendering.HighDefinition
                     {
                         // The other compute fails hard on Intel because of texture format issues
                         cs = m_Resources.shaders.depthOfFieldMipSafeCS;
-                        kernel = cs.FindKernel("KMain");
+                        kernel = cs.FindKernel(m_EnableAlpha? "KMainAlpha" : "KMain");
                         var mipScale = scale;
 
                         for (int i = 0; i < 4; i++)
