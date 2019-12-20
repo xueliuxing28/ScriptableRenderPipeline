@@ -220,6 +220,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fixed init of debug for FrameSettingsHistory on SceneView camera
 - Added a fix script to handle the warning 'referenced script in (GameObject 'SceneIDMap') is missing'
 - Fix Wizard load when none selected for RenderPipelineAsset
+- Fixed TerrainLitGUI when per-pixel normal property is not present.
 - Fixed rendering errors when enabling debug modes with custom passes
 - Fix an issue that made PCSS dependent on Atlas resolution (not shadow map res)
 - Fixing a bug whith histories when n>4 for ray traced shadows
@@ -259,7 +260,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fixed CustomPassSampleCameraColor scale issue when called from Before Transparent injection point.
 - Fixed corruption of AO in baked probes.
 - Fixed issue with upgrade of projects that still had Very High as shadow filtering quality.
+- Fixed issue that caused Distortion UI to appear in Lit.
+- Fixed several issues with decal duplicating when editing them.
+- Fixed initialization of volumetric buffer params (1204159)
+- Fixed an issue where frame count was incorrectly reset for the game view, causing temporal processes to fail.
+- Fixed Culling group was not disposed error.
 - Fix issues where decals on PS4 would not correctly write out the tile mask causing bits of the decal to go missing.
+
 
 ### Changed
 - Color buffer pyramid is not allocated anymore if neither refraction nor distortion are enabled
@@ -303,6 +310,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Reduced the constrained distance for temporal reprojection of ray tracing denoising
 - Removed shadow near plane from the Directional Light Shadow UI.
 - Improved the performances of custom pass culling.
+- The scene view camera now replicates the physical parameters from the camera tagged as "MainCamera".
+- Ray tracing reflection temporal filtering is now done in pre-exposed space
 
 ## [7.1.1] - 2019-09-05
 
