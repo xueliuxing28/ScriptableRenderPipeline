@@ -311,6 +311,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Improved the performances of custom pass culling.
 - The scene view camera now replicates the physical parameters from the camera tagged as "MainCamera".
 - Ray tracing reflection temporal filtering is now done in pre-exposed space
+- Improved performance when entering play mode without domain reload by a factor of ~25
 
 ## [7.1.1] - 2019-09-05
 
