@@ -42,6 +42,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added the possibility to have ray traced colored and semi-transparent shadows on directional lights.
 - Added a check in the custom post process template to throw an error if the default shader is not found.
 - Exposed the debug overlay ratio in the debug menu.
+- Added a separate frame settings for tonemapping alongside color grading.
 
 ### Fixed
 - Sorting, undo, labels, layout in the Lighting Explorer.
@@ -266,6 +267,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fixed initialization of volumetric buffer params (1204159)
 - Fixed an issue where frame count was incorrectly reset for the game view, causing temporal processes to fail.
 - Fixed Culling group was not disposed error.
+- Fixed issues on some GPU that do not support gathers on integer textures.
+- Fixed an issue with ambient probe not being initialized for the first frame after a domain reload for volumetric fog.
 - Fixed caused by using gather on a UINT texture in motion blur. 
 
 ### Changed
@@ -311,6 +314,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Removed shadow near plane from the Directional Light Shadow UI.
 - Improved the performances of custom pass culling.
 - The scene view camera now replicates the physical parameters from the camera tagged as "MainCamera".
+- Reduced the number of GC.Alloc calls, one simple scene without plarnar / probes, it should be 0B.
+- Renamed ProfilingSample to ProfilingScope and unified API. Added GPU Timings.
 - Ray tracing reflection temporal filtering is now done in pre-exposed space
 
 ## [7.1.1] - 2019-09-05
