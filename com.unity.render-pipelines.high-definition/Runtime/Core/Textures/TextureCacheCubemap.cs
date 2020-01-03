@@ -1,10 +1,11 @@
 using System;
+using UnityEngine.Experimental.Rendering;
 
 namespace UnityEngine.Rendering.HighDefinition
 {
     class TextureCacheCubemap : TextureCache
     {
-        private CubemapArray m_Cache;
+        private RenderTexture m_Cache;
 
         const int k_NbFace = 6;
 
@@ -48,7 +49,7 @@ namespace UnityEngine.Rendering.HighDefinition
 
                 if (textureArray[0] is Cubemap)
                 {
-                    mismatch |= (m_Cache.format != (textureArray[0] as Cubemap).format);
+                    mismatch |= (m_Cache.graphicsFormat != (textureArray[0] as Cubemap).graphicsFormat);
                 }
 
                 for (int texIDx = 0; texIDx < textureArray.Length; ++texIDx)
@@ -76,7 +77,7 @@ namespace UnityEngine.Rendering.HighDefinition
             return !TextureCache.supportsCubemapArrayTextures ? (Texture)m_CacheNoCubeArray : m_Cache;
         }
 
-        public bool AllocTextureArray(int numCubeMaps, int width, TextureFormat format, bool isMipMapped, Material cubeBlitMaterial)
+        public bool AllocTextureArray(int numCubeMaps, int width, GraphicsFormat format, bool isMipMapped, Material cubeBlitMaterial)
         {
             var res = AllocTextureArray(numCubeMaps);
             m_NumMipLevels = GetNumMips(width, width);      // will calculate same way whether we have cube array or not
@@ -97,7 +98,7 @@ namespace UnityEngine.Rendering.HighDefinition
                     wrapModeV = TextureWrapMode.Clamp,
                     filterMode = FilterMode.Trilinear,
                     anisoLevel = 0,
-                    name = CoreUtils.GetTextureAutoName(panoWidthTop, panoHeightTop, format, TextureDimension.Tex2DArray, depth: numCubeMaps, name: m_CacheName)
+                    name = CoreUtils.GetTextureAutoName(panoWidthTop, panoHeightTop, TextureFormat.RGBAHalf, TextureDimension.Tex2DArray, depth: numCubeMaps, name: m_CacheName)
                 };
 
                 m_NumPanoMipLevels = isMipMapped ? GetNumMips(panoWidthTop, panoHeightTop) : 1;
@@ -116,13 +117,22 @@ namespace UnityEngine.Rendering.HighDefinition
             }
             else
             {
-                m_Cache = new CubemapArray(width, numCubeMaps, format, isMipMapped)
+                var desc = new RenderTextureDescriptor(width, width, format, 0)
+                {
+                    // autoGenerateMips is true by default
+                    dimension = TextureDimension.CubeArray,
+                    volumeDepth = numCubeMaps,
+                    autoGenerateMips = false,
+                    useMipMap = isMipMapped,
+                };
+
+                m_Cache = new RenderTexture(desc)
                 {
                     hideFlags = HideFlags.HideAndDontSave,
                     wrapMode = TextureWrapMode.Clamp,
                     filterMode = FilterMode.Trilinear,
                     anisoLevel = 0, // It is important to set 0 here, else unity force anisotropy filtering
-                    name = CoreUtils.GetTextureAutoName(width, width, format, TextureDimension.CubeArray, depth: numCubeMaps, name: m_CacheName)
+                    name = CoreUtils.GetTextureAutoName(width, width, format, desc.dimension, depth: numCubeMaps, name: m_CacheName, mips: isMipMapped)
                 };
             }
 
@@ -142,7 +152,7 @@ namespace UnityEngine.Rendering.HighDefinition
                 CoreUtils.Destroy(m_CubeBlitMaterial);
             }
 
-            CoreUtils.Destroy(m_Cache);
+            m_Cache.Release();
         }
 
         private bool TransferToPanoCache(CommandBuffer cmd, int sliceIndex, Texture[] textureArray)

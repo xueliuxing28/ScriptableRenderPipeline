@@ -1,8 +1,10 @@
+using UnityEngine.Experimental.Rendering;
+
 namespace UnityEngine.Rendering.HighDefinition
 {
  	class TextureCache2D : TextureCache
     {
-        private Texture2DArray m_Cache;
+        private RenderTexture m_Cache;
 
         public TextureCache2D(string cacheName = "")
             : base(cacheName)
@@ -42,7 +44,7 @@ namespace UnityEngine.Rendering.HighDefinition
 
             if (textureArray[0] is Texture2D)
             {
-                mismatch |= (m_Cache.format != (textureArray[0] as Texture2D).format);
+                mismatch |= (m_Cache.graphicsFormat != (textureArray[0] as Texture2D).graphicsFormat);
             }
 
             for (int texIDx = 0; texIDx < textureArray.Length; ++texIDx)
@@ -67,13 +69,17 @@ namespace UnityEngine.Rendering.HighDefinition
             return m_Cache;
         }
 
-        public bool AllocTextureArray(int numTextures, int width, int height, TextureFormat format, bool isMipMapped)
+        public bool AllocTextureArray(int numTextures, int width, int height, GraphicsFormat format, bool isMipMapped)
         {
             var res = AllocTextureArray(numTextures);
             m_NumMipLevels = GetNumMips(width, height);
 
-            m_Cache = new Texture2DArray(width, height, numTextures, format, isMipMapped)
+            m_Cache = new RenderTexture(width, height, 0, format)
             {
+                // autoGenerateMips is true by default
+                dimension = TextureDimension.Tex2DArray,
+                volumeDepth = numTextures,
+                useMipMap = isMipMapped,
                 hideFlags = HideFlags.HideAndDontSave,
                 wrapMode = TextureWrapMode.Clamp,
                 name = CoreUtils.GetTextureAutoName(width, height, format, TextureDimension.Tex2DArray, depth: numTextures, name: m_CacheName)
