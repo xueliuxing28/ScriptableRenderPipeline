@@ -220,6 +220,7 @@ namespace UnityEngine.Rendering.HighDefinition
             public Vector4          aoParams2;
             public Vector4          aoParams3;
             public Vector4          aoParams4;
+            public Vector4          firstAndSecondMipOffsets;
             public Vector4          aoBufferInfo;
             public Vector4          toViewSpaceProj;
             public Vector2          runningRes;
@@ -321,6 +322,10 @@ namespace UnityEngine.Rendering.HighDefinition
                 0
             );
 
+            var hdrp = (RenderPipelineManager.currentPipeline as HDRenderPipeline);
+            var depthMipInfo = hdrp.sharedRTManager.GetDepthBufferMipChainInfo();
+            parameters.firstAndSecondMipOffsets = new Vector4(depthMipInfo.mipLevelOffsets[1].x, depthMipInfo.mipLevelOffsets[1].y, depthMipInfo.mipLevelOffsets[2].x, depthMipInfo.mipLevelOffsets[2].y);
+
             parameters.bilateralUpsample = settings.bilateralUpsample;
             parameters.gtaoCS = m_Resources.shaders.GTAOCS;
             parameters.temporalAccumulation = settings.temporalAccumulation.value;
@@ -383,6 +388,7 @@ namespace UnityEngine.Rendering.HighDefinition
             cmd.SetComputeVectorParam(parameters.gtaoCS, HDShaderIDs._AOParams1, parameters.aoParams1);
             cmd.SetComputeVectorParam(parameters.gtaoCS, HDShaderIDs._AOParams2, parameters.aoParams2);
             cmd.SetComputeVectorParam(parameters.gtaoCS, HDShaderIDs._AOParams4, parameters.aoParams4);
+            cmd.SetComputeVectorParam(parameters.gtaoCS, HDShaderIDs._FirstTwoDepthMipOffsets, parameters.firstAndSecondMipOffsets);
 
             cmd.SetComputeTextureParam(parameters.gtaoCS, parameters.gtaoKernel, HDShaderIDs._AOPackedData, packedDataTexture);
 
