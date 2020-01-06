@@ -1565,7 +1565,7 @@ namespace UnityEngine.Rendering.HighDefinition
             }
         }
 
-        internal void ReserveShadowMap(Camera camera, HDShadowManager shadowManager, HDShadowSettings shadowSetings, HDShadowInitParameters initParameters, Rect screenRect)
+        internal void ReserveShadowMap(Camera camera, HDShadowManager shadowManager, HDShadowSettings shadowSettings, HDShadowInitParameters initParameters, Rect screenRect)
         {
             if (!m_WillRenderShadowMap)
                 return;
@@ -1619,9 +1619,9 @@ namespace UnityEngine.Rendering.HighDefinition
 
             // Update the directional shadow atlas size
             if (type == HDLightType.Directional)
-                shadowManager.UpdateDirectionalShadowResolution((int)viewportSize.x, shadowSetings.cascadeShadowSplitCount.value);
+                shadowManager.UpdateDirectionalShadowResolution((int)viewportSize.x, shadowSettings.cascadeShadowSplitCount.value);
 
-            int count = GetShadowRequestCount(shadowSetings);
+            int count = GetShadowRequestCount(shadowSettings);
             bool needsCachedSlotsInAtlas = shadowsAreCached && !(ShadowIsUpdatedEveryFrame() || type == HDLightType.Directional);
 
             for (int index = 0; index < count; index++)
