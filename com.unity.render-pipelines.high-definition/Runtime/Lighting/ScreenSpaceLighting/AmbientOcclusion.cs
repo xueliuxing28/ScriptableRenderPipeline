@@ -118,6 +118,7 @@ namespace UnityEngine.Rendering.HighDefinition
         private RTHandle m_FinalHalfRes;
 
         private bool m_RunningFullRes = false;
+        private Vector4 m_HistoryInfo = new Vector4();
 
         readonly HDRaytracingAmbientOcclusion m_RaytracingAmbientOcclusion = new HDRaytracingAmbientOcclusion();
 
@@ -284,9 +285,11 @@ namespace UnityEngine.Rendering.HighDefinition
             float scaleFactor = (parameters.runningRes.x * parameters.runningRes.y) / (540.0f * 960.0f);
             float radInPixels = Mathf.Max(16, settings.maximumRadiusInPixels * Mathf.Sqrt(scaleFactor));
 
+            
+
             parameters.aoParams2 = new Vector4(
-                rtHandleProperties.currentRenderTargetSize.x,
-                rtHandleProperties.currentRenderTargetSize.y,
+                m_HistoryInfo.x,
+                m_HistoryInfo.y,
                 1.0f / (settings.stepCount + 1.0f),
                 radInPixels
             );
@@ -417,6 +420,7 @@ namespace UnityEngine.Rendering.HighDefinition
             {
                 var blurCS = parameters.denoiseAOCS;
                 cmd.SetComputeVectorParam(parameters.denoiseAOCS, HDShaderIDs._AOParams1, parameters.aoParams1);
+                cmd.SetComputeVectorParam(parameters.denoiseAOCS, HDShaderIDs._AOParams2, parameters.aoParams2);
                 cmd.SetComputeVectorParam(parameters.denoiseAOCS, HDShaderIDs._AOParams3, parameters.aoParams3);
                 cmd.SetComputeVectorParam(parameters.denoiseAOCS, HDShaderIDs._AOParams4, parameters.aoParams4);
                 cmd.SetComputeVectorParam(parameters.denoiseAOCS, HDShaderIDs._AOBufferSize, parameters.aoBufferInfo);
@@ -512,6 +516,7 @@ namespace UnityEngine.Rendering.HighDefinition
                     {
                         var output = m_RunningFullRes ? m_AmbientOcclusionTex : m_FinalHalfRes;
                         DenoiseAO(aoParameters, m_PackedDataTex, m_PackedDataBlurred, currentHistory, historyOutput, output, cmd);
+                        m_HistoryInfo = aoParameters.aoBufferInfo;
                     }
 
                     if (!m_RunningFullRes)

@@ -24,7 +24,7 @@ CBUFFER_END
 #define _AOTemporalRotationIdx _AOParams1.w
 #define _AOInvStepCountPlusOne _AOParams2.z
 #define _AOMaxRadiusInPixels (int)_AOParams2.w
-#define _AORTHandleSize _AOParams2.xy
+#define _AOHistorySize _AOParams2.xy
 #define _AODirectionCount _AOParams4.x
 #define _FirstDepthMipOffset _FirstTwoDepthMipOffsets.xy
 #define _SecondDepthMipOffset _FirstTwoDepthMipOffsets.zw
