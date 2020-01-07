@@ -43,6 +43,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added a check in the custom post process template to throw an error if the default shader is not found.
 - Exposed the debug overlay ratio in the debug menu.
 - Added a separate frame settings for tonemapping alongside color grading.
+- Added the receive fog option in the material UI for ShaderGraphs.
+- Added a public virtual bool in the custom post processes API to specify if a post processes should be executed in the scene view.
 
 ### Fixed
 - Sorting, undo, labels, layout in the Lighting Explorer.
@@ -269,6 +271,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fixed Culling group was not disposed error.
 - Fixed issues on some GPU that do not support gathers on integer textures.
 - Fixed an issue with ambient probe not being initialized for the first frame after a domain reload for volumetric fog.
+- Fixed the scene visibility of decal projectors and density volumes
+- Fixed a leak in sky manager.
+- Fixed an issue where entering playmode while the light editor is opened would produce null reference exceptions.
+- Fixed the debug overlay overlapping the debug menu at runtime.
+- Fixed an issue with the framecount when changing scene.
+- Fixed errors that occurred when using invalid near and far clip plane values for planar reflections.
 - Fixed an issue where shadow resolution would be wrong on the first face of a baked reflection probe.
 
 ### Changed
@@ -317,6 +325,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Reduced the number of GC.Alloc calls, one simple scene without plarnar / probes, it should be 0B.
 - Renamed ProfilingSample to ProfilingScope and unified API. Added GPU Timings.
 - Ray tracing reflection temporal filtering is now done in pre-exposed space
+- Search field selects the appropriate fields in both project settings panels 'HDRP Default Settings' and 'Quality/HDRP'
+- Disabled the refraction and transmission map keywords if the material is opaque.
 - Now each camera has its own Volume Stack. This allows Volume Parameters to be updated as early as possible and be ready for the whole frame without conflicts between cameras.
 
 ## [7.1.1] - 2019-09-05
