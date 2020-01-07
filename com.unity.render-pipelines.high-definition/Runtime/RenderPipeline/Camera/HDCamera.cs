@@ -73,6 +73,8 @@ namespace UnityEngine.Rendering.HighDefinition
         // the lights can be done after the volume update.
         internal float shadowMaxDistance = 500.0f;
 
+        internal bool hasRunLightListBuildingPrevFrame = false;
+
         // XR multipass and instanced views are supported (see XRSystem)
         XRPass m_XRPass;
         public XRPass xr { get { return m_XRPass; } }
