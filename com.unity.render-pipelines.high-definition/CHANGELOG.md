@@ -276,6 +276,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fixed an issue where entering playmode while the light editor is opened would produce null reference exceptions.
 - Fixed the debug overlay overlapping the debug menu at runtime.
 - Fixed an issue with the framecount when changing scene.
+- Fixed an issue with light list remaining in a stale state if multiple camera are present and no non-directional lights are in the scene.
 
 ### Changed
 - Color buffer pyramid is not allocated anymore if neither refraction nor distortion are enabled
