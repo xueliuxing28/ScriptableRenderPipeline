@@ -136,7 +136,7 @@ float PackAOOutput(float AO, float depth)
 {
     uint packedDepth = f32tof16(depth) << 16;
     uint packedAO = f32tof16(AO);
-    uint packedVal = packedAO | packedDepth << 16;
+    uint packedVal = packedAO | packedDepth;
     // If it is a NaN we have no guarantee the sampler will keep the bit pattern, hence we invalidate the depth, meaning that the various bilateral passes will skip the sample.
     if ((packedVal & 0x7FFFFFFF) > 0x7F800000)
     {
