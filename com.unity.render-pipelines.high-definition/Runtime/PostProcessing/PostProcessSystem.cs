@@ -2368,7 +2368,7 @@ namespace UnityEngine.Rendering.HighDefinition
             m_FinalPassMaterial.SetTexture(HDShaderIDs._AlphaTexture,
                 m_KeepAlpha
                 ? m_AlphaTexture.rt
-                : (Texture)Texture2D.whiteTexture
+                : (Texture)TextureXR.GetWhiteTexture()
             );
 
             m_FinalPassMaterial.SetVector(HDShaderIDs._UVTransform,

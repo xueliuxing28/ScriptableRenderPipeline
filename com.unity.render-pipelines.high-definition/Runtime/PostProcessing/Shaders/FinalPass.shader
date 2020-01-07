@@ -33,6 +33,7 @@ Shader "Hidden/HDRP/FinalPass"
         float4 _GrainTextureParams;     // x: width, y: height, zw: random offset
         float3 _DitherParams;           // x: width, y: height, z: texture_id
         float4 _UVTransform;
+        float4 _AlphaTexture_TexelSize;
 
         struct Attributes
         {
@@ -92,7 +93,7 @@ Shader "Hidden/HDRP/FinalPass"
             float3 outColor = inputColor.rgb;
             #endif
 
-            float outAlpha = LOAD_TEXTURE2D_X(_AlphaTexture, positionSS).x;
+            float outAlpha = LOAD_TEXTURE2D_X(_AlphaTexture, min(positionSS, _AlphaTexture_TexelSize.zw - float2(1.0, 1.0))).x;
 
             #if FXAA
             RunFXAA(_InputTexture, sampler_LinearClamp, outColor, positionSS, positionNDC);
