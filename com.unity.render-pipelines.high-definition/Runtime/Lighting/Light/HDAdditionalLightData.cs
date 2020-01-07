@@ -1542,12 +1542,24 @@ namespace UnityEngine.Rendering.HighDefinition
             HDRenderPipeline.EvaluateGPULightType(type, spotLightShape, areaLightShape, ref lightCategory, ref gpuLightType, ref lightVolumeType);
 
             // Flag the ray tracing only shadows
-            if (frameSettings.IsEnabled(FrameSettingsField.RayTracing)
-                && m_UseRayTracedShadows
-                && (gpuLightType == GPULightType.Rectangle || gpuLightType == GPULightType.Point || (gpuLightType == GPULightType.Spot && lightVolumeType == LightVolumeType.Cone)))
+            if (frameSettings.IsEnabled(FrameSettingsField.RayTracing) && m_UseRayTracedShadows)
             {
-                m_WillRenderScreenSpaceShadow = true;
-                m_WillRenderRayTracedShadow = true;
+                bool validShadow = false;
+                if (gpuLightType == GPULightType.Rectangle && hdCamera.frameSettings.litShaderMode == LitShaderMode.Deferred)
+                {
+                    // For area light shadows, we only support them  when in deferred mode
+                    validShadow = true;
+                }
+                else if (gpuLightType == GPULightType.Point || (gpuLightType == GPULightType.Spot && lightVolumeType == LightVolumeType.Cone))
+                {
+                    validShadow = true;
+                }
+
+                if (validShadow)
+                {
+                    m_WillRenderScreenSpaceShadow = true;
+                    m_WillRenderRayTracedShadow = true;
+                }
             }
 
             // Flag the directional shadow

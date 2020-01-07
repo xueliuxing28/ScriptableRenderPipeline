@@ -500,8 +500,8 @@ void AreaShadowNoDenoise(uint2 groupThreadId : SV_GroupThreadID, uint2 groupId :
     // Compute the pixel position to process
     uint2 currentCoord = groupId * AREA_BILLATERAL_TILE_SIZE + groupThreadId;
 
-    // Grab the previous value stored in the buffer
-    float4 previousValue = _ScreenSpaceShadowsTextureRW[uint3(currentCoord, INDEX_TEXTURE2D_ARRAY_X(_DenoisingHistorySlice))];
+    // Grab the previous value stored in the buffer. We use a max with 0 to avoid using invalid values that may come from rthandle resizing
+    float4 previousValue = max(0, _ScreenSpaceShadowsTextureRW[uint3(currentCoord, INDEX_TEXTURE2D_ARRAY_X(_DenoisingHistorySlice))]);
 
     // Compute the shadow value that we need to store
     float shadowValue = _DenoiseInputTexture[COORD_TEXTURE2D_X(currentCoord)].y > 0.0 ? _DenoiseInputTexture[COORD_TEXTURE2D_X(currentCoord)].x / _DenoiseInputTexture[COORD_TEXTURE2D_X(currentCoord)].y : 0.0;

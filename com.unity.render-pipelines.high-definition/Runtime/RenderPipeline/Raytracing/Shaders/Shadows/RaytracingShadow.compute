@@ -601,8 +601,8 @@ void OUTPUT_SHADOW_TEXTURE(uint3 dispatchThreadId : SV_DispatchThreadID, uint2 g
     previousShadowValues.xyz = _RaytracedShadowIntegration[COORD_TEXTURE2D_X(currentCoord)].xyz;
     _ScreenSpaceShadowsTextureRW[uint3(currentCoord, shadowSlot)] = previousShadowValues;
 #else
-    // Otherwise we only override the channel we are interested in
-    _ScreenSpaceShadowsTextureRW[uint3(currentCoord, shadowSlot)] = (1.0 - _RaytracingChannelMask) * previousShadowValues 
+    // Otherwise we only override the channel we are interested in. We use a max with 0 to avoid using invalid values that may come from rthandle resizing
+    _ScreenSpaceShadowsTextureRW[uint3(currentCoord, shadowSlot)] = (1.0 - _RaytracingChannelMask) * max(0, previousShadowValues) 
                                                                     + _RaytracingChannelMask * _RaytracedShadowIntegration[COORD_TEXTURE2D_X(currentCoord)].x;
 #endif
 }
