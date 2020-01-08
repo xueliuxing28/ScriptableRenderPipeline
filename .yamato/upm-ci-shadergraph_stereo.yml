@@ -126,7 +126,7 @@ Build_{{ project.name }}_Win_Player_{{ editor.version }}:
 
 {% endfor %}    
 {% endfor %}
-{% endfor %}
+
 
 All_{{ project.name }}_{{ editor.version }}:
   name: All {{ project.name }} CI - {{ editor.version }}
@@ -148,5 +148,6 @@ All_{{ project.name }}_{{ editor.version }}:
   #       - "**/*.md"
   # {% endif %}
 
+{% endfor %}
 {% endfor %}
 {% endfor %}
