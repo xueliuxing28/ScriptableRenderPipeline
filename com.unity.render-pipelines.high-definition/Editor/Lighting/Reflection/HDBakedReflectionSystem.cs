@@ -38,7 +38,8 @@ namespace UnityEditor.Rendering.HighDefinition
         [InitializeOnLoadMethod]
         static void Initialize()
         {
-            ScriptableBakedReflectionSystemSettings.system = new HDBakedReflectionSystem();
+            if (GraphicsSettings.currentRenderPipeline is HDRenderPipelineAsset)
+                ScriptableBakedReflectionSystemSettings.system = new HDBakedReflectionSystem();
         }
 
         enum BakingStages

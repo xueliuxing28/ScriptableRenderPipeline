@@ -19,6 +19,10 @@ namespace UnityEngine.Rendering.HighDefinition
         internal static HDRenderPipelineAsset currentAsset
             => GraphicsSettings.currentRenderPipeline is HDRenderPipelineAsset hdrpAsset ? hdrpAsset : null;
 
+        internal static HDRenderPipeline currentPipeline
+            => RenderPipelineManager.currentPipeline is HDRenderPipeline hdrp ? hdrp : null;
+
+
         private static Volume s_DefaultVolume = null;
         static VolumeProfile defaultVolumeProfile
             => defaultAsset?.defaultVolumeProfile;
@@ -1167,6 +1171,13 @@ namespace UnityEngine.Rendering.HighDefinition
                         m_LastTime = m_Time;
                         m_Time = newTime;
                     }
+                    else if (newTime < m_Time)
+                    {
+                        m_FrameCount = 0;
+                        m_LastTime = m_Time;
+                        m_Time = newTime;
+                    }
+                    // Note: We do nothing if newTime = m_Time
                 }
             }
 
@@ -1535,7 +1546,6 @@ namespace UnityEngine.Rendering.HighDefinition
                             )))
                         {
                             // Skip request and free resources
-                            Object.Destroy(camera);
                             UnsafeGenericPool<HDCullingResults>.Release(_cullingResults);
                             continue;
                         }
@@ -1939,6 +1949,7 @@ namespace UnityEngine.Rendering.HighDefinition
                 // If objects motion vectors if enabled, this will render the objects with motion vector into the target buffers (in addition to the depth)
                 // Note: An object with motion vector must not be render in the prepass otherwise we can have motion vector write that should have been rejected
                 RenderObjectsMotionVectors(cullingResults, hdCamera, renderContext, cmd);
+                RenderCameraMotionVectors(cullingResults, hdCamera, renderContext, cmd);
             }
 
             PreRenderSky(hdCamera, cmd);
@@ -1966,9 +1977,9 @@ namespace UnityEngine.Rendering.HighDefinition
             {
                 // See the call RenderObjectsMotionVectors() above and comment
                 RenderObjectsMotionVectors(cullingResults, hdCamera, renderContext, cmd);
+                RenderCameraMotionVectors(cullingResults, hdCamera, renderContext, cmd);
             }
 
-            RenderCameraMotionVectors(cullingResults, hdCamera, renderContext, cmd);
 
 #if UNITY_EDITOR
             var showGizmos = camera.cameraType == CameraType.SceneView ||
@@ -3574,17 +3585,19 @@ namespace UnityEngine.Rendering.HighDefinition
 
             using (new ProfilingScope(cmd, ProfilingSampler.Get(HDProfileId.CameraMotionVectors)))
             {
+            	bool msaa = hdCamera.frameSettings.IsEnabled(FrameSettingsField.MSAA);
+
                 // These flags are still required in SRP or the engine won't compute previous model matrices...
                 // If the flag hasn't been set yet on this camera, motion vectors will skip a frame.
                 hdCamera.camera.depthTextureMode |= DepthTextureMode.MotionVectors | DepthTextureMode.Depth;
 
-                HDUtils.DrawFullScreen(cmd, m_CameraMotionVectorsMaterial, m_SharedRTManager.GetMotionVectorsBuffer(), m_SharedRTManager.GetDepthStencilBuffer(), null, 0);
+                HDUtils.DrawFullScreen(cmd, m_CameraMotionVectorsMaterial, m_SharedRTManager.GetMotionVectorsBuffer(msaa), m_SharedRTManager.GetDepthStencilBuffer(msaa), null, 0);
 
 #if UNITY_EDITOR
                 // In scene view there is no motion vector, so we clear the RT to black
                 if (hdCamera.camera.cameraType == CameraType.SceneView && !CoreUtils.AreAnimatedMaterialsEnabled(hdCamera.camera))
                 {
-                    CoreUtils.SetRenderTarget(cmd, m_SharedRTManager.GetMotionVectorsBuffer(), m_SharedRTManager.GetDepthStencilBuffer(), ClearFlag.Color, Color.clear);
+                    CoreUtils.SetRenderTarget(cmd, m_SharedRTManager.GetMotionVectorsBuffer(msaa), m_SharedRTManager.GetDepthStencilBuffer(msaa), ClearFlag.Color, Color.clear);
                 }
 #endif
             }
@@ -4121,10 +4134,14 @@ namespace UnityEngine.Rendering.HighDefinition
 
                 // Then overlays
                 HDUtils.ResetOverlay();
+                float debugPanelWidth = HDUtils.GetRuntimeDebugPanelWidth(debugParams.hdCamera);
                 float x = 0.0f;
                 float overlayRatio = debugParams.debugDisplaySettings.data.debugOverlayRatio;
-                float overlaySize = Math.Min(debugParams.hdCamera.actualHeight, debugParams.hdCamera.actualWidth) * overlayRatio;
+                float overlaySize = Math.Min(debugParams.hdCamera.actualHeight, debugParams.hdCamera.actualWidth - debugPanelWidth) * overlayRatio;
                 float y = debugParams.hdCamera.actualHeight - overlaySize;
+
+                // Add the width of the debug display if enabled on the camera
+                x += debugPanelWidth;
 
                 RenderSkyReflectionOverlay(debugParams, cmd, m_SharedPropertyBlock, ref x, ref y, overlaySize);
                 RenderRayCountOverlay(debugParams, cmd, ref x, ref y, overlaySize);
