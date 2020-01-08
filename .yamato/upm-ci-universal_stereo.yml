@@ -7,7 +7,7 @@ editors:
     cmdwin: -r %CUSTOM_REVISION%
     cmdposix: -r $CUSTOM_REVISION
 platforms:
-  - name: Windows64
+  - name: Win
     type: Unity::VM::GPU
     image: sdet/gamecode_win10:stable
     flavor: b1.large
