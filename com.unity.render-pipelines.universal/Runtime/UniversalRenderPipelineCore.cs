@@ -218,20 +218,26 @@ namespace UnityEngine.Rendering.Universal
             RenderTextureDescriptor desc;
             RenderTextureFormat renderTextureFormatDefault = RenderTextureFormat.Default;
 
+            // NB: There's a weird case about XR and render texture
+            // In test framework currently we render stereo tests to target texture
+            // The descriptor in that case needs to be initialized from XR eyeTexture not render texture
+            // Otherwise current tests will fail. Check: Do we need to update the test images instead?
             if (isStereoEnabled)
             {
                 desc = XRGraphics.eyeTextureDesc;
                 renderTextureFormatDefault = desc.colorFormat;
             }
-            else
+            else if (camera.targetTexture == null)
             {
                 desc = new RenderTextureDescriptor(camera.pixelWidth, camera.pixelHeight);
                 desc.width = (int)((float)desc.width * renderScale);
                 desc.height = (int)((float)desc.height * renderScale);
             }
+            else
+            {
+                desc = camera.targetTexture.descriptor;
+            }
 
-            bool use32BitHDR = !needsAlpha && RenderingUtils.SupportsRenderTextureFormat(RenderTextureFormat.RGB111110Float);
-            RenderTextureFormat hdrFormat = (use32BitHDR) ? RenderTextureFormat.RGB111110Float : RenderTextureFormat.DefaultHDR;
             if (camera.targetTexture != null)
             {
                 desc.colorFormat = camera.targetTexture.descriptor.colorFormat;
@@ -241,6 +247,9 @@ namespace UnityEngine.Rendering.Universal
             }
             else
             {
+                bool use32BitHDR = !needsAlpha && RenderingUtils.SupportsRenderTextureFormat(RenderTextureFormat.RGB111110Float);
+                RenderTextureFormat hdrFormat = (use32BitHDR) ? RenderTextureFormat.RGB111110Float : RenderTextureFormat.DefaultHDR;
+            
                 desc.colorFormat = isHdrEnabled ? hdrFormat : renderTextureFormatDefault;
                 desc.depthBufferBits = 32;
                 desc.msaaSamples = msaaSamples;

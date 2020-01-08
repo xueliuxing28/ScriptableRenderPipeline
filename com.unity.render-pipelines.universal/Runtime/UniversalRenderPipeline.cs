@@ -405,7 +405,6 @@ namespace UnityEngine.Rendering.Universal
         static void InitializeStackedCameraData(Camera baseCamera, UniversalAdditionalCameraData baseAdditionalCameraData, ref CameraData cameraData)
         {
             var settings = asset;
-            cameraData = new CameraData();
             cameraData.targetTexture = baseCamera.targetTexture;
             cameraData.isStereoEnabled = IsStereoEnabled(baseCamera);
             cameraData.isSceneViewCamera = baseCamera.cameraType == CameraType.SceneView;
@@ -488,16 +487,9 @@ namespace UnityEngine.Rendering.Universal
             cameraData.defaultOpaqueSortFlags = canSkipFrontToBackSorting ? noFrontToBackOpaqueFlags : commonOpaqueFlags;
             cameraData.captureActions = CameraCaptureBridge.GetCaptureActions(baseCamera);
 
-            if (baseCamera.targetTexture == null)
-            {
-                bool needsAlphaChannel = Graphics.preserveFramebufferAlpha;
-                cameraData.cameraTargetDescriptor = CreateRenderTextureDescriptor(baseCamera, cameraData.renderScale,
-                    cameraData.isStereoEnabled, cameraData.isHdrEnabled, msaaSamples, needsAlphaChannel);
-            }
-            else
-            {
-                cameraData.cameraTargetDescriptor = baseCamera.targetTexture.descriptor;
-            }
+            bool needsAlphaChannel = Graphics.preserveFramebufferAlpha;
+            cameraData.cameraTargetDescriptor = CreateRenderTextureDescriptor(baseCamera, cameraData.renderScale,
+                cameraData.isStereoEnabled, cameraData.isHdrEnabled, msaaSamples, needsAlphaChannel);
         }
 
         /// <summary>
@@ -790,9 +782,5 @@ namespace UnityEngine.Rendering.Universal
             Matrix4x4 invViewProjMatrix = Matrix4x4.Inverse(viewProjMatrix);
             Shader.SetGlobalMatrix(PerCameraBuffer.unity_MatrixInvVP, invViewProjMatrix);
         }
-
-
-
-
     }
 }
