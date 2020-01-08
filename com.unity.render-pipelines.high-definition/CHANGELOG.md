@@ -279,6 +279,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Fixed errors that occurred when using invalid near and far clip plane values for planar reflections.
 - Fixed issue with motion blur sample weighting function.
 - Fixed motion vectors in MSAA.
+- Fixed particle lights.
 
 ### Changed
 - Color buffer pyramid is not allocated anymore if neither refraction nor distortion are enabled
