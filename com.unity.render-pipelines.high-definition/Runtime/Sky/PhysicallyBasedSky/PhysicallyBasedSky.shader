@@ -143,7 +143,7 @@ Shader "Hidden/HDRP/Sky/PbrSky"
                             scale *= pow(w, light.flareFalloff);
                         }
 
-                        radiance = color * scale;
+                        radiance += color * scale;
                     }
                 }
             }
