@@ -102,7 +102,7 @@ Shader "Hidden/HDRP/Sky/PbrSky"
                 // Celestial body must be outside the atmosphere (request from Pierre D).
                 float lightDist = max(light.distanceFromCamera, tExit);
 
-                if (interactsWithSky && asint(light.angularDiameter) != 0 && lightDist <= tFrag)
+                if (interactsWithSky && asint(light.angularDiameter) != 0 && lightDist < tFrag)
                 {
                     // We may be able to see the celestial body.
                     float3 L = -light.forward.xyz;
